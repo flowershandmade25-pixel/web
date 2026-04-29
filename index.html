@@ -639,7 +639,7 @@ function onCatColorChange(){
 }
 function applyPreset(name){
   const p=PRESETS[name]; if(!p) return;
-  Object.entries(p).forEach(([k,v])+>{
+  Object.entries(p).forEach(([k,v])=>{
     const el=document.getElementById("cc_"+k);
     if(el) el.value=v;
   });
@@ -653,12 +653,11 @@ function getCatColorState(){
 }
 function loadCatColorState(s){
   if(!s) return;
-  Object.entries(s).forEach(([k,v])+>{const el=document.getElementById("cc_"+k);if(el)el.value=v;});
+  Object.entries(s).forEach(([k,v])=>{const el=document.getElementById("cc_"+k);if(el)el.value=v;});
   onCatColorChange();
 }
 
 // ─── CATALOGO FORM ─────────────────────────────────────────
-let selCat="";
 function renderCatChips(){
   document.getElementById("catChips").innerHTML=CATS.map(c=>
     `<div class="chip${selCat===c.label?" sel":""}" onclick="pickCat('${c.label}')">${c.icon} ${c.label}</div>`
