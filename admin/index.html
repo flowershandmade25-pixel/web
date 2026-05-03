@@ -70,10 +70,29 @@ input:focus,select:focus,textarea:focus{outline:none}
   display:flex;align-items:center;gap:6px;font-size:11px;
   padding:5px 9px;border-radius:20px;
   background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+  cursor:pointer;
+  transition:background .15s;
 }
-.app-header .status .dot{width:7px;height:7px;border-radius:50%;background:#9a9a9a}
+.app-header .status:hover{background:rgba(255,255,255,.18)}
+.app-header .status .dot{width:7px;height:7px;border-radius:50%;background:#9a9a9a;position:relative}
 .app-header .status.connected .dot{background:#7be098;box-shadow:0 0 6px rgba(123,224,152,.6)}
+.app-header .status.connected.realtime .dot::after{
+  content:'';position:absolute;inset:-3px;border-radius:50%;
+  background:rgba(123,224,152,.4);
+  animation:pulse 1.8s ease-out infinite;
+}
 .app-header .status.error .dot{background:#ff8a7a}
+.app-header .status.refreshing .dot{
+  background:#fbd47a;
+  animation:spin 1s linear infinite;
+}
+@keyframes pulse{
+  0%{transform:scale(.8);opacity:1}
+  100%{transform:scale(1.8);opacity:0}
+}
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
 .app-header .logout-btn{
   background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
   color:var(--cream);width:36px;height:36px;border-radius:50%;
@@ -203,6 +222,37 @@ input:focus,select:focus,textarea:focus{outline:none}
 }
 .range-tabs button.active{
   background:#fff;color:var(--bark);box-shadow:var(--shadow-sm);font-weight:600;
+}
+
+/* Chip de rango personalizado activo */
+.custom-range-chip{
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold-2) 100%);
+  color:#fff;padding:7px 12px;border-radius:18px;
+  font-size:12px;font-weight:500;letter-spacing:.2px;
+  display:inline-flex;align-items:center;gap:8px;
+  margin-bottom:10px;
+  box-shadow:0 2px 6px rgba(184,147,90,.25);
+}
+.custom-range-chip .clear{
+  background:rgba(255,255,255,.25);border:none;color:#fff;
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;cursor:pointer;line-height:1;
+}
+.custom-range-chip .clear:hover{background:rgba(255,255,255,.4)}
+
+/* Botón "Filtrar por fecha" en inventario y clientes */
+.date-filter-btn{
+  background:#fff;border:1px dashed var(--gold);
+  color:var(--gold-2);padding:8px 13px;border-radius:9px;
+  font-size:12.5px;font-weight:500;cursor:pointer;
+  transition:all .15s;
+}
+.date-filter-btn:hover{
+  background:var(--cream-2);border-style:solid;
+}
+.date-filter-btn.active{
+  background:var(--gold);color:#fff;border-style:solid;border-color:var(--gold);
 }
 
 /* ─── BUTTONS ─── */
@@ -506,7 +556,7 @@ input:focus,select:focus,textarea:focus{outline:none}
     <h1>Admin <span class="ver-badge" id="verBadge">v—</span></h1>
     <div class="sub">Detalles que perduran</div>
   </div>
-  <div class="status" id="sbStatus" title="Estado de conexión">
+  <div class="status" id="sbStatus" title="Click para refrescar datos" onclick="manualRefresh()">
     <span class="dot"></span>
     <span id="sbStatusText">…</span>
   </div>
@@ -549,7 +599,9 @@ input:focus,select:focus,textarea:focus{outline:none}
     <button class="active" onclick="setDashRange('today',this)">Hoy</button>
     <button onclick="setDashRange('week',this)">Semana</button>
     <button onclick="setDashRange('month',this)">Mes</button>
+    <button onclick="openDateRangePicker('dash')" title="Rango personalizado">📅</button>
   </div>
+  <div id="dashCustomChip" class="custom-range-chip" style="display:none"></div>
 
   <div class="stat-grid" id="statGrid">
     <div class="stat-tile hero">
@@ -653,7 +705,9 @@ input:focus,select:focus,textarea:focus{outline:none}
     <button onclick="setSalesRange('week',this)">Semana</button>
     <button onclick="setSalesRange('month',this)">Mes</button>
     <button onclick="setSalesRange('all',this)">Todo</button>
+    <button onclick="openDateRangePicker('sales')" title="Rango personalizado">📅</button>
   </div>
+  <div id="salesCustomChip" class="custom-range-chip" style="display:none"></div>
 
   <div class="card">
     <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
@@ -691,11 +745,17 @@ input:focus,select:focus,textarea:focus{outline:none}
     <input id="invSearch" placeholder="Buscar producto…" oninput="renderInventory()">
   </div>
 
+  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+    <button class="date-filter-btn" onclick="openDateRangePicker('inv')" id="invDateBtn">📅 Filtrar por fecha de alta</button>
+    <div id="invCustomChip" class="custom-range-chip" style="display:none;margin:0"></div>
+  </div>
+
   <div class="chips" id="invFilterChips"></div>
 
-  <div style="display:flex;gap:8px;margin-bottom:14px">
-    <button class="btn btn-rose" style="flex:1" onclick="openProductModal()">+ Nuevo producto</button>
-    <button class="btn btn-outline btn-sm" onclick="loadAll()" title="Refrescar">🔄</button>
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-rose" style="flex:1;min-width:160px" onclick="openProductModal()">+ Nuevo producto</button>
+    <button class="btn btn-outline btn-sm" onclick="syncFromCatalog()" title="Importar nuevos productos del panel de publicaciones">📥 Sincronizar catálogo</button>
+    <button class="btn btn-outline btn-sm" onclick="loadAll()" title="Refrescar desde Supabase">🔄</button>
   </div>
 
   <div id="inventoryList"></div>
@@ -711,6 +771,11 @@ input:focus,select:focus,textarea:focus{outline:none}
   <div class="search">
     <span class="ic">🔍</span>
     <input id="cliSearch" placeholder="Buscar cliente…" oninput="renderCustomers()">
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="date-filter-btn" onclick="openDateRangePicker('cust')" id="custDateBtn">📅 Filtrar por última compra</button>
+    <div id="custCustomChip" class="custom-range-chip" style="display:none;margin:0"></div>
   </div>
 
   <div id="customersList"></div>
@@ -904,6 +969,46 @@ input:focus,select:focus,textarea:focus{outline:none}
   </div>
 </div>
 
+<!-- ═══════════ MODAL: SELECTOR DE RANGO DE FECHAS ═══════════ -->
+<div class="modal-overlay" id="dateRangeModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="dateRangeTitle">Rango personalizado</h3>
+      <button class="modal-close" onclick="closeModal('dateRangeModal')">✕</button>
+    </div>
+
+    <div id="dateRangeHint" style="font-size:12.5px;color:var(--muted);margin-bottom:14px;font-style:italic"></div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Desde</label>
+        <input class="input" id="dateRangeFrom" type="date">
+      </div>
+      <div class="field">
+        <label>Hasta</label>
+        <input class="input" id="dateRangeTo" type="date">
+      </div>
+    </div>
+
+    <div class="divider">Atajos</div>
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:14px">
+      <button class="btn btn-outline btn-sm" onclick="setDatePreset(7)">Últimos 7 días</button>
+      <button class="btn btn-outline btn-sm" onclick="setDatePreset(15)">Últimos 15 días</button>
+      <button class="btn btn-outline btn-sm" onclick="setDatePreset(30)">Últimos 30 días</button>
+      <button class="btn btn-outline btn-sm" onclick="setDatePreset(90)">Últimos 90 días</button>
+      <button class="btn btn-outline btn-sm" onclick="setDatePresetThisMonth()">Este mes</button>
+      <button class="btn btn-outline btn-sm" onclick="setDatePresetLastMonth()">Mes anterior</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-outline" onclick="closeModal('dateRangeModal')">Cancelar</button>
+      <button class="btn btn-rose" onclick="applyDateRange()">Aplicar</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -912,7 +1017,7 @@ input:focus,select:focus,textarea:focus{outline:none}
    FLOWERS HANDMADE · ADMIN PANEL · LÓGICA
 ═══════════════════════════════════════════════════════════════════ */
 
-const APP_VERSION = '1.15.3';
+const APP_VERSION = '1.17.1';
 const APP_BUILD_DATE = '2026-05-03';
 const PUBLICATIONS_URL = 'https://flowershandmade25-pixel.github.io/web/tool/';
 
@@ -934,6 +1039,15 @@ let dashRange = 'today';
 let salesRange = 'today';
 let invFilter = 'all';
 
+// Rangos personalizados (cuando el usuario elige "Personalizado")
+let dashCustomRange = null;   // { from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' } | null
+let salesCustomRange = null;
+let invDateFilter = null;     // { from, to } | null — productos creados en ese rango
+let custDateFilter = null;    // { from, to } | null — clientes con última compra en ese rango
+
+// Contexto del modal de calendario (qué sección lo invoca)
+let dateRangeContext = null;  // 'dash' | 'sales' | 'inv' | 'cust'
+
 let editingProductId = null;
 let editingStockProductId = null;
 let pendingSaleProductId = null;
@@ -943,6 +1057,14 @@ let pendingProductPhoto = null;
 let chartTimeInstance = null;
 let chartTopProductsInstance = null;
 let chartPaymentsInstance = null;
+
+// Realtime: una suscripción por tabla (para poder limpiarlas al hacer logout)
+let realtimeChannel = null;
+let realtimeReady = false;
+// Debounce para no recargar muchas veces si llegan varios eventos seguidos
+let realtimeRefreshTimer = null;
+// Última vez que se hizo refresh manual o por foco (para evitar spam)
+let lastRefreshAt = 0;
 
 const LOW_STOCK_THRESHOLD = 3;
 const LS_BACKUP_KEY = 'fh_admin_backup_v1';
@@ -1030,9 +1152,10 @@ async function signIn(){
 
 async function signOut(){
   if(!confirm('¿Cerrar sesión?')) return;
+  unsubscribeRealtime();
   try{ await sb.auth.signOut(); }catch(e){}
   currentUser = null; currentSessionId = null;
-  products = []; sales = []; customers = [];
+  products = []; sales = []; customers = []; paymentMethods = [];
   showAuth();
 }
 
@@ -1143,10 +1266,30 @@ function copyText(t){
 }
 
 /* ───── LOAD ALL ───── */
-async function loadAll(){
-  await Promise.all([loadProducts(), loadSales(), loadCustomers(), loadPaymentMethods()]);
-  saveBackup();
-  renderAll();
+async function loadAll(silent){
+  if(!silent) setSbStatus('refreshing','Actualizando…');
+  try{
+    await Promise.all([loadProducts(), loadSales(), loadCustomers(), loadPaymentMethods()]);
+    saveBackup();
+    renderAll();
+    lastRefreshAt = Date.now();
+    if(!silent) setSbStatus(realtimeReady?'connected realtime':'connected', realtimeReady?'En vivo':'Conectado');
+    // En cada carga, revisar si hay nuevos productos en el catálogo del index.html
+    // (no bloquea, corre en background)
+    checkMigration().catch(()=>{});
+  }catch(e){
+    console.warn('loadAll error:', e);
+    if(!silent) setSbStatus('error','Error al cargar');
+  }
+}
+
+/* Refresh manual (clic en el badge de estado) */
+async function manualRefresh(){
+  // Evitar spam: si se hizo refresh hace menos de 1 segundo, ignorar
+  if(Date.now() - lastRefreshAt < 1000) return;
+  if(!currentSessionId){ return; }
+  await loadAll();
+  toast('✓ Datos actualizados');
 }
 
 async function loadProducts(){
@@ -1247,13 +1390,8 @@ function readBackup(){
   try{ return JSON.parse(localStorage.getItem(LS_BACKUP_KEY) || 'null'); }catch(e){ return null; }
 }
 
-/* ───── MIGRACIÓN: importar productos desde app_settings ───── */
+/* ───── MIGRACIÓN / SYNC: importar productos desde app_settings ───── */
 async function checkMigration(){
-  // Si la tabla products tiene contenido, no mostrar
-  if(products.length > 0){
-    document.getElementById('migrationBanner').style.display = 'none';
-    return;
-  }
   // Buscar en app_settings (estructura del index.html)
   try{
     const { data, error } = await sb.from('app_settings')
@@ -1261,26 +1399,112 @@ async function checkMigration(){
       .eq('session_id', currentSessionId)
       .maybeSingle();
     if(error || !data?.data?.products?.length){
+      // No hay catálogo en index.html → ocultar banner
       document.getElementById('migrationBanner').style.display = 'none';
       return;
     }
-    const count = data.data.products.length;
-    document.getElementById('migCount').textContent = count;
-    document.getElementById('migrationBanner').style.display = 'block';
+    const catalogProducts = data.data.products;
+
+    // Detectar cuáles del catálogo NO están todavía en la tabla products
+    // Comparamos por legacy_id (id original del catálogo)
+    const existingLegacyIds = new Set(
+      products.map(p => p.legacy_id).filter(x => x != null).map(String)
+    );
+    const missing = catalogProducts.filter(cp => {
+      const id = cp.id != null ? String(cp.id) : null;
+      return id && !existingLegacyIds.has(id);
+    });
+
+    const banner = document.getElementById('migrationBanner');
+    if(products.length === 0 && catalogProducts.length > 0){
+      // Caso 1: tabla vacía — importación inicial completa
+      banner.style.display = 'block';
+      banner.innerHTML = `
+        <h4>📥 Importar productos del catálogo</h4>
+        <p>Detecté <b>${catalogProducts.length}</b> productos en el catálogo público que aún no existen en la nueva base de datos. Importarlos te permitirá llevar inventario y ventas.</p>
+        <button class="btn btn-gold btn-block" onclick="importFromAppSettings(false)">Importar productos al inventario</button>
+      `;
+    }else if(missing.length > 0){
+      // Caso 2: tabla con datos, pero hay productos nuevos en el catálogo
+      banner.style.display = 'block';
+      banner.innerHTML = `
+        <h4>🔄 Sincronizar con el catálogo</h4>
+        <p>Detecté <b>${missing.length}</b> producto${missing.length>1?'s':''} en el panel de publicaciones que aún no ${missing.length>1?'están':'está'} en tu inventario.</p>
+        <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px;line-height:1.5;background:rgba(255,255,255,.4);padding:8px 10px;border-radius:8px">
+          <b style="color:var(--bark)">Nuevos:</b> ${missing.slice(0,3).map(p=>escapeHtml(p.name||'?')).join(', ')}${missing.length>3?` <i>+ ${missing.length-3} más</i>`:''}
+        </div>
+        <button class="btn btn-gold btn-block" onclick="importFromAppSettings(true)">+ Agregar al inventario</button>
+      `;
+    }else{
+      banner.style.display = 'none';
+    }
   }catch(e){
+    console.warn('checkMigration:', e);
     document.getElementById('migrationBanner').style.display = 'none';
   }
 }
 
-async function importFromAppSettings(){
-  if(!confirm('¿Importar todos los productos del catálogo al inventario? Stock y costo se inicializarán en 0; podrás editarlos después.')) return;
+/* Botón "Sincronizar catálogo" en la pestaña Inventario.
+   A diferencia del banner automático, este SIEMPRE responde con info al usuario,
+   incluso cuando no hay nada nuevo que importar. */
+async function syncFromCatalog(){
+  try{
+    const { data, error } = await sb.from('app_settings')
+      .select('data').eq('session_id', currentSessionId).maybeSingle();
+    if(error){
+      toast('Error al leer el catálogo: ' + error.message);
+      return;
+    }
+    const catalogProducts = data?.data?.products || [];
+    if(!catalogProducts.length){
+      toast('El catálogo del panel de publicaciones está vacío');
+      return;
+    }
+    // Comparar
+    const existingLegacyIds = new Set(
+      products.map(p => p.legacy_id).filter(x => x != null).map(String)
+    );
+    const missing = catalogProducts.filter(cp => {
+      const id = cp.id != null ? String(cp.id) : null;
+      return id && !existingLegacyIds.has(id);
+    });
+
+    if(missing.length === 0){
+      toast(`✓ Tu inventario ya está al día (${catalogProducts.length} productos en el catálogo)`);
+      return;
+    }
+    // Hay nuevos: importarlos
+    await importFromAppSettings(true);
+  }catch(e){
+    console.warn('syncFromCatalog:', e);
+    toast('Error al sincronizar');
+  }
+}
+
+async function importFromAppSettings(onlyMissing){
+  // onlyMissing = true → solo importa los que no están (modo sync)
+  // onlyMissing = false → importa todos (modo migración inicial)
+  const msg = onlyMissing
+    ? '¿Agregar al inventario los productos nuevos del catálogo? Solo se importarán los que no existen todavía.'
+    : '¿Importar todos los productos del catálogo al inventario? Stock y costo se inicializarán en 0; podrás editarlos después.';
+  if(!confirm(msg)) return;
   try{
     const { data, error } = await sb.from('app_settings')
       .select('data').eq('session_id', currentSessionId).maybeSingle();
     if(error || !data?.data?.products?.length){
       toast('No hay productos para importar'); return;
     }
-    const src = data.data.products;
+    let src = data.data.products;
+    if(onlyMissing){
+      const existingLegacyIds = new Set(
+        products.map(p => p.legacy_id).filter(x => x != null).map(String)
+      );
+      src = src.filter(p => p.id != null && !existingLegacyIds.has(String(p.id)));
+    }
+    if(!src.length){
+      toast('Todos los productos del catálogo ya están en el inventario');
+      return;
+    }
     // Preparar inserts
     const rows = src.map(p => ({
       user_id: currentSessionId,
@@ -1300,10 +1524,12 @@ async function importFromAppSettings(){
       if(ie){ console.warn(ie); toast('Error: '+ie.message); break; }
       inserted += chunk.length;
     }
-    toast(`✓ ${inserted} productos importados`);
+    toast(`✓ ${inserted} producto${inserted>1?'s':''} ${onlyMissing?'sincronizado':'importado'}${inserted>1?'s':''}`);
     document.getElementById('migrationBanner').style.display = 'none';
     await loadProducts();
     renderAll();
+    // Re-evaluar el banner por si quedaron más
+    await checkMigration();
   }catch(e){
     console.warn(e); toast('Error en migración');
   }
@@ -1323,9 +1549,11 @@ function renderAll(){
 /* ───── DASHBOARD ───── */
 function setDashRange(r, btn){
   dashRange = r;
+  dashCustomRange = null; // limpiar custom al elegir un preset
   document.querySelectorAll('#dashRangeTabs button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
   document.getElementById('dashRangeLbl').textContent = r==='today'?'hoy':r==='week'?'esta semana':'este mes';
+  updateCustomChip('dash');
   renderDashboard();
 }
 
@@ -1343,13 +1571,29 @@ function rangeStart(r){
   return new Date(0);
 }
 
-function filterSalesByRange(r){
+// Convierte 'YYYY-MM-DD' a Date local (00:00:00 inicio o 23:59:59 fin)
+function dateStrToLocal(str, endOfDay){
+  if(!str) return null;
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y, m-1, d, endOfDay?23:0, endOfDay?59:0, endOfDay?59:0, endOfDay?999:0);
+}
+
+function filterSalesByRange(r, customRange){
+  // Si hay customRange activo, ignora 'r'
+  if(customRange && customRange.from && customRange.to){
+    const from = dateStrToLocal(customRange.from, false).getTime();
+    const to = dateStrToLocal(customRange.to, true).getTime();
+    return sales.filter(s => {
+      const t = new Date(s.created_at).getTime();
+      return t >= from && t <= to;
+    });
+  }
   const start = rangeStart(r).getTime();
   return sales.filter(s => new Date(s.created_at).getTime() >= start);
 }
 
 function renderDashboard(){
-  const filtered = filterSalesByRange(dashRange);
+  const filtered = filterSalesByRange(dashRange, dashCustomRange);
   const revenue = filtered.reduce((a,s)=>a+Number(s.total||0),0);
   const profit = filtered.reduce((a,s)=>a+Number(s.profit||0),0);
   const count = filtered.length;
@@ -1702,10 +1946,23 @@ function renderInventory(){
   }).join('');
 
   const q = (document.getElementById('invSearch')?.value || '').toLowerCase();
+  // Pre-calcular rango fecha si está activo
+  const fromTs = invDateFilter?.from ? dateStrToLocal(invDateFilter.from, false).getTime() : null;
+  const toTs = invDateFilter?.to ? dateStrToLocal(invDateFilter.to, true).getTime() : null;
+
   let list = products.filter(p => {
     const matchQ = !q || (p.name||'').toLowerCase().includes(q) || (p.tag||'').toLowerCase().includes(q);
     const matchT = invFilter==='all' || p.tag === invFilter;
-    return matchQ && matchT;
+    let matchD = true;
+    if(fromTs !== null || toTs !== null){
+      if(!p.created_at){ matchD = false; }
+      else{
+        const t = new Date(p.created_at).getTime();
+        if(fromTs !== null && t < fromTs) matchD = false;
+        if(toTs !== null && t > toTs) matchD = false;
+      }
+    }
+    return matchQ && matchT && matchD;
   });
   list.sort((a,b) => (a.name||'').localeCompare(b.name||''));
 
@@ -1748,13 +2005,15 @@ function setInvFilter(t){
 /* ───── VENTAS ───── */
 function setSalesRange(r, btn){
   salesRange = r;
+  salesCustomRange = null;
   document.querySelectorAll('#salesRangeTabs button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
+  updateCustomChip('sales');
   renderSales();
 }
 
 function renderSales(){
-  const filtered = filterSalesByRange(salesRange);
+  const filtered = filterSalesByRange(salesRange, salesCustomRange);
   const total = filtered.reduce((a,s)=>a+Number(s.total||0),0);
   const profit = filtered.reduce((a,s)=>a+Number(s.profit||0),0);
   document.getElementById('salesTotalLbl').textContent = fmt(total);
@@ -1803,7 +2062,22 @@ function getPaymentMethodByName(name){
 /* ───── CLIENTES ───── */
 function renderCustomers(){
   const q = (document.getElementById('cliSearch')?.value || '').toLowerCase();
-  let list = customers.filter(c => !q || (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q));
+  const fromTs = custDateFilter?.from ? dateStrToLocal(custDateFilter.from, false).getTime() : null;
+  const toTs = custDateFilter?.to ? dateStrToLocal(custDateFilter.to, true).getTime() : null;
+
+  let list = customers.filter(c => {
+    const matchQ = !q || (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q);
+    let matchD = true;
+    if(fromTs !== null || toTs !== null){
+      if(!c.last_purchase_at){ matchD = false; }
+      else{
+        const t = new Date(c.last_purchase_at).getTime();
+        if(fromTs !== null && t < fromTs) matchD = false;
+        if(toTs !== null && t > toTs) matchD = false;
+      }
+    }
+    return matchQ && matchD;
+  });
   list.sort((a,b)=>Number(b.total_purchases||0) - Number(a.total_purchases||0));
 
   const wrap = document.getElementById('customersList');
@@ -2454,11 +2728,180 @@ async function deletePaymentMethod(id){
   }catch(e){ toast('Error: '+(e.message||e)); }
 }
 
+/* ═══════════ DATE RANGE PICKER (rango personalizado por sección) ═══════════ */
+function openDateRangePicker(context){
+  // context: 'dash' | 'sales' | 'inv' | 'cust'
+  dateRangeContext = context;
+
+  const titles = {
+    dash:  'Rango personalizado · Dashboard',
+    sales: 'Rango personalizado · Ventas',
+    inv:   'Filtro de fecha · Inventario',
+    cust:  'Filtro de fecha · Clientes'
+  };
+  const hints = {
+    dash:  'Las métricas y gráficas del dashboard se filtrarán por este rango.',
+    sales: 'Solo se mostrarán las ventas registradas en este rango.',
+    inv:   'Solo se mostrarán los productos creados en este rango (fecha de alta).',
+    cust:  'Solo se mostrarán los clientes cuya última compra cae en este rango.'
+  };
+  document.getElementById('dateRangeTitle').textContent = titles[context] || 'Rango personalizado';
+  document.getElementById('dateRangeHint').textContent = hints[context] || '';
+
+  // Pre-llenar con el rango actual si lo hay
+  const current = getCurrentCustomRange(context);
+  if(current){
+    document.getElementById('dateRangeFrom').value = current.from || '';
+    document.getElementById('dateRangeTo').value = current.to || '';
+  }else{
+    // Default: hace 30 días → hoy
+    const today = todayStr();
+    const past = daysAgoStr(29);
+    document.getElementById('dateRangeFrom').value = past;
+    document.getElementById('dateRangeTo').value = today;
+  }
+  document.getElementById('dateRangeModal').classList.add('open');
+}
+
+function getCurrentCustomRange(context){
+  if(context==='dash') return dashCustomRange;
+  if(context==='sales') return salesCustomRange;
+  if(context==='inv') return invDateFilter;
+  if(context==='cust') return custDateFilter;
+  return null;
+}
+
+function applyDateRange(){
+  const from = document.getElementById('dateRangeFrom').value;
+  const to = document.getElementById('dateRangeTo').value;
+  if(!from || !to){ toast('Completa ambas fechas'); return; }
+  if(from > to){ toast('La fecha inicial no puede ser mayor que la final'); return; }
+  const range = { from, to };
+  if(dateRangeContext === 'dash'){
+    dashCustomRange = range;
+    updateCustomChip('dash');
+    renderDashboard();
+  }else if(dateRangeContext === 'sales'){
+    salesCustomRange = range;
+    updateCustomChip('sales');
+    renderSales();
+  }else if(dateRangeContext === 'inv'){
+    invDateFilter = range;
+    updateCustomChip('inv');
+    renderInventory();
+  }else if(dateRangeContext === 'cust'){
+    custDateFilter = range;
+    updateCustomChip('cust');
+    renderCustomers();
+  }
+  closeModal('dateRangeModal');
+  toast('Filtro aplicado');
+}
+
+function clearCustomRange(context){
+  if(context === 'dash'){
+    dashCustomRange = null;
+    updateCustomChip('dash');
+    renderDashboard();
+  }else if(context === 'sales'){
+    salesCustomRange = null;
+    updateCustomChip('sales');
+    renderSales();
+  }else if(context === 'inv'){
+    invDateFilter = null;
+    updateCustomChip('inv');
+    renderInventory();
+  }else if(context === 'cust'){
+    custDateFilter = null;
+    updateCustomChip('cust');
+    renderCustomers();
+  }
+}
+
+function updateCustomChip(context){
+  const ranges = {
+    dash:  { range: dashCustomRange,  chipId: 'dashCustomChip',  btnId: null },
+    sales: { range: salesCustomRange, chipId: 'salesCustomChip', btnId: null },
+    inv:   { range: invDateFilter,    chipId: 'invCustomChip',   btnId: 'invDateBtn' },
+    cust:  { range: custDateFilter,   chipId: 'custCustomChip',  btnId: 'custDateBtn' }
+  };
+  const cfg = ranges[context];
+  if(!cfg) return;
+  const chip = document.getElementById(cfg.chipId);
+  if(!chip) return;
+  if(cfg.range && cfg.range.from && cfg.range.to){
+    chip.style.display = 'inline-flex';
+    chip.innerHTML = `📅 ${formatDateChip(cfg.range.from)} → ${formatDateChip(cfg.range.to)}
+      <button class="clear" onclick="clearCustomRange('${context}')" title="Quitar filtro">✕</button>`;
+    if(cfg.btnId){
+      const b = document.getElementById(cfg.btnId);
+      if(b){ b.classList.add('active'); b.innerHTML = '📅 Filtro activo'; }
+    }
+    // Para dashboard/ventas: desactivar los chips de preset (hoy/semana/mes)
+    if(context === 'dash'){
+      document.querySelectorAll('#dashRangeTabs button').forEach(b => b.classList.remove('active'));
+    }else if(context === 'sales'){
+      document.querySelectorAll('#salesRangeTabs button').forEach(b => b.classList.remove('active'));
+    }
+  }else{
+    chip.style.display = 'none';
+    chip.innerHTML = '';
+    if(cfg.btnId){
+      const b = document.getElementById(cfg.btnId);
+      if(b){
+        b.classList.remove('active');
+        if(context === 'inv') b.innerHTML = '📅 Filtrar por fecha de alta';
+        if(context === 'cust') b.innerHTML = '📅 Filtrar por última compra';
+      }
+    }
+  }
+}
+
+function formatDateChip(str){
+  // 'YYYY-MM-DD' → 'DD/MM'
+  if(!str) return '';
+  const [y,m,d] = str.split('-');
+  return `${d}/${m}`;
+}
+
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+function daysAgoStr(n){
+  const d = new Date(); d.setDate(d.getDate()-n);
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+
+function setDatePreset(days){
+  document.getElementById('dateRangeFrom').value = daysAgoStr(days-1);
+  document.getElementById('dateRangeTo').value = todayStr();
+}
+function setDatePresetThisMonth(){
+  const now = new Date();
+  const first = new Date(now.getFullYear(), now.getMonth(), 1);
+  document.getElementById('dateRangeFrom').value =
+    `${first.getFullYear()}-${pad2(first.getMonth()+1)}-${pad2(first.getDate())}`;
+  document.getElementById('dateRangeTo').value = todayStr();
+}
+function setDatePresetLastMonth(){
+  const now = new Date();
+  const first = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const last = new Date(now.getFullYear(), now.getMonth(), 0); // último día del mes anterior
+  document.getElementById('dateRangeFrom').value =
+    `${first.getFullYear()}-${pad2(first.getMonth()+1)}-${pad2(first.getDate())}`;
+  document.getElementById('dateRangeTo').value =
+    `${last.getFullYear()}-${pad2(last.getMonth()+1)}-${pad2(last.getDate())}`;
+}
+
 /* ───── EXPORT CSV ───── */
 function exportSalesCSV(){
   if(!sales.length){ toast('No hay ventas para exportar'); return; }
+  // Respetar el filtro de la pestaña ventas si está activo
+  const filtered = filterSalesByRange(salesRange, salesCustomRange);
+  if(!filtered.length){ toast('No hay ventas en el rango seleccionado'); return; }
   const head = ['Fecha','Producto','Cantidad','Precio Unit','Total','Utilidad','Cliente','Telefono','Metodo','Icono'];
-  const rows = sales.map(s => {
+  const rows = filtered.map(s => {
     const c = s.customer_id ? customers.find(x=>x.id===s.customer_id) : null;
     const pm = getPaymentMethodByName(s.payment_method);
     return [
@@ -2514,6 +2957,89 @@ function toast(msg){
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2700);
 }
 
+/* ═══════════ REALTIME · suscripciones a cambios en Supabase ═══════════ */
+/* Cuando alguien (incluido el panel de Supabase) modifica las tablas,
+   estas suscripciones recargan los datos automáticamente. */
+
+function subscribeRealtime(){
+  if(!sb || !currentSessionId) return;
+  // Si ya hay un canal activo, no duplicar
+  if(realtimeChannel){ return; }
+
+  const tables = ['products','sales','customers','payment_methods'];
+  realtimeChannel = sb.channel(`fh_admin_${currentSessionId.slice(0,8)}`);
+
+  tables.forEach(table => {
+    realtimeChannel.on(
+      'postgres_changes',
+      {
+        event: '*',           // INSERT, UPDATE, DELETE
+        schema: 'public',
+        table: table,
+        filter: `user_id=eq.${currentSessionId}`
+      },
+      (payload) => {
+        console.log(`🔔 Realtime [${table}]`, payload.eventType);
+        // Debounce: si llegan varios eventos seguidos, esperar 400ms y refrescar una sola vez
+        clearTimeout(realtimeRefreshTimer);
+        realtimeRefreshTimer = setTimeout(()=>{
+          // Refresco silencioso (sin "Actualizando…" para no parpadear)
+          loadAll(true).then(()=>{
+            const events = { INSERT:'+ Nuevo', UPDATE:'✎ Actualizado', DELETE:'🗑 Eliminado' };
+            const t = events[payload.eventType] || 'Cambio';
+            const tableLabels = { products:'producto', sales:'venta', customers:'cliente', payment_methods:'método de pago' };
+            toast(`${t}: ${tableLabels[table]||table}`);
+          });
+        }, 400);
+      }
+    );
+  });
+
+  realtimeChannel.subscribe((status) => {
+    console.log('Realtime status:', status);
+    if(status === 'SUBSCRIBED'){
+      realtimeReady = true;
+      setSbStatus('connected realtime','En vivo');
+    }else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED'){
+      realtimeReady = false;
+      setSbStatus('connected','Conectado');
+      // No es un error fatal: la app sigue funcionando, solo sin auto-refresh.
+      // El usuario puede usar el botón refrescar manualmente.
+    }
+  });
+}
+
+function unsubscribeRealtime(){
+  if(realtimeChannel){
+    try{ sb.removeChannel(realtimeChannel); }catch(e){}
+    realtimeChannel = null;
+  }
+  realtimeReady = false;
+}
+
+/* Auto-refresh al volver a la pestaña */
+function setupVisibilityRefresh(){
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible' && currentSessionId){
+      // Si pasaron más de 30 segundos desde el último refresh, recargar
+      const elapsed = Date.now() - lastRefreshAt;
+      if(elapsed > 30000){
+        console.log(`Tab visible after ${Math.round(elapsed/1000)}s — refreshing`);
+        loadAll(true);
+      }
+    }
+  });
+  // También al recuperar foco de la ventana (algunos navegadores no disparan visibilitychange)
+  window.addEventListener('focus', () => {
+    if(currentSessionId){
+      const elapsed = Date.now() - lastRefreshAt;
+      if(elapsed > 30000){
+        loadAll(true);
+      }
+    }
+  });
+}
+
 /* ═══════════ BOOT ═══════════ */
 async function bootApp(){
   setSbStatus('connecting','Verificando…');
@@ -2524,6 +3050,8 @@ async function bootApp(){
   }
   await loadAll();
   await checkMigration();
+  // Activar realtime y auto-refresh
+  subscribeRealtime();
 }
 
 window.addEventListener('DOMContentLoaded', async ()=>{
@@ -2533,6 +3061,9 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     verEl.textContent = 'v' + APP_VERSION;
     verEl.title = `Versión ${APP_VERSION} · Build ${APP_BUILD_DATE}`;
   }
+
+  // Auto-refresh al volver a la pestaña
+  setupVisibilityRefresh();
 
   // Login con Enter
   ['authEmail','authPassword'].forEach(id=>{
