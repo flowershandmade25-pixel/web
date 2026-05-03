@@ -355,6 +355,23 @@ nav a:hover::after { right: 0; }
   font-size: 10px; color: var(--sage); font-weight: 500;
   text-align: right; line-height: 1.35;
 }
+.card-share-btn {
+  background: none; border: 1.5px solid rgba(196,126,110,.22);
+  color: var(--deep); width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; cursor: pointer; transition: all .2s;
+  flex-shrink: 0;
+}
+.card-share-btn:hover { border-color: var(--rose); color: var(--rose); transform: scale(1.08); }
+.modal-share {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: none; border: 1.5px solid rgba(196,126,110,.25);
+  color: var(--deep); padding: 12px 20px; border-radius: 50px;
+  font-size: 10px; font-weight: 500; letter-spacing: 1.5px;
+  text-transform: uppercase; cursor: pointer; transition: all .2s;
+  font-family: 'Jost', sans-serif;
+}
+.modal-share:hover { border-color: var(--rose); color: var(--rose); }
 
 /* ─── EMPTY STATE ─────────────────────── */
 .empty-state {
@@ -1048,6 +1065,7 @@ footer {
       </div>
       <div class="modal-actions">
         <a href="#" class="modal-wa" id="modalWa">💬 Pedir por WhatsApp</a>
+        <button class="modal-share" id="modalShare" onclick="shareProduct(currentModalId)">↗ Compartir por WhatsApp</button>
       </div>
     </div>
   </div>
@@ -1125,7 +1143,7 @@ async function loadData() {
 
 function applyBiz() {
   const waUrl = `https://wa.me/593${BIZ.wa.replace(/^0/, '')}`;
-  const igUrl = `https://instagram.com/${BIZ.ig.replace('@','')}`;
+  const igUrl = `https://www.instagram.com/${BIZ.ig.replace('@','')}/`;
 
   document.getElementById('headerSlogan').textContent = BIZ.slogan;
   document.getElementById('footerSlogan').textContent = `${BIZ.shipping} · ${BIZ.addr}`;
@@ -1228,7 +1246,10 @@ function renderProducts(products) {
         <a href="${waLink}" class="card-wa-btn" target="_blank" onclick="event.stopPropagation()">
           <span class="card-wa-icon">💬</span> Pedir
         </a>
-        ${hasWholesale ? `<div class="card-wholesale-lbl">Por mayor<br>desde ${p.minQty}u.</div>` : ''}
+        <div style="display:flex;align-items:center;gap:8px">
+          ${hasWholesale ? `<div class="card-wholesale-lbl">Por mayor<br>desde ${p.minQty}u.</div>` : ''}
+          <button class="card-share-btn" title="Compartir por WhatsApp" onclick="event.stopPropagation();shareProduct(${p.id})">↗</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1240,10 +1261,38 @@ function renderProducts(products) {
 // Hero images are fixed: img/hero1.jpg, img/hero2.jpg, img/hero3.jpg
 // To change them, replace those files in GitHub.
 
+// ─── COMPARTIR ────────────────────────────────────────
+let currentModalId = null;
+
+function shareProduct(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+
+  const price = p.priceAfterDiscount ?? p.price ?? 0;
+  const pageUrl = window.location.href.split('#')[0] + `#producto-${id}`;
+  const waBase = `https://wa.me/`;
+
+  const msg = [
+    `🌸 *${p.name}*`,
+    p.desc ? p.desc : '',
+    `💰 Precio: *$${Number(price).toFixed(2)}*`,
+    ``,
+    `✨ Flores artesanales hechas a mano — Flowers Handmade`,
+    `🔗 ${pageUrl}`,
+    ``,
+    `📲 Para pedir escríbenos: wa.me/593${BIZ.wa.replace(/^0/,'')}`
+  ].filter(l => l !== undefined).join('\n');
+
+  // Abrir selector de contacto en WhatsApp (sin número fijo = elige el cliente)
+  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
 // ─── MODAL ────────────────────────────────────────────
 function openModal(id) {
   const p = allProducts.find(x => x.id === id);
   if (!p) return;
+  currentModalId = id;
   const waBase = `https://wa.me/593${BIZ.wa.replace(/^0/, '')}`;
   const waMsg = encodeURIComponent(`Hola Flowers Handmade! Me interesa: *${p.name}* 🌸 ¿Me pueden dar más información?`);
 
