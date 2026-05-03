@@ -1115,7 +1115,7 @@ async function loadData() {
     allProducts = products.filter(p => p.name); // Solo con nombre
     renderProducts(allProducts);
     buildFilters(allProducts);
-    updateHeroImages(allProducts);
+    // Hero images are static (img/hero1-3.jpg) — not replaced by products
     document.getElementById('statProducts').textContent = allProducts.length + '+';
   } catch(e) {
     console.warn('Error cargando datos:', e);
@@ -1237,17 +1237,8 @@ function renderProducts(products) {
 }
 
 // ─── HERO IMAGES ──────────────────────────────────────
-function updateHeroImages(products) {
-  const withPhoto = products.filter(p => p.photo);
-  if (withPhoto.length < 2) return;
-  const grid = document.getElementById('heroImgGrid');
-  const picks = withPhoto.slice(0, 3);
-  grid.innerHTML = picks.map((p, i) => `
-    <div class="hero-img-cell${i === 0 ? ' large' : ''}">
-      <img src="${p.photo}" alt="${p.name}" loading="lazy">
-    </div>
-  `).join('');
-}
+// Hero images are fixed: img/hero1.jpg, img/hero2.jpg, img/hero3.jpg
+// To change them, replace those files in GitHub.
 
 // ─── MODAL ────────────────────────────────────────────
 function openModal(id) {
