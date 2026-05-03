@@ -386,7 +386,24 @@ nav a:hover::after { right: 0; }
 }
 .empty-sub { font-size: 12px; color: var(--deep); opacity: .4; }
 
-/* ─── LOADING ─────────────────────────── */
+.card-stock {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 9px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 20px;
+  margin-top: 8px;
+}
+.card-stock.in-stock { background: #e8f5e9; color: #2e7d32; }
+.card-stock.low-stock { background: #fff8e1; color: #f57f17; }
+.card-stock.no-stock { background: #fce4ec; color: #c62828; }
+.modal-stock {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 20px;
+  margin-bottom: 14px;
+}
+.modal-stock.in-stock { background: #e8f5e9; color: #2e7d32; }
+.modal-stock.low-stock { background: #fff8e1; color: #f57f17; }
+.modal-stock.no-stock { background: #fce4ec; color: #c62828; }
 .loader-wrap {
   grid-column: 1/-1; text-align: center; padding: 80px 40px;
 }
@@ -1056,6 +1073,7 @@ footer {
       <h3 class="modal-name" id="modalName">—</h3>
       <p class="modal-desc" id="modalDesc">—</p>
       <div class="modal-price-section">
+        <div id="modalStock"></div>
         <div class="modal-price-label">Precio</div>
         <div>
           <span class="modal-price-final" id="modalPrice">—</span>
@@ -1100,14 +1118,23 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY);
 
 async function loadData() {
   try {
-    // Intentar cargar todos los sessions para encontrar productos
-    const { data: rows, error } = await sb
-      .from('app_settings')
-      .select('data, updated_at')
-      .order('updated_at', { ascending: false });
+    // Cargar productos de app_settings Y stock de tabla products en paralelo
+    const [settingsRes, stockRes] = await Promise.all([
+      sb.from('app_settings').select('data, updated_at').order('updated_at', { ascending: false }),
+      sb.from('products').select('legacy_id, stock')
+    ]);
 
-    if (error) { throw error; }
-    if (!rows || !rows.length) { renderProducts([]); return; }
+    if (settingsRes.error) throw settingsRes.error;
+    const rows = settingsRes.data || [];
+    if (!rows.length) { renderProducts([]); return; }
+
+    // Construir mapa de stock: { legacy_id -> stock }
+    const stockMap = {};
+    if (!stockRes.error && stockRes.data) {
+      stockRes.data.forEach(r => {
+        if (r.legacy_id !== null) stockMap[r.legacy_id] = r.stock ?? null;
+      });
+    }
 
     // Tomar la sesión más reciente que tenga productos
     let products = [];
@@ -1121,7 +1148,6 @@ async function loadData() {
     }
 
     if (bizData) {
-      // Actualizar datos del negocio
       if (bizData.shopWa) BIZ.wa = bizData.shopWa;
       if (bizData.shopIg) BIZ.ig = bizData.shopIg;
       if (bizData.shopSlogan) BIZ.slogan = bizData.shopSlogan;
@@ -1130,7 +1156,15 @@ async function loadData() {
     }
 
     applyBiz();
-    allProducts = products.filter(p => p.name); // Solo con nombre
+
+    // Fusionar stock en cada producto
+    allProducts = products
+      .filter(p => p.name)
+      .map(p => ({
+        ...p,
+        stock: stockMap.hasOwnProperty(p.id) ? stockMap[p.id] : null
+      }));
+
     renderProducts(allProducts);
     buildFilters(allProducts);
     // Hero images are static (img/hero1-3.jpg) — not replaced by products
@@ -1192,6 +1226,15 @@ document.querySelector('.filter-pill[data-filter="all"]').addEventListener('clic
   setFilter('all', this);
 });
 
+// ─── STOCK HELPER ─────────────────────────────────────
+function stockBadge(stock, type = 'card') {
+  if (stock === null || stock === undefined) return '';
+  const cls = type === 'card' ? 'card-stock' : 'modal-stock';
+  if (stock <= 0)  return `<div class="${cls} no-stock">● Sin stock</div>`;
+  if (stock <= 3)  return `<div class="${cls} low-stock">● Últimas ${stock} unidades</div>`;
+  return `<div class="${cls} in-stock">● ${stock} disponibles</div>`;
+}
+
 // ─── RENDER PRODUCTOS ─────────────────────────────────
 function fmt(n, currency) {
   const c = currency || 'USD';
@@ -1222,7 +1265,7 @@ function renderProducts(products) {
     const waLink = `${waBase}?text=${waMsg}`;
 
     return `
-    <div class="product-card reveal" onclick="openModal(${p.id})">
+    <div class="product-card reveal" id="producto-${p.id}" onclick="openModal(${p.id})">
       <div class="card-img-wrap">
         ${p.photo
           ? `<img src="${p.photo}" alt="${p.name}" loading="lazy">`
@@ -1237,6 +1280,7 @@ function renderProducts(products) {
       <div class="card-body">
         <div class="card-name">${p.name}</div>
         ${p.desc ? `<div class="card-desc">${p.desc}</div>` : ''}
+        ${stockBadge(p.stock, 'card')}
         <div class="card-price-row">
           ${orig ? `<span class="card-price-orig">$${Number(orig).toFixed(2)}</span>` : ''}
           <span class="card-price-final">$${Number(price).toFixed(2)}</span>
@@ -1268,24 +1312,25 @@ function shareProduct(id) {
   const p = allProducts.find(x => x.id === id);
   if (!p) return;
 
-  const price = p.priceAfterDiscount ?? p.price ?? 0;
-  const pageUrl = window.location.href.split('#')[0] + `#producto-${id}`;
-  const waBase = `https://wa.me/`;
+  const pageUrl = `${window.location.href.split('#')[0]}#producto-${id}`;
 
-  const msg = [
-    `🌸 *${p.name}*`,
-    p.desc ? p.desc : '',
-    `💰 Precio: *$${Number(price).toFixed(2)}*`,
-    ``,
-    `✨ Flores artesanales hechas a mano — Flowers Handmade`,
-    `🔗 ${pageUrl}`,
-    ``,
-    `📲 Para pedir escríbenos: wa.me/593${BIZ.wa.replace(/^0/,'')}`
-  ].filter(l => l !== undefined).join('\n');
+  // Usar Web Share API en móvil si está disponible
+  if (navigator.share) {
+    navigator.share({
+      title: p.name,
+      text: `Mira este arreglo de Flowers Handmade 🌸`,
+      url: pageUrl
+    }).catch(() => {});
+    return;
+  }
 
-  // Abrir selector de contacto en WhatsApp (sin número fijo = elige el cliente)
-  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
+  // Fallback: copiar link al portapapeles
+  navigator.clipboard.writeText(pageUrl).then(() => {
+    showToast('🔗 Link copiado al portapapeles');
+  }).catch(() => {
+    // Último recurso: abrir WhatsApp solo con el link
+    window.open(`https://wa.me/?text=${encodeURIComponent(pageUrl)}`, '_blank');
+  });
 }
 
 // ─── MODAL ────────────────────────────────────────────
@@ -1309,6 +1354,7 @@ function openModal(id) {
   document.getElementById('modalDesc').textContent = p.desc || 'Pieza artesanal elaborada a mano con cinta de tela y otros materiales. Un regalo único creado en Loja, Ecuador.';
 
   const price = p.priceAfterDiscount ?? p.price ?? 0;
+  document.getElementById('modalStock').innerHTML = stockBadge(p.stock, 'modal');
   document.getElementById('modalPrice').textContent = `$${Number(price).toFixed(2)}`;
   const origEl = document.getElementById('modalPriceOrig');
   origEl.textContent = p.discount > 0 ? `$${Number(p.price).toFixed(2)}` : '';
@@ -1376,7 +1422,20 @@ function showToast(msg) {
 // ─── INIT ─────────────────────────────────────────────
 applyBiz();
 observeReveal();
-loadData();
+loadData().then(() => {
+  // Si la URL tiene #producto-ID, hacer scroll y abrir modal
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#producto-')) {
+    const id = parseInt(hash.replace('#producto-', ''));
+    if (!isNaN(id)) {
+      setTimeout(() => {
+        const el = document.getElementById(`producto-${id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        openModal(id);
+      }, 400);
+    }
+  }
+});
 </script>
 </body>
 </html>
