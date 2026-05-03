@@ -1311,7 +1311,7 @@ input:focus,select:focus,textarea:focus{outline:none}
    FLOWERS HANDMADE · ADMIN PANEL · LÓGICA
 ═══════════════════════════════════════════════════════════════════ */
 
-const APP_VERSION = '1.18.0';
+const APP_VERSION = '1.20.0';
 const APP_BUILD_DATE = '2026-05-03';
 const PUBLICATIONS_URL = 'https://flowershandmade25-pixel.github.io/web/tool/';
 
@@ -1372,6 +1372,327 @@ let lastRefreshAt = 0;
 
 const LOW_STOCK_THRESHOLD = 3;
 const LS_BACKUP_KEY = 'fh_admin_backup_v1';
+
+// ════════════════════════════════════════════════════════════
+// OUTBOX (cola offline → sincronización al volver internet)
+// ════════════════════════════════════════════════════════════
+//
+// Cada operación de escritura (insert/update/delete) se intenta
+// directo contra Supabase. Si falla (offline, tabla no existe,
+// 500, etc.) se encola en localStorage. Un flusher la reintenta:
+//   - al volver `online`
+//   - al iniciar sesión
+//   - cada 30s mientras haya pendientes
+//
+// IDs temporales: cuando creamos algo offline (venta, cliente,
+// producto), Supabase aún no asignó un `id` BIGSERIAL. Generamos
+// un `id` local con prefijo "tmp_" y formato negativo que jamás
+// chocará con un BIGSERIAL real. Al sincronizar, obtenemos el id
+// real desde Supabase y reemplazamos las referencias en otras
+// filas locales (ej: `customer_id` en una venta) y en la cola.
+
+const OUTBOX_KEY = 'fh_admin_outbox_v1';
+const TEMP_ID_PREFIX = 'tmp_';
+let outboxFlushing = false;
+
+function isTempId(id){ return typeof id === 'string' && id.startsWith(TEMP_ID_PREFIX); }
+function newTempId(){
+  return TEMP_ID_PREFIX + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+}
+// Devuelve un id de manera segura para inyectar en un onclick="fn(${JID(id)})".
+// Si es tempId (string), lo envuelve en comillas. Si es número, lo deja como número.
+function JID(id){
+  if(typeof id === 'string') return `'${id.replace(/'/g, "\\'")}'`;
+  return id;
+}
+
+function outboxRead(){
+  try{ return JSON.parse(localStorage.getItem(OUTBOX_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function outboxWrite(arr){
+  try{ localStorage.setItem(OUTBOX_KEY, JSON.stringify(arr)); }
+  catch(e){ console.warn('outboxWrite fail:', e); }
+}
+function outboxCount(){ return outboxRead().length; }
+
+// Encolar una operación. `meta` puede traer info auxiliar (p.ej. tempId
+// que después del éxito hay que reemplazar en otras tablas locales).
+function outboxPush(op){
+  const q = outboxRead();
+  // Dedupe por (type + targetId) para updates: solo importa el último
+  if(op.dedupeKey){
+    const filtered = q.filter(x => x.dedupeKey !== op.dedupeKey);
+    filtered.push({ ...op, queuedAt: Date.now(), sessionId: currentSessionId || null });
+    outboxWrite(filtered);
+  }else{
+    q.push({ ...op, queuedAt: Date.now(), sessionId: currentSessionId || null });
+    outboxWrite(q);
+  }
+  updateOutboxBadge();
+}
+
+// Reemplazar un tempId por el id real en TODAS las operaciones pendientes
+// y en los arrays en memoria (productos, clientes, ventas).
+function outboxReplaceTempId(table, tempId, realId){
+  // 1) En memoria
+  if(table === 'products'){
+    const p = products.find(x=>x.id===tempId); if(p) p.id = realId;
+    sales.forEach(s=>{ if(s.product_id===tempId) s.product_id = realId; });
+  } else if(table === 'customers'){
+    const c = customers.find(x=>x.id===tempId); if(c) c.id = realId;
+    sales.forEach(s=>{ if(s.customer_id===tempId) s.customer_id = realId; });
+  } else if(table === 'sales'){
+    const s = sales.find(x=>x.id===tempId); if(s) s.id = realId;
+  } else if(table === 'payment_methods'){
+    const m = paymentMethods.find(x=>x.id===tempId); if(m) m.id = realId;
+  }
+  // 2) En la cola: reescribir referencias
+  const q = outboxRead();
+  q.forEach(op => {
+    if(op.targetId === tempId) op.targetId = realId;
+    if(op.payload){
+      if(table==='customers' && op.payload.customer_id === tempId) op.payload.customer_id = realId;
+      if(table==='products'  && op.payload.product_id  === tempId) op.payload.product_id  = realId;
+      if(op.payload.id === tempId) op.payload.id = realId;
+    }
+  });
+  outboxWrite(q);
+}
+
+// Indicador visual del outbox en el header
+function updateOutboxBadge(){
+  try{
+    const n = outboxCount();
+    let badge = document.getElementById('outboxBadge');
+    if(!badge){
+      const host = document.getElementById('sbStatus');
+      if(!host) return;
+      badge = document.createElement('span');
+      badge.id = 'outboxBadge';
+      badge.style.cssText = 'display:none;margin-left:6px;padding:3px 9px;background:#b8935a;color:#fff;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;vertical-align:middle;';
+      badge.title = 'Cambios pendientes de sincronizar. Click para reintentar.';
+      badge.onclick = (e) => { e.stopPropagation(); outboxFlush(true); };
+      host.parentNode.insertBefore(badge, host.nextSibling);
+    }
+    if(n > 0){
+      badge.style.display = 'inline-block';
+      badge.textContent = `⟳ ${n} pendiente${n>1?'s':''}`;
+    } else {
+      badge.style.display = 'none';
+    }
+  }catch(e){}
+}
+
+// Ejecutar UNA operación de la cola contra Supabase
+async function outboxExecute(op){
+  if(!sb) return false;
+  // (v1.20: datos compartidos — la op se ejecuta con cualquier usuario
+  // autenticado. user_id de la op queda solo como auditoría.)
+  try{
+    switch(op.type){
+
+      // ─── PRODUCTOS ─────────────────────────────────────────
+      case 'product_insert': {
+        const payload = { ...op.payload, user_id: op.sessionId || currentSessionId };
+        delete payload.id; // dejar que la BD genere el real
+        const { data, error } = await sb.from('products').insert(payload).select().single();
+        if(error) throw error;
+        if(op.tempId && data?.id) outboxReplaceTempId('products', op.tempId, data.id);
+        return true;
+      }
+      case 'product_update': {
+        if(isTempId(op.targetId)) return false; // espera al insert primero
+        const { error } = await sb.from('products')
+          .update(op.payload).eq('id', op.targetId);
+        if(error) throw error;
+        return true;
+      }
+      // Update relativo de stock (ej: +5, -3) — para no pisar otros dispositivos
+      case 'product_stock_delta': {
+        if(isTempId(op.targetId)) return false;
+        // Leemos stock actual y aplicamos el delta
+        const { data: cur, error: re } = await sb.from('products')
+          .select('stock').eq('id', op.targetId).single();
+        if(re) throw re;
+        const newStock = Math.max(0, Number(cur?.stock||0) + Number(op.payload.delta||0));
+        const { error } = await sb.from('products')
+          .update({ stock: newStock }).eq('id', op.targetId);
+        if(error) throw error;
+        return true;
+      }
+      case 'product_delete': {
+        if(isTempId(op.targetId)) return true; // si nunca se subió, nada que borrar
+        const { error } = await sb.from('products').delete()
+          .eq('id', op.targetId);
+        if(error) throw error;
+        return true;
+      }
+
+      // ─── CLIENTES ──────────────────────────────────────────
+      case 'customer_insert': {
+        const payload = { ...op.payload, user_id: op.sessionId || currentSessionId };
+        delete payload.id;
+        const { data, error } = await sb.from('customers').insert(payload).select().single();
+        if(error) throw error;
+        if(op.tempId && data?.id) outboxReplaceTempId('customers', op.tempId, data.id);
+        return true;
+      }
+      case 'customer_update': {
+        if(isTempId(op.targetId)) return false;
+        const { error } = await sb.from('customers')
+          .update(op.payload).eq('id', op.targetId);
+        if(error) throw error;
+        return true;
+      }
+      // Sumar/restar al total del cliente sin pisar (al volver online)
+      case 'customer_total_delta': {
+        if(isTempId(op.targetId)) return false;
+        const { data: cur, error: re } = await sb.from('customers')
+          .select('total_purchases').eq('id', op.targetId).single();
+        if(re) throw re;
+        const newTotal = Math.max(0, Number(cur?.total_purchases||0) + Number(op.payload.delta||0));
+        const upd = { total_purchases: newTotal };
+        if(op.payload.touchLast) upd.last_purchase_at = new Date().toISOString();
+        const { error } = await sb.from('customers')
+          .update(upd).eq('id', op.targetId);
+        if(error) throw error;
+        return true;
+      }
+      case 'customer_delete': {
+        if(isTempId(op.targetId)) return true;
+        const { error } = await sb.from('customers').delete()
+          .eq('id', op.targetId);
+        if(error) throw error;
+        return true;
+      }
+
+      // ─── VENTAS ────────────────────────────────────────────
+      case 'sale_insert': {
+        // Si la venta apunta a un tempId que aún no se subió, esperamos
+        if(isTempId(op.payload.product_id) || isTempId(op.payload.customer_id)) return false;
+        const payload = { ...op.payload, user_id: op.sessionId || currentSessionId };
+        delete payload.id;
+        const { data, error } = await sb.from('sales').insert(payload).select().single();
+        if(error) throw error;
+        if(op.tempId && data?.id) outboxReplaceTempId('sales', op.tempId, data.id);
+        return true;
+      }
+      case 'sale_delete': {
+        if(isTempId(op.targetId)) return true;
+        const { error } = await sb.from('sales').delete()
+          .eq('id', op.targetId);
+        if(error) throw error;
+        return true;
+      }
+
+      // ─── MÉTODOS DE PAGO ───────────────────────────────────
+      case 'payment_insert': {
+        const payload = { ...op.payload, user_id: op.sessionId || currentSessionId };
+        delete payload.id;
+        const { data, error } = await sb.from('payment_methods').insert(payload).select().single();
+        if(error) throw error;
+        if(op.tempId && data?.id) outboxReplaceTempId('payment_methods', op.tempId, data.id);
+        return true;
+      }
+      case 'payment_update': {
+        if(isTempId(op.targetId)) return false;
+        const { error } = await sb.from('payment_methods')
+          .update(op.payload).eq('id', op.targetId);
+        if(error) throw error;
+        return true;
+      }
+      case 'payment_delete': {
+        if(isTempId(op.targetId)) return true;
+        const { error } = await sb.from('payment_methods').delete()
+          .eq('id', op.targetId);
+        if(error) throw error;
+        return true;
+      }
+
+      default:
+        console.warn('outbox: tipo desconocido', op.type);
+        return true; // descartar
+    }
+  }catch(e){
+    console.warn('outbox execute fail:', op.type, e?.message || e);
+    return false;
+  }
+}
+
+// Vaciar la cola hasta donde se pueda
+async function outboxFlush(showToast = false){
+  if(outboxFlushing) return;
+  if(!sb || !navigator.onLine){
+    if(showToast) toast('Sin conexión — se reintentará al volver internet');
+    return;
+  }
+  if(outboxCount() === 0){
+    if(showToast) toast('✓ Todo sincronizado');
+    return;
+  }
+  outboxFlushing = true;
+  let ok = 0, skipped = 0, hardFail = false;
+  try{
+    // Procesar en orden, pero saltando ops que dependan de tempIds que aún no subieron
+    let i = 0;
+    while(i < outboxRead().length){
+      const q = outboxRead();
+      const op = q[i];
+      const success = await outboxExecute(op);
+      if(success){
+        // Quitar la op procesada
+        const fresh = outboxRead();
+        fresh.splice(i, 1);
+        outboxWrite(fresh);
+        ok++;
+        // No incrementamos i — la siguiente quedó en la misma posición
+      }else{
+        // Si la op depende de algo aún no subido, la saltamos por ahora
+        // (el tempId se resolverá cuando otra op anterior lo cree)
+        skipped++;
+        i++;
+        if(skipped > 3 && ok === 0){
+          // Llevamos varias fallidas y ningún éxito → red fría
+          hardFail = true;
+          break;
+        }
+      }
+    }
+  } finally {
+    outboxFlushing = false;
+    updateOutboxBadge();
+  }
+  if(ok > 0){
+    saveBackup();
+    // Refrescar UI por si los IDs cambiaron
+    try{ renderAll(); }catch(e){}
+  }
+  if(showToast || ok > 0){
+    if(outboxCount() === 0 && ok > 0) toast(`✓ ${ok} sincronizada${ok>1?'s':''}`);
+    else if(ok > 0) toast(`${ok} sincronizadas · ${outboxCount()} pendientes`);
+    else if(hardFail) toast('Sin conexión — reintentando…');
+  }
+}
+
+// Listeners online/offline
+window.addEventListener('online', () => {
+  toast('Conexión recuperada — sincronizando…');
+  setTimeout(()=> outboxFlush(false), 600);
+});
+window.addEventListener('offline', () => {
+  toast('Sin conexión — los cambios se guardan localmente');
+});
+// Flush periódico mientras haya pendientes
+setInterval(() => {
+  if(outboxCount() > 0 && navigator.onLine && sb){
+    outboxFlush(false);
+  }
+}, 30000);
+
+// ════════════════════════════════════════════════════════════
+// FIN OUTBOX
+// ════════════════════════════════════════════════════════════
 
 /* ───── INIT ───── */
 function initSb(){
@@ -1469,7 +1790,7 @@ async function signOut(){
 async function verifyTables(){
   // Test mínimo: intentamos seleccionar de products
   try{
-    const { error } = await sb.from('products').select('id',{ count:'exact', head:true }).eq('user_id', currentSessionId);
+    const { error } = await sb.from('products').select('id',{ count:'exact', head:true });
     if(error){
       if(error.code === '42P01' || /does not exist/i.test(error.message) || error.code === 'PGRST205'){
         setSbStatus('error','Crea las tablas');
@@ -1585,13 +1906,13 @@ ALTER TABLE product_costs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "users_own_products" ON products FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "users_own_customers" ON customers FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "users_own_sales" ON sales FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "users_own_payments" ON payment_methods FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "users_own_costs" ON product_costs FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "users_own_orders" ON orders FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "users_own_order_items" ON order_items FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+CREATE POLICY "shared_products" ON products FOR ALL USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "shared_customers" ON customers FOR ALL USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "shared_sales" ON sales FOR ALL USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "shared_payments" ON payment_methods FOR ALL USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "shared_costs" ON product_costs FOR ALL USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "shared_orders" ON orders FOR ALL USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "shared_order_items" ON order_items FOR ALL USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
 
 CREATE INDEX IF NOT EXISTS idx_products_user ON products(user_id);
 CREATE INDEX IF NOT EXISTS idx_sales_user_date ON sales(user_id, created_at DESC);
@@ -1621,7 +1942,20 @@ function copyText(t){
 async function loadAll(silent){
   if(!silent) setSbStatus('refreshing','Actualizando…');
   try{
+    // Antes de recargar, capturamos las filas locales con tempId (aún no subidas)
+    const tempProducts  = (products||[]).filter(p => isTempId(p.id));
+    const tempCustomers = (customers||[]).filter(c => isTempId(c.id));
+    const tempSales     = (sales||[]).filter(s => isTempId(s.id));
+    const tempPayments  = (paymentMethods||[]).filter(m => isTempId(m.id));
+
     await Promise.all([loadProducts(), loadSales(), loadCustomers(), loadPaymentMethods(), loadOrders(), loadProductCosts()]);
+
+    // Re-inyectamos las filas temp para que el usuario las siga viendo
+    if(tempProducts.length)  products  = [...tempProducts,  ...products];
+    if(tempCustomers.length) customers = [...tempCustomers, ...customers];
+    if(tempSales.length)     sales     = [...tempSales,     ...sales];
+    if(tempPayments.length)  paymentMethods = [...paymentMethods, ...tempPayments];
+
     saveBackup();
     renderAll();
     lastRefreshAt = Date.now();
@@ -1629,6 +1963,11 @@ async function loadAll(silent){
     // En cada carga, revisar si hay nuevos productos en el catálogo del index.html
     // (no bloquea, corre en background)
     checkMigration().catch(()=>{});
+    // Y vaciar la cola pendiente si hay
+    if(outboxCount() > 0 && navigator.onLine){
+      setTimeout(()=> outboxFlush(false), 700);
+    }
+    updateOutboxBadge();
   }catch(e){
     console.warn('loadAll error:', e);
     if(!silent) setSbStatus('error','Error al cargar');
@@ -1647,7 +1986,7 @@ async function manualRefresh(){
 async function loadProducts(){
   try{
     const { data, error } = await sb.from('products')
-      .select('*').eq('user_id', currentSessionId).order('name');
+      .select('*').order('name');
     if(error) throw error;
     products = data || [];
   }catch(e){
@@ -1660,7 +1999,7 @@ async function loadProducts(){
 async function loadSales(){
   try{
     const { data, error } = await sb.from('sales')
-      .select('*').eq('user_id', currentSessionId)
+      .select('*')
       .order('created_at',{ ascending:false }).limit(500);
     if(error) throw error;
     sales = data || [];
@@ -1673,7 +2012,7 @@ async function loadSales(){
 async function loadCustomers(){
   try{
     const { data, error } = await sb.from('customers')
-      .select('*').eq('user_id', currentSessionId)
+      .select('*')
       .order('total_purchases',{ ascending:false });
     if(error) throw error;
     customers = data || [];
@@ -1686,7 +2025,7 @@ async function loadCustomers(){
 async function loadPaymentMethods(){
   try{
     const { data, error } = await sb.from('payment_methods')
-      .select('*').eq('user_id', currentSessionId)
+      .select('*')
       .order('sort_order',{ ascending:true });
     if(error){
       // Si la tabla no existe todavía, usar defaults en memoria (no fallar)
@@ -1733,12 +2072,12 @@ async function loadOrders(){
   try{
     // Cargar pedidos con sus items (consulta separada para evitar joins complejos)
     const { data: ordersData, error } = await sb.from('orders')
-      .select('*').eq('user_id', currentSessionId)
+      .select('*')
       .order('due_date',{ ascending:true, nullsFirst:false });
     if(error) throw error;
 
     const { data: itemsData, error: ie } = await sb.from('order_items')
-      .select('*').eq('user_id', currentSessionId);
+      .select('*');
     if(ie) throw ie;
 
     // Adjuntar items a cada orden
@@ -1764,7 +2103,7 @@ async function loadOrders(){
 async function loadProductCosts(){
   try{
     const { data, error } = await sb.from('product_costs')
-      .select('*').eq('user_id', currentSessionId)
+      .select('*')
       .order('product_id',{ ascending:true });
     if(error) throw error;
     productCosts = data || [];
@@ -2405,10 +2744,10 @@ function renderInventory(){
         <div style="margin-top:5px"><span class="stock-badge ${stockClass}">${stockTxt}</span></div>
       </div>
       <div class="acts">
-        <button class="icon-btn" title="Calcular costo" onclick="openCostModal(${p.id})">💰</button>
-        <button class="icon-btn" title="Stock" onclick="openStockModal(${p.id})">📦</button>
-        <button class="icon-btn" title="Editar" onclick="openProductModal(${p.id})">✎</button>
-        <button class="icon-btn danger" title="Eliminar" onclick="deleteProduct(${p.id})">🗑</button>
+        <button class="icon-btn" title="Calcular costo" onclick="openCostModal(${JID(p.id)})">💰</button>
+        <button class="icon-btn" title="Stock" onclick="openStockModal(${JID(p.id)})">📦</button>
+        <button class="icon-btn" title="Editar" onclick="openProductModal(${JID(p.id)})">✎</button>
+        <button class="icon-btn danger" title="Eliminar" onclick="deleteProduct(${JID(p.id)})">🗑</button>
       </div>
     </div>`;
   }).join('');
@@ -2465,7 +2804,7 @@ function saleListItemHTML(s){
       <div style="font-size:11px;color:var(--muted);margin-top:3px">${dateStr} · utilidad ${profitTxt}</div>
     </div>
     <div class="acts">
-      <button class="icon-btn danger" title="Eliminar" onclick="deleteSale(${s.id})">🗑</button>
+      <button class="icon-btn danger" title="Eliminar" onclick="deleteSale(${JID(s.id)})">🗑</button>
     </div>
   </div>`;
 }
@@ -2504,7 +2843,7 @@ function renderCustomers(){
   wrap.innerHTML = list.map((c, i) => {
     const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
     const last = c.last_purchase_at ? new Date(c.last_purchase_at).toLocaleDateString() : '—';
-    return `<div class="list-item" onclick="openCustomerDetail(${c.id})">
+    return `<div class="list-item" onclick="openCustomerDetail(${JID(c.id)})">
       <div class="rank-badge ${rankClass}">${i+1}</div>
       <div class="body">
         <div class="name">${escapeHtml(c.name)}</div>
@@ -2536,7 +2875,7 @@ async function openCustomerDetail(id){
     ${cs.length ? cs.map(saleListItemHTML).join('') : '<div class="empty-state" style="padding:18px"><div class="msg">Sin compras todavía</div></div>'}
     <div style="margin-top:14px;display:flex;gap:8px">
       <button class="btn btn-outline" style="flex:1" onclick="closeModal('customerModal')">Cerrar</button>
-      <button class="btn btn-danger" onclick="deleteCustomer(${c.id})">Eliminar cliente</button>
+      <button class="btn btn-danger" onclick="deleteCustomer(${JID(c.id)})">Eliminar cliente</button>
     </div>
   `;
   document.getElementById('customerModal').classList.add('open');
@@ -2544,16 +2883,33 @@ async function openCustomerDetail(id){
 
 async function deleteCustomer(id){
   if(!confirm('¿Eliminar este cliente? Las ventas que tenga asociadas conservarán el nombre pero perderán el vínculo.')) return;
-  try{
-    const { error } = await sb.from('customers').delete().eq('id', id).eq('user_id', currentSessionId);
-    if(error){ toast('Error: '+error.message); return; }
-    customers = customers.filter(c=>c.id!==id);
-    sales.forEach(s=>{ if(s.customer_id===id) s.customer_id = null; });
-    saveBackup();
-    closeModal('customerModal');
-    renderAll();
+  // UI optimista
+  customers = customers.filter(c=>c.id!==id);
+  sales.forEach(s=>{ if(s.customer_id===id) s.customer_id = null; });
+  saveBackup();
+  closeModal('customerModal');
+  renderAll();
+  // Si era temp, cancelar su insert pendiente
+  if(isTempId(id)){
+    const q = outboxRead().filter(op => !(op.type==='customer_insert' && op.tempId===id));
+    outboxWrite(q); updateOutboxBadge();
     toast('Cliente eliminado');
-  }catch(e){ toast('Error'); }
+    return;
+  }
+  let synced = false;
+  if(navigator.onLine && sb){
+    try{
+      const { error } = await sb.from('customers').delete().eq('id', id);
+      if(error) throw error;
+      synced = true;
+    }catch(e){ console.warn('deleteCustomer online fail:', e?.message); }
+  }
+  if(!synced){
+    outboxPush({ type:'customer_delete', targetId: id, dedupeKey:'customer_delete_'+id });
+    toast(navigator.onLine ? 'Eliminando · sincronizando…' : 'Eliminado offline · se subirá al volver internet');
+  }else{
+    toast('Cliente eliminado');
+  }
 }
 
 /* ═══════════ MODALS ═══════════ */
@@ -2646,16 +3002,56 @@ async function saveProduct(){
   btn.disabled = true; btn.textContent = 'Guardando…';
   try{
     if(editingProductId){
-      const { data, error } = await sb.from('products').update(payload).eq('id', editingProductId).eq('user_id', currentSessionId).select().single();
-      if(error) throw error;
+      // ── UPDATE ──
       const idx = products.findIndex(p=>p.id===editingProductId);
-      if(idx>=0) products[idx] = data;
-      toast('Producto actualizado');
+      if(idx>=0) products[idx] = { ...products[idx], ...payload };
+      let synced = false;
+      if(!isTempId(editingProductId) && navigator.onLine && sb){
+        try{
+          const { data, error } = await sb.from('products').update(payload)
+            .eq('id', editingProductId).select().single();
+          if(error) throw error;
+          if(idx>=0) products[idx] = data;
+          synced = true;
+        }catch(e){ console.warn('saveProduct update online fail:', e?.message); }
+      }
+      if(!synced){
+        outboxPush({
+          type: 'product_update',
+          targetId: editingProductId,
+          dedupeKey: 'product_update_'+editingProductId,
+          payload
+        });
+        toast(navigator.onLine ? 'Guardado · sincronizando…' : 'Guardado offline · se subirá al volver internet');
+      }else{
+        toast('Producto actualizado');
+      }
     }else{
-      const { data, error } = await sb.from('products').insert(payload).select().single();
-      if(error) throw error;
-      products.push(data);
-      toast('Producto agregado');
+      // ── INSERT ──
+      let synced = false;
+      let newRow = null;
+      if(navigator.onLine && sb){
+        try{
+          const { data, error } = await sb.from('products').insert(payload).select().single();
+          if(error) throw error;
+          newRow = data;
+          synced = true;
+        }catch(e){ console.warn('saveProduct insert online fail:', e?.message); }
+      }
+      if(synced && newRow){
+        products.push(newRow);
+        toast('Producto agregado');
+      }else{
+        const tempId = newTempId();
+        const localRow = { ...payload, id: tempId, created_at: new Date().toISOString() };
+        products.push(localRow);
+        outboxPush({
+          type: 'product_insert',
+          tempId,
+          payload
+        });
+        toast(navigator.onLine ? 'Agregado · sincronizando…' : 'Agregado offline · se subirá al volver internet');
+      }
     }
     saveBackup();
     closeModal('productModal');
@@ -2671,14 +3067,31 @@ async function saveProduct(){
 async function deleteProduct(id){
   const p = products.find(x=>x.id===id); if(!p) return;
   if(!confirm(`¿Eliminar "${p.name}"? Las ventas históricas conservarán el nombre del producto.`)) return;
-  try{
-    const { error } = await sb.from('products').delete().eq('id', id).eq('user_id', currentSessionId);
-    if(error) throw error;
-    products = products.filter(x=>x.id!==id);
-    saveBackup();
-    renderAll();
+  // Quitar de memoria de inmediato (UI optimista)
+  products = products.filter(x=>x.id!==id);
+  saveBackup();
+  renderAll();
+  // Si era temp y aún no se subió, descartar también su insert pendiente
+  if(isTempId(id)){
+    const q = outboxRead().filter(op => !(op.type==='product_insert' && op.tempId===id));
+    outboxWrite(q); updateOutboxBadge();
     toast('Producto eliminado');
-  }catch(e){ toast('Error: '+e.message); }
+    return;
+  }
+  let synced = false;
+  if(navigator.onLine && sb){
+    try{
+      const { error } = await sb.from('products').delete().eq('id', id);
+      if(error) throw error;
+      synced = true;
+    }catch(e){ console.warn('deleteProduct online fail:', e?.message); }
+  }
+  if(!synced){
+    outboxPush({ type:'product_delete', targetId: id, dedupeKey:'product_delete_'+id });
+    toast(navigator.onLine ? 'Eliminado · sincronizando…' : 'Eliminado offline · se subirá al volver internet');
+  }else{
+    toast('Producto eliminado');
+  }
 }
 
 /* ───── STOCK MODAL ───── */
@@ -2696,16 +3109,38 @@ function adjStock(delta){
 async function saveStock(){
   const id = editingStockProductId;
   const newStock = parseInt(document.getElementById('stockNewValue').value)||0;
-  try{
-    const { data, error } = await sb.from('products').update({ stock: newStock }).eq('id', id).eq('user_id', currentSessionId).select().single();
-    if(error) throw error;
-    const idx = products.findIndex(p=>p.id===id);
-    if(idx>=0) products[idx] = data;
-    saveBackup();
-    closeModal('stockModal');
-    renderAll();
+  const p = products.find(x=>x.id===id); if(!p){ toast('Producto no encontrado'); return; }
+  const oldStock = Number(p.stock||0);
+  const delta = newStock - oldStock;
+  // Actualizar memoria de inmediato
+  p.stock = newStock;
+  saveBackup();
+  closeModal('stockModal');
+  renderAll();
+  // Subir
+  let synced = false;
+  if(!isTempId(id) && navigator.onLine && sb){
+    try{
+      const { data, error } = await sb.from('products').update({ stock: newStock })
+        .eq('id', id).select().single();
+      if(error) throw error;
+      const idx = products.findIndex(x=>x.id===id);
+      if(idx>=0) products[idx] = data;
+      synced = true;
+    }catch(e){ console.warn('saveStock online fail:', e?.message); }
+  }
+  if(!synced){
+    // Encolar como delta (para no pisar cambios remotos al sincronizar)
+    outboxPush({
+      type: 'product_stock_delta',
+      targetId: id,
+      dedupeKey: null, // los deltas SÍ se acumulan
+      payload: { delta }
+    });
+    toast(navigator.onLine ? 'Stock guardado · sincronizando…' : 'Stock guardado offline · se subirá al volver internet');
+  }else{
     toast('Stock actualizado');
-  }catch(e){ toast('Error: '+e.message); }
+  }
 }
 
 /* ───── VENTA MODAL ───── */
@@ -2750,8 +3185,9 @@ function populateSalePaymentMethods(){
 }
 
 function onSaleProductChange(){
-  const id = parseInt(document.getElementById('saleProduct').value);
-  const p = products.find(x=>x.id===id);
+  const raw = document.getElementById('saleProduct').value;
+  const id = isTempId(raw) ? raw : (parseInt(raw) || raw);
+  const p = products.find(x=> String(x.id) === String(id));
   const hint = document.getElementById('saleStockHint');
   if(!p){ hint.textContent = ''; return; }
   document.getElementById('salePrice').value = p.price || 0;
@@ -2761,8 +3197,9 @@ function onSaleProductChange(){
 }
 
 function updateSaleTotal(){
-  const id = parseInt(document.getElementById('saleProduct').value);
-  const p = products.find(x=>x.id===id);
+  const raw = document.getElementById('saleProduct').value;
+  const id = isTempId(raw) ? raw : (parseInt(raw) || raw);
+  const p = products.find(x=> String(x.id) === String(id));
   const qty = parseInt(document.getElementById('saleQty').value)||0;
   const price = parseFloat(document.getElementById('salePrice').value)||0;
   const total = qty*price;
@@ -2773,8 +3210,10 @@ function updateSaleTotal(){
 }
 
 async function registerSale(){
-  const id = parseInt(document.getElementById('saleProduct').value);
-  const p = products.find(x=>x.id===id);
+  // El select trae el id como string; los productos pueden tener id numérico (real) o tmp_xxx
+  const rawId = document.getElementById('saleProduct').value;
+  const id = isTempId(rawId) ? rawId : (parseInt(rawId) || rawId);
+  const p = products.find(x=> String(x.id) === String(id));
   if(!p){ toast('Selecciona un producto'); return; }
   const qty = parseInt(document.getElementById('saleQty').value)||0;
   if(qty<1){ toast('Cantidad inválida'); return; }
@@ -2792,7 +3231,7 @@ async function registerSale(){
   btn.disabled = true; btn.textContent = 'Registrando…';
 
   try{
-    // 1) Cliente: buscar/crear
+    // ════ 1) CLIENTE ════
     let customerId = null, customerName = null;
     if(custName || custPhone){
       let existing = null;
@@ -2805,24 +3244,39 @@ async function registerSale(){
       if(existing){
         customerId = existing.id;
         customerName = existing.name;
-        // Actualizar totales (lo haremos al final con el total nuevo)
       }else{
-        const { data: newC, error: ce } = await sb.from('customers').insert({
+        // Crear cliente. Si hay internet → directo; si no → tempId
+        const newCustPayload = {
           user_id: currentSessionId,
           name: custName || 'Sin nombre',
           phone: custPhone || null,
           total_purchases: 0,
           last_purchase_at: new Date().toISOString()
-        }).select().single();
-        if(ce) throw ce;
-        customers.push(newC);
-        customerId = newC.id;
-        customerName = newC.name;
+        };
+        let synced = false;
+        if(navigator.onLine && sb){
+          try{
+            const { data: newC, error: ce } = await sb.from('customers').insert(newCustPayload).select().single();
+            if(ce) throw ce;
+            customers.push(newC);
+            customerId = newC.id;
+            customerName = newC.name;
+            synced = true;
+          }catch(e){ console.warn('insert customer online fail:', e?.message); }
+        }
+        if(!synced){
+          const tempId = newTempId();
+          const localCust = { ...newCustPayload, id: tempId, created_at: new Date().toISOString() };
+          customers.push(localCust);
+          customerId = tempId;
+          customerName = localCust.name;
+          outboxPush({ type:'customer_insert', tempId, payload: newCustPayload });
+        }
       }
     }
 
-    // 2) Insertar venta
-    const { data: newS, error: se } = await sb.from('sales').insert({
+    // ════ 2) VENTA ════
+    const salePayload = {
       user_id: currentSessionId,
       product_id: id,
       product_name: p.name,
@@ -2833,30 +3287,75 @@ async function registerSale(){
       total: total,
       profit: profit,
       payment_method: paymentMethod
-    }).select().single();
-    if(se) throw se;
-    sales.unshift(newS);
-
-    // 3) Descontar stock
-    const newStock = Math.max(0, Number(p.stock||0) - qty);
-    const { data: upP, error: pe } = await sb.from('products').update({ stock: newStock }).eq('id', id).eq('user_id', currentSessionId).select().single();
-    if(!pe && upP){
-      const idx = products.findIndex(x=>x.id===id);
-      if(idx>=0) products[idx] = upP;
+    };
+    let saleSynced = false;
+    // Solo intentamos directo si NO hay tempIds en juego (ni producto, ni cliente nuevo)
+    if(navigator.onLine && sb && !isTempId(id) && !isTempId(customerId)){
+      try{
+        const { data: newS, error: se } = await sb.from('sales').insert(salePayload).select().single();
+        if(se) throw se;
+        sales.unshift(newS);
+        saleSynced = true;
+      }catch(e){ console.warn('insert sale online fail:', e?.message); }
+    }
+    if(!saleSynced){
+      const tempId = newTempId();
+      const localSale = { ...salePayload, id: tempId, created_at: new Date().toISOString() };
+      sales.unshift(localSale);
+      outboxPush({ type:'sale_insert', tempId, payload: salePayload });
     }
 
-    // 4) Actualizar totales del cliente
+    // ════ 3) STOCK (descontar) ════
+    const newStock = Math.max(0, Number(p.stock||0) - qty);
+    p.stock = newStock; // memoria
+    let stockSynced = false;
+    if(navigator.onLine && sb && !isTempId(id)){
+      try{
+        const { data: upP, error: pe } = await sb.from('products').update({ stock: newStock })
+          .eq('id', id).select().single();
+        if(pe) throw pe;
+        const idx = products.findIndex(x=>x.id===id);
+        if(idx>=0) products[idx] = upP;
+        stockSynced = true;
+      }catch(e){ console.warn('update stock online fail:', e?.message); }
+    }
+    if(!stockSynced){
+      // Encolamos como DELTA para no pisar otros dispositivos
+      outboxPush({
+        type: 'product_stock_delta',
+        targetId: id,
+        dedupeKey: null, // los deltas se acumulan
+        payload: { delta: -qty }
+      });
+    }
+
+    // ════ 4) TOTAL DEL CLIENTE ════
     if(customerId){
       const c = customers.find(x=>x.id===customerId);
       if(c){
-        const newTotal = Number(c.total_purchases||0) + total;
-        const { data: upC } = await sb.from('customers').update({
-          total_purchases: newTotal,
-          last_purchase_at: new Date().toISOString()
-        }).eq('id', customerId).eq('user_id', currentSessionId).select().single();
-        if(upC){
-          const idx = customers.findIndex(x=>x.id===customerId);
-          if(idx>=0) customers[idx] = upC;
+        c.total_purchases = Number(c.total_purchases||0) + total;
+        c.last_purchase_at = new Date().toISOString();
+        let custSynced = false;
+        if(navigator.onLine && sb && !isTempId(customerId)){
+          try{
+            const { data: upC, error: ue } = await sb.from('customers').update({
+              total_purchases: c.total_purchases,
+              last_purchase_at: c.last_purchase_at
+            }).eq('id', customerId).select().single();
+            if(ue) throw ue;
+            const idx = customers.findIndex(x=>x.id===customerId);
+            if(idx>=0) customers[idx] = upC;
+            custSynced = true;
+          }catch(e){ console.warn('update customer total online fail:', e?.message); }
+        }
+        if(!custSynced){
+          // DELTA + tocar last_purchase_at
+          outboxPush({
+            type: 'customer_total_delta',
+            targetId: customerId,
+            dedupeKey: null,
+            payload: { delta: total, touchLast: true }
+          });
         }
       }
     }
@@ -2864,9 +3363,16 @@ async function registerSale(){
     saveBackup();
     closeModal('saleModal');
     renderAll();
-    toast(`✓ Venta de ${fmt(total)} registrada`);
 
-    // Alerta visual si stock bajó al límite
+    if(saleSynced && stockSynced){
+      toast(`✓ Venta de ${fmt(total)} registrada`);
+    }else if(navigator.onLine){
+      toast(`✓ Venta de ${fmt(total)} · sincronizando…`);
+      setTimeout(()=> outboxFlush(false), 400);
+    }else{
+      toast(`✓ Venta de ${fmt(total)} guardada offline`);
+    }
+
     if(newStock < LOW_STOCK_THRESHOLD){
       setTimeout(()=>toast(`⚠️ Stock bajo de "${p.name}" (${newStock})`), 1300);
     }
@@ -2881,26 +3387,66 @@ async function registerSale(){
 async function deleteSale(id){
   const s = sales.find(x=>x.id===id); if(!s) return;
   if(!confirm(`¿Eliminar esta venta de ${fmt(s.total)}?\nEl stock NO se restaurará automáticamente.`)) return;
-  try{
-    const { error } = await sb.from('sales').delete().eq('id', id).eq('user_id', currentSessionId);
-    if(error) throw error;
-    sales = sales.filter(x=>x.id!==id);
-    // Restar del cliente
-    if(s.customer_id){
-      const c = customers.find(x=>x.id===s.customer_id);
-      if(c){
-        const newTotal = Math.max(0, Number(c.total_purchases||0) - Number(s.total||0));
-        const { data: upC } = await sb.from('customers').update({ total_purchases: newTotal }).eq('id', s.customer_id).eq('user_id', currentSessionId).select().single();
-        if(upC){
+  // UI optimista: borrar de memoria
+  sales = sales.filter(x=>x.id!==id);
+  // Restar del cliente en memoria
+  if(s.customer_id){
+    const c = customers.find(x=>x.id===s.customer_id);
+    if(c) c.total_purchases = Math.max(0, Number(c.total_purchases||0) - Number(s.total||0));
+  }
+  saveBackup();
+  renderAll();
+
+  // Si era una venta temp todavía no subida → cancelar su insert pendiente
+  if(isTempId(id)){
+    const q = outboxRead().filter(op => !(op.type==='sale_insert' && op.tempId===id));
+    outboxWrite(q); updateOutboxBadge();
+    toast('Venta eliminada');
+    return;
+  }
+
+  // Eliminar venta en Supabase
+  let synced = false;
+  if(navigator.onLine && sb){
+    try{
+      const { error } = await sb.from('sales').delete().eq('id', id);
+      if(error) throw error;
+      synced = true;
+    }catch(e){ console.warn('deleteSale online fail:', e?.message); }
+  }
+  if(!synced){
+    outboxPush({ type:'sale_delete', targetId: id, dedupeKey:'sale_delete_'+id });
+  }
+
+  // Restar del total del cliente
+  if(s.customer_id && !isTempId(s.customer_id)){
+    let custSynced = false;
+    if(navigator.onLine && sb){
+      try{
+        const c = customers.find(x=>x.id===s.customer_id);
+        if(c){
+          const { data: upC, error: ue } = await sb.from('customers')
+            .update({ total_purchases: c.total_purchases })
+            .eq('id', s.customer_id).select().single();
+          if(ue) throw ue;
           const idx = customers.findIndex(x=>x.id===s.customer_id);
           if(idx>=0) customers[idx] = upC;
+          custSynced = true;
         }
-      }
+      }catch(e){ console.warn('deleteSale customer total fail:', e?.message); }
     }
-    saveBackup();
-    renderAll();
-    toast('Venta eliminada');
-  }catch(e){ toast('Error: '+e.message); }
+    if(!custSynced){
+      outboxPush({
+        type: 'customer_total_delta',
+        targetId: s.customer_id,
+        dedupeKey: null,
+        payload: { delta: -Number(s.total||0), touchLast: false }
+      });
+    }
+  }
+
+  if(synced) toast('Venta eliminada');
+  else toast(navigator.onLine ? 'Eliminando · sincronizando…' : 'Eliminada offline · se sincronizará');
 }
 
 /* ═══════════ SETTINGS / FORMAS DE PAGO ═══════════ */
@@ -2967,32 +3513,41 @@ async function addPaymentMethod(){
   const name = document.getElementById('newPmName').value.trim();
   const icon = document.getElementById('newPmIcon').value.trim() || '💰';
   if(!name){ toast('Ingresa un nombre'); return; }
-  // Evitar duplicados por nombre (case-insensitive)
   if(paymentMethods.some(m => (m.name||'').toLowerCase() === name.toLowerCase())){
     toast('Ya existe un método con ese nombre');
     return;
   }
   const sortOrder = paymentMethods.length;
-  try{
-    const { data, error } = await sb.from('payment_methods').insert({
-      user_id: currentSessionId,
-      name, icon,
-      sort_order: sortOrder,
-      active: true
-    }).select().single();
-    if(error) throw error;
-    // Si había defaults sin guardar, persistirlos también
-    await persistDefaultPaymentsIfNeeded();
-    paymentMethods.push(data);
-    saveBackup();
-    document.getElementById('newPmName').value = '';
-    document.getElementById('newPmIcon').value = '';
-    renderPaymentMethodsList();
-    populateSalePaymentMethods();
-    toast(`✓ ${name} agregado`);
-  }catch(e){
-    toast('Error: '+(e.message||e));
+  const payload = {
+    user_id: currentSessionId,
+    name, icon,
+    sort_order: sortOrder,
+    active: true
+  };
+  let synced = false;
+  let newRow = null;
+  if(navigator.onLine && sb){
+    try{
+      const { data, error } = await sb.from('payment_methods').insert(payload).select().single();
+      if(error) throw error;
+      await persistDefaultPaymentsIfNeeded();
+      newRow = data;
+      synced = true;
+    }catch(e){ console.warn('addPaymentMethod online fail:', e?.message); }
   }
+  if(synced && newRow){
+    paymentMethods.push(newRow);
+  }else{
+    const tempId = newTempId();
+    paymentMethods.push({ ...payload, id: tempId, created_at: new Date().toISOString() });
+    outboxPush({ type:'payment_insert', tempId, payload });
+  }
+  saveBackup();
+  document.getElementById('newPmName').value = '';
+  document.getElementById('newPmIcon').value = '';
+  renderPaymentMethodsList();
+  populateSalePaymentMethods();
+  toast(synced ? `✓ ${name} agregado` : `✓ ${name} · sincronizando…`);
 }
 
 async function persistDefaultPaymentsIfNeeded(){
@@ -3020,26 +3575,39 @@ async function updatePaymentName(id, newName){
   if(!m) return;
   if(!newName){ renderPaymentMethodsList(); toast('El nombre no puede estar vacío'); return; }
   if(newName === m.name) return; // sin cambios
-  // Si es default todavía, persistirlo primero
+  // Si es default todavía, persistirlo primero (solo si hay internet)
   if(String(id).startsWith('default_')){
-    await persistDefaultPaymentsIfNeeded();
-    // Ahora hay que encontrar el método con el mismo nombre que tenía
-    const real = paymentMethods.find(x => x.name === m.name);
-    if(real) id = real.id;
+    if(navigator.onLine && sb){
+      await persistDefaultPaymentsIfNeeded();
+      const real = paymentMethods.find(x => x.name === m.name);
+      if(real) id = real.id;
+    }
   }
-  try{
-    const { data, error } = await sb.from('payment_methods')
-      .update({ name: newName }).eq('id', id).eq('user_id', currentSessionId).select().single();
-    if(error) throw error;
-    const idx = paymentMethods.findIndex(x => x.id === id);
-    if(idx>=0) paymentMethods[idx] = data;
-    saveBackup();
-    populateSalePaymentMethods();
-    toast('Nombre actualizado');
-  }catch(e){
-    toast('Error: '+(e.message||e));
-    renderPaymentMethodsList();
+  // Actualizar memoria
+  m.name = newName;
+  saveBackup();
+  populateSalePaymentMethods();
+
+  let synced = false;
+  if(!isTempId(id) && !String(id).startsWith('default_') && navigator.onLine && sb){
+    try{
+      const { data, error } = await sb.from('payment_methods')
+        .update({ name: newName }).eq('id', id).select().single();
+      if(error) throw error;
+      const idx = paymentMethods.findIndex(x => x.id === id);
+      if(idx>=0) paymentMethods[idx] = data;
+      synced = true;
+    }catch(e){ console.warn('updatePaymentName online fail:', e?.message); }
   }
+  if(!synced && !String(id).startsWith('default_')){
+    outboxPush({
+      type: 'payment_update',
+      targetId: id,
+      dedupeKey: 'payment_update_'+id,
+      payload: { name: newName }
+    });
+  }
+  toast(synced ? 'Nombre actualizado' : 'Guardado · sincronizando…');
 }
 
 async function changePaymentIcon(id){
@@ -3055,7 +3623,7 @@ async function changePaymentIcon(id){
   }
   try{
     const { data, error } = await sb.from('payment_methods')
-      .update({ icon }).eq('id', id).eq('user_id', currentSessionId).select().single();
+      .update({ icon }).eq('id', id).select().single();
     if(error) throw error;
     const idx = paymentMethods.findIndex(x => x.id === id);
     if(idx>=0) paymentMethods[idx] = data;
@@ -3084,8 +3652,8 @@ async function movePaymentMethod(id, delta){
   }
   const newOrderA = b.sort_order, newOrderB = a.sort_order;
   try{
-    await sb.from('payment_methods').update({ sort_order: newOrderA }).eq('id', a.id).eq('user_id', currentSessionId);
-    await sb.from('payment_methods').update({ sort_order: newOrderB }).eq('id', b.id).eq('user_id', currentSessionId);
+    await sb.from('payment_methods').update({ sort_order: newOrderA }).eq('id', a.id);
+    await sb.from('payment_methods').update({ sort_order: newOrderB }).eq('id', b.id);
     a.sort_order = newOrderA; b.sort_order = newOrderB;
     saveBackup();
     renderPaymentMethodsList();
@@ -3097,21 +3665,36 @@ async function togglePaymentActive(id, active){
   const m = paymentMethods.find(x => String(x.id) === String(id));
   if(!m) return;
   if(String(id).startsWith('default_')){
-    await persistDefaultPaymentsIfNeeded();
-    const real = paymentMethods.find(x => x.name === m.name);
-    if(real) id = real.id;
+    if(navigator.onLine && sb){
+      await persistDefaultPaymentsIfNeeded();
+      const real = paymentMethods.find(x => x.name === m.name);
+      if(real) id = real.id;
+    }
   }
-  try{
-    const { data, error } = await sb.from('payment_methods')
-      .update({ active }).eq('id', id).eq('user_id', currentSessionId).select().single();
-    if(error) throw error;
-    const idx = paymentMethods.findIndex(x => x.id === id);
-    if(idx>=0) paymentMethods[idx] = data;
-    saveBackup();
-    renderPaymentMethodsList();
-    populateSalePaymentMethods();
-    toast(active?'✓ Reactivado':'Método desactivado');
-  }catch(e){ toast('Error: '+(e.message||e)); }
+  m.active = active;
+  saveBackup();
+  renderPaymentMethodsList();
+  populateSalePaymentMethods();
+  let synced = false;
+  if(!isTempId(id) && !String(id).startsWith('default_') && navigator.onLine && sb){
+    try{
+      const { data, error } = await sb.from('payment_methods')
+        .update({ active }).eq('id', id).select().single();
+      if(error) throw error;
+      const idx = paymentMethods.findIndex(x => x.id === id);
+      if(idx>=0) paymentMethods[idx] = data;
+      synced = true;
+    }catch(e){ console.warn('togglePaymentActive online fail:', e?.message); }
+  }
+  if(!synced && !String(id).startsWith('default_')){
+    outboxPush({
+      type: 'payment_update',
+      targetId: id,
+      dedupeKey: 'payment_active_'+id,
+      payload: { active }
+    });
+  }
+  toast(synced ? (active?'✓ Reactivado':'Método desactivado') : 'Guardado · sincronizando…');
 }
 
 async function deletePaymentMethod(id){
@@ -3125,7 +3708,6 @@ async function deletePaymentMethod(id){
   }
   if(!confirm(`¿Eliminar "${m.name}" de las formas de pago?`)) return;
   if(String(id).startsWith('default_')){
-    // Es un default no persistido — sólo quitarlo de memoria
     paymentMethods = paymentMethods.filter(x => x.id !== id);
     saveBackup();
     renderPaymentMethodsList();
@@ -3133,15 +3715,32 @@ async function deletePaymentMethod(id){
     toast('Método eliminado');
     return;
   }
-  try{
-    const { error } = await sb.from('payment_methods').delete().eq('id', id).eq('user_id', currentSessionId);
-    if(error) throw error;
-    paymentMethods = paymentMethods.filter(x => x.id !== id);
-    saveBackup();
-    renderPaymentMethodsList();
-    populateSalePaymentMethods();
+  // UI optimista
+  paymentMethods = paymentMethods.filter(x => x.id !== id);
+  saveBackup();
+  renderPaymentMethodsList();
+  populateSalePaymentMethods();
+  // Si era temp, cancelar el insert pendiente
+  if(isTempId(id)){
+    const q = outboxRead().filter(op => !(op.type==='payment_insert' && op.tempId===id));
+    outboxWrite(q); updateOutboxBadge();
     toast('Método eliminado');
-  }catch(e){ toast('Error: '+(e.message||e)); }
+    return;
+  }
+  let synced = false;
+  if(navigator.onLine && sb){
+    try{
+      const { error } = await sb.from('payment_methods').delete().eq('id', id);
+      if(error) throw error;
+      synced = true;
+    }catch(e){ console.warn('deletePaymentMethod online fail:', e?.message); }
+  }
+  if(!synced){
+    outboxPush({ type:'payment_delete', targetId: id, dedupeKey:'payment_delete_'+id });
+    toast(navigator.onLine ? 'Eliminando · sincronizando…' : 'Eliminado offline · se subirá al volver');
+  }else{
+    toast('Método eliminado');
+  }
 }
 
 /* ═══════════ DATE RANGE PICKER (rango personalizado por sección) ═══════════ */
@@ -3448,7 +4047,7 @@ async function applyCostToProduct(){
     // 1) Eliminar los items marcados como _deleted (que no son _new)
     const toDelete = costItemsDraft.filter(i => i._deleted && !i._new && i.id);
     for(const it of toDelete){
-      await sb.from('product_costs').delete().eq('id', it.id).eq('user_id', currentSessionId);
+      await sb.from('product_costs').delete().eq('id', it.id);
     }
     // 2) Insertar los nuevos
     const toInsert = costItemsDraft.filter(i => i._new && !i._deleted);
@@ -3468,7 +4067,7 @@ async function applyCostToProduct(){
     // 3) Actualizar el cost del producto
     const { data: upP, error: pe } = await sb.from('products')
       .update({ cost: total })
-      .eq('id', editingCostProductId).eq('user_id', currentSessionId)
+      .eq('id', editingCostProductId)
       .select().single();
     if(pe) throw pe;
 
@@ -3765,11 +4364,11 @@ async function saveOrder(){
       const { data, error } = await sb.from('orders').update({
         customer_id, customer_name: finalCustomerName, customer_phone: customer_phone || null,
         status, notes, total, due_date, created_date
-      }).eq('id', editingOrderId).eq('user_id', currentSessionId).select().single();
+      }).eq('id', editingOrderId).select().single();
       if(error) throw error;
       savedOrder = data;
       // Borrar todos los items existentes y reinsertar (más simple que diffear)
-      await sb.from('order_items').delete().eq('order_id', editingOrderId).eq('user_id', currentSessionId);
+      await sb.from('order_items').delete().eq('order_id', editingOrderId);
     }else{
       // Insert
       const { data, error } = await sb.from('orders').insert({
@@ -3811,7 +4410,7 @@ async function saveOrder(){
 async function updateOrderStatus(id, status){
   try{
     const { data, error } = await sb.from('orders')
-      .update({ status }).eq('id', id).eq('user_id', currentSessionId).select().single();
+      .update({ status }).eq('id', id).select().single();
     if(error) throw error;
     const idx = orders.findIndex(o => o.id === id);
     if(idx >= 0) orders[idx] = { ...data, items: orders[idx].items };
@@ -3894,7 +4493,7 @@ async function deliverOrder(id){
         const newStock = Math.max(0, Number(p.stock||0) - Number(it.quantity));
         const { data: upP } = await sb.from('products')
           .update({ stock: newStock })
-          .eq('id', p.id).eq('user_id', currentSessionId).select().single();
+          .eq('id', p.id).select().single();
         if(upP){
           const idx = products.findIndex(x => x.id === p.id);
           if(idx >= 0) products[idx] = upP;
@@ -3906,7 +4505,7 @@ async function deliverOrder(id){
     const { data: upO, error: oe } = await sb.from('orders').update({
       status: 'delivered',
       delivered_at: new Date().toISOString()
-    }).eq('id', id).eq('user_id', currentSessionId).select().single();
+    }).eq('id', id).select().single();
     if(oe) throw oe;
     const idx = orders.findIndex(x => x.id === id);
     if(idx >= 0) orders[idx] = { ...upO, items: orders[idx].items };
@@ -3919,7 +4518,7 @@ async function deliverOrder(id){
         const { data: upC } = await sb.from('customers').update({
           total_purchases: newTotal,
           last_purchase_at: new Date().toISOString()
-        }).eq('id', o.customer_id).eq('user_id', currentSessionId).select().single();
+        }).eq('id', o.customer_id).select().single();
         if(upC){
           const ci = customers.findIndex(x => x.id === o.customer_id);
           if(ci >= 0) customers[ci] = upC;
@@ -4009,7 +4608,7 @@ function subscribeRealtime(){
   if(realtimeChannel){ return; }
 
   const tables = ['products','sales','customers','payment_methods','orders','order_items','product_costs'];
-  realtimeChannel = sb.channel(`fh_admin_${currentSessionId.slice(0,8)}`);
+  realtimeChannel = sb.channel(`fh_admin_shared`);
 
   tables.forEach(table => {
     realtimeChannel.on(
@@ -4017,8 +4616,8 @@ function subscribeRealtime(){
       {
         event: '*',           // INSERT, UPDATE, DELETE
         schema: 'public',
-        table: table,
-        filter: `user_id=eq.${currentSessionId}`
+        table: table
+        // (v1.20: sin filtro de user_id — datos compartidos entre todos los usuarios)
       },
       (payload) => {
         console.log(`🔔 Realtime [${table}]`, payload.eventType);
