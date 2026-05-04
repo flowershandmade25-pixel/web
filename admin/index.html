@@ -958,6 +958,15 @@ input:focus,select:focus,textarea:focus{outline:none}
 
     <div class="field">
       <label style="display:flex;justify-content:space-between;align-items:center">
+        <span>Fecha de venta</span>
+        <button type="button" onclick="resetSaleDateToToday()" style="background:none;border:none;color:var(--rose);font-size:11px;font-weight:600;cursor:pointer;text-transform:none;letter-spacing:0">📅 Hoy</button>
+      </label>
+      <input class="input" id="saleDate" type="date">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Por defecto se usa la fecha de hoy. Cámbiala si registras una venta pasada.</div>
+    </div>
+
+    <div class="field">
+      <label style="display:flex;justify-content:space-between;align-items:center">
         <span>Método de pago</span>
         <button type="button" onclick="openSettings('payments')" style="background:none;border:none;color:var(--rose);font-size:11px;font-weight:600;cursor:pointer;text-transform:none;letter-spacing:0">+ Editar</button>
       </label>
@@ -1311,7 +1320,7 @@ input:focus,select:focus,textarea:focus{outline:none}
    FLOWERS HANDMADE · ADMIN PANEL · LÓGICA
 ═══════════════════════════════════════════════════════════════════ */
 
-const APP_VERSION = '1.22.0';
+const APP_VERSION = '1.22.3';
 const APP_BUILD_DATE = '2026-05-03';
 const PUBLICATIONS_URL = 'https://flowershandmade25-pixel.github.io/web/tool/';
 
@@ -3199,8 +3208,22 @@ function openSaleModal(productId){
   document.getElementById('saleQty').value = 1;
   document.getElementById('saleCustomerName').value = '';
   document.getElementById('saleCustomerPhone').value = '';
+  // v1.22.3: la fecha por defecto es hoy. Si el usuario quiere registrar
+  // una venta pasada, puede cambiarla manualmente antes de Registrar.
+  resetSaleDateToToday();
   onSaleProductChange();
   document.getElementById('saleModal').classList.add('open');
+}
+
+// Establece el campo de fecha al día de hoy (hora local del navegador)
+function resetSaleDateToToday(){
+  const el = document.getElementById('saleDate');
+  if(!el) return;
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  el.value = `${yyyy}-${mm}-${dd}`;
 }
 
 function populateSaleProductSelect(presetId){
@@ -3275,6 +3298,31 @@ async function registerSale(){
   const custName = document.getElementById('saleCustomerName').value.trim();
   const custPhone = document.getElementById('saleCustomerPhone').value.trim();
 
+  // v1.22.3: si la fecha de venta NO es hoy, la usamos como created_at.
+  // Si es hoy, dejamos que Supabase ponga NOW() (con la hora actual).
+  // Esto permite registrar ventas pasadas con fecha correcta.
+  const saleDateStr = (document.getElementById('saleDate')||{}).value || '';
+  let customCreatedAt = null;
+  if(saleDateStr){
+    const todayStr = (() => {
+      const n = new Date();
+      return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+    })();
+    // Validar: no permitir fechas futuras
+    if(saleDateStr > todayStr){
+      toast('La fecha de venta no puede ser futura');
+      return;
+    }
+    if(saleDateStr !== todayStr){
+      // Para ventas pasadas, ponemos hora 12:00 local (mediodía) para que
+      // no haya ambigüedad por zona horaria al filtrar por día.
+      const dt = new Date(saleDateStr + 'T12:00:00');
+      if(!isNaN(dt.getTime())){
+        customCreatedAt = dt.toISOString();
+      }
+    }
+  }
+
   const btn = document.getElementById('saleSubmitBtn');
   btn.disabled = true; btn.textContent = 'Registrando…';
 
@@ -3299,7 +3347,8 @@ async function registerSale(){
           name: custName || 'Sin nombre',
           phone: custPhone || null,
           total_purchases: 0,
-          last_purchase_at: new Date().toISOString()
+          // v1.22.3: si la venta es pasada, usar esa fecha como última compra
+          last_purchase_at: customCreatedAt || new Date().toISOString()
         };
         let synced = false;
         if(navigator.onLine && sb){
@@ -3336,6 +3385,10 @@ async function registerSale(){
       profit: profit,
       payment_method: paymentMethod
     };
+    // v1.22.3: si el usuario registró una venta con fecha pasada, usar esa fecha
+    if(customCreatedAt){
+      salePayload.created_at = customCreatedAt;
+    }
     let saleSynced = false;
     // Solo intentamos directo si NO hay tempIds en juego (ni producto, ni cliente nuevo)
     if(navigator.onLine && sb && !isTempId(id) && !isTempId(customerId)){
@@ -3348,7 +3401,8 @@ async function registerSale(){
     }
     if(!saleSynced){
       const tempId = newTempId();
-      const localSale = { ...salePayload, id: tempId, created_at: new Date().toISOString() };
+      // v1.22.3: si el payload trae created_at (venta pasada), respetar; si no, usar ahora
+      const localSale = { ...salePayload, id: tempId, created_at: salePayload.created_at || new Date().toISOString() };
       sales.unshift(localSale);
       outboxPush({ type:'sale_insert', tempId, payload: salePayload });
     }
@@ -3382,7 +3436,13 @@ async function registerSale(){
       const c = customers.find(x=>x.id===customerId);
       if(c){
         c.total_purchases = Number(c.total_purchases||0) + total;
-        c.last_purchase_at = new Date().toISOString();
+        // v1.22.3: si la venta es pasada, usamos su fecha como last_purchase_at
+        // sólo si es más reciente que la actual (no retrocedemos al cliente).
+        const saleDateIso = customCreatedAt || new Date().toISOString();
+        const prevLastPurchase = c.last_purchase_at ? new Date(c.last_purchase_at).getTime() : 0;
+        if(new Date(saleDateIso).getTime() >= prevLastPurchase){
+          c.last_purchase_at = saleDateIso;
+        }
         let custSynced = false;
         if(navigator.onLine && sb && !isTempId(customerId)){
           try{
