@@ -1311,7 +1311,7 @@ input:focus,select:focus,textarea:focus{outline:none}
    FLOWERS HANDMADE · ADMIN PANEL · LÓGICA
 ═══════════════════════════════════════════════════════════════════ */
 
-const APP_VERSION = '1.20.0';
+const APP_VERSION = '1.22.0';
 const APP_BUILD_DATE = '2026-05-03';
 const PUBLICATIONS_URL = 'https://flowershandmade25-pixel.github.io/web/tool/';
 
@@ -1322,6 +1322,9 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let sb = null;
 let currentUser = null;
 let currentSessionId = null; // = user.id cuando hay sesión
+// Modo compartido (v1.20+): el catálogo público (app_settings) se guarda
+// bajo este id fijo para que todos los usuarios autenticados lo vean.
+const SHARED_SESSION_ID = 'shared_flowers_handmade';
 
 // State local en memoria (se hidrata desde Supabase)
 let products = [];   // [{id,name,price,cost,stock,tag,photo,...}]
@@ -2136,7 +2139,7 @@ async function checkMigration(){
   try{
     const { data, error } = await sb.from('app_settings')
       .select('data')
-      .eq('session_id', currentSessionId)
+      .eq('session_id', SHARED_SESSION_ID)
       .maybeSingle();
     if(error || !data?.data?.products?.length){
       // No hay catálogo en index.html → ocultar banner
@@ -2145,14 +2148,18 @@ async function checkMigration(){
     }
     const catalogProducts = data.data.products;
 
-    // Detectar cuáles del catálogo NO están todavía en la tabla products
-    // Comparamos por legacy_id (id original del catálogo)
+    // Detectar cuáles del catálogo NO están todavía en la tabla products.
+    // Usamos la misma comparación robusta que syncFromCatalog: legacy_id O nombre normalizado.
+    const norm = s => String(s||'').toLowerCase().trim().replace(/\s+/g,' ');
     const existingLegacyIds = new Set(
       products.map(p => p.legacy_id).filter(x => x != null).map(String)
     );
+    const existingNames = new Set(products.map(p => norm(p.name)));
     const missing = catalogProducts.filter(cp => {
-      const id = cp.id != null ? String(cp.id) : null;
-      return id && !existingLegacyIds.has(id);
+      const lid = cp.id != null ? String(cp.id) : null;
+      if (lid && existingLegacyIds.has(lid)) return false;
+      if (existingNames.has(norm(cp.name))) return false;
+      return true;
     });
 
     const banner = document.getElementById('migrationBanner');
@@ -2190,7 +2197,7 @@ async function checkMigration(){
 async function syncFromCatalog(){
   try{
     const { data, error } = await sb.from('app_settings')
-      .select('data').eq('session_id', currentSessionId).maybeSingle();
+      .select('data').eq('session_id', SHARED_SESSION_ID).maybeSingle();
     if(error){
       toast('Error al leer el catálogo: ' + error.message);
       return;
@@ -2200,24 +2207,82 @@ async function syncFromCatalog(){
       toast('El catálogo del panel de publicaciones está vacío');
       return;
     }
-    // Comparar
+    // Comparación robusta: un producto se considera "ya en inventario" si:
+    //   1. Tiene un legacy_id que coincide con uno del inventario, O
+    //   2. Su nombre coincide (case-insensitive, sin espacios extras) con uno
+    //      del inventario.
+    // Esto cubre productos viejos que se importaron sin legacy_id, y
+    // productos creados directamente en el inventario que tienen el mismo
+    // nombre pero distinto id.
+    const norm = s => String(s||'').toLowerCase().trim().replace(/\s+/g,' ');
     const existingLegacyIds = new Set(
       products.map(p => p.legacy_id).filter(x => x != null).map(String)
     );
+    const existingNames = new Set(products.map(p => norm(p.name)));
+
     const missing = catalogProducts.filter(cp => {
-      const id = cp.id != null ? String(cp.id) : null;
-      return id && !existingLegacyIds.has(id);
+      const lid = cp.id != null ? String(cp.id) : null;
+      if (lid && existingLegacyIds.has(lid)) return false;
+      if (existingNames.has(norm(cp.name))) return false;
+      return true;
     });
 
     if(missing.length === 0){
       toast(`✓ Tu inventario ya está al día (${catalogProducts.length} productos en el catálogo)`);
       return;
     }
-    // Hay nuevos: importarlos
-    await importFromAppSettings(true);
+    const namesPreview = missing.slice(0,3).map(p => p.name).join(', ');
+    const more = missing.length > 3 ? ` y ${missing.length-3} más` : '';
+    if(!confirm(`Se encontraron ${missing.length} producto(s) nuevo(s) en el catálogo:\n• ${namesPreview}${more}\n\n¿Importarlos al inventario? Stock y costo se inicializarán en 0.`)){
+      return;
+    }
+    await doImportProducts(missing, /*silentConfirm=*/true);
   }catch(e){
     console.warn('syncFromCatalog:', e);
     toast('Error al sincronizar');
+  }
+}
+
+// Núcleo de importación reutilizable
+async function doImportProducts(src, silentConfirm){
+  if(!src || !src.length) return;
+  if(!silentConfirm && !confirm('¿Importar todos los productos del catálogo al inventario?')) return;
+  try{
+    const rows = src.map(p => ({
+      user_id: currentSessionId,
+      name: p.name || 'Sin nombre',
+      price: parseFloat(p.priceAfterDiscount ?? p.price ?? 0) || 0,
+      cost: 0,
+      stock: 0,
+      tag: p.tag || null,
+      photo: p.photo || null,
+      // Si el producto del catálogo no tiene id, usamos un sentinel determinístico
+      // basado en nombre+timestamp del catálogo para no duplicarlo en futuras syncs
+      legacy_id: p.id != null ? p.id : null
+    }));
+    let inserted = 0, failed = 0;
+    for(let i=0;i<rows.length;i+=50){
+      const chunk = rows.slice(i,i+50);
+      const { error: ie } = await sb.from('products').insert(chunk);
+      if(ie){
+        console.warn(ie);
+        failed += chunk.length;
+      } else {
+        inserted += chunk.length;
+      }
+    }
+    if(inserted > 0){
+      toast(`✓ ${inserted} producto${inserted>1?'s':''} importado${inserted>1?'s':''}${failed>0?` (${failed} fallaron)`:''}`);
+    } else {
+      toast(`Error: no se pudo importar ningún producto`);
+    }
+    const banner = document.getElementById('migrationBanner');
+    if (banner) banner.style.display = 'none';
+    await loadProducts();
+    renderAll();
+    await checkMigration();
+  }catch(e){
+    console.warn(e); toast('Error en importación');
   }
 }
 
@@ -2230,46 +2295,29 @@ async function importFromAppSettings(onlyMissing){
   if(!confirm(msg)) return;
   try{
     const { data, error } = await sb.from('app_settings')
-      .select('data').eq('session_id', currentSessionId).maybeSingle();
+      .select('data').eq('session_id', SHARED_SESSION_ID).maybeSingle();
     if(error || !data?.data?.products?.length){
       toast('No hay productos para importar'); return;
     }
     let src = data.data.products;
     if(onlyMissing){
+      const norm = s => String(s||'').toLowerCase().trim().replace(/\s+/g,' ');
       const existingLegacyIds = new Set(
         products.map(p => p.legacy_id).filter(x => x != null).map(String)
       );
-      src = src.filter(p => p.id != null && !existingLegacyIds.has(String(p.id)));
+      const existingNames = new Set(products.map(p => norm(p.name)));
+      src = src.filter(p => {
+        const lid = p.id != null ? String(p.id) : null;
+        if (lid && existingLegacyIds.has(lid)) return false;
+        if (existingNames.has(norm(p.name))) return false;
+        return true;
+      });
     }
     if(!src.length){
       toast('Todos los productos del catálogo ya están en el inventario');
       return;
     }
-    // Preparar inserts
-    const rows = src.map(p => ({
-      user_id: currentSessionId,
-      name: p.name || 'Sin nombre',
-      price: parseFloat(p.priceAfterDiscount ?? p.price ?? 0) || 0,
-      cost: 0,
-      stock: 0,
-      tag: p.tag || null,
-      photo: p.photo || null,
-      legacy_id: p.id || null
-    }));
-    // Insert en lotes de 50 (por si la lista es grande)
-    let inserted = 0;
-    for(let i=0;i<rows.length;i+=50){
-      const chunk = rows.slice(i,i+50);
-      const { error: ie } = await sb.from('products').insert(chunk);
-      if(ie){ console.warn(ie); toast('Error: '+ie.message); break; }
-      inserted += chunk.length;
-    }
-    toast(`✓ ${inserted} producto${inserted>1?'s':''} ${onlyMissing?'sincronizado':'importado'}${inserted>1?'s':''}`);
-    document.getElementById('migrationBanner').style.display = 'none';
-    await loadProducts();
-    renderAll();
-    // Re-evaluar el banner por si quedaron más
-    await checkMigration();
+    await doImportProducts(src, /*silentConfirm=*/true);
   }catch(e){
     console.warn(e); toast('Error en migración');
   }
