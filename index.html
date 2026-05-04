@@ -114,7 +114,7 @@ nav a:hover::after { right: 0; }
 
 /* ─── HERO ─────────────────────────────── */
 .hero {
-  min-height: 70vh;
+  min-height: 55vh;
   display: grid; grid-template-columns: 1fr 1fr;
   padding-top: 68px;
   overflow: hidden;
@@ -122,7 +122,7 @@ nav a:hover::after { right: 0; }
 }
 .hero-left {
   display: flex; flex-direction: column; justify-content: center;
-  padding: 36px 48px 36px 64px;
+  padding: 24px 48px 24px 64px;
   position: relative; z-index: 2;
 }
 .hero-tag {
@@ -1111,8 +1111,8 @@ footer {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ─── CONFIG ─────────────────────────────────────────────
-const SB_URL = 'https://owfetilyxgvkrtdopskz.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93ZmV0aWx5eGd2a3J0ZG9wc2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MzcyMzYsImV4cCI6MjA5MDQxMzIzNn0.tQuq7XBTvqhn5dI3XMgm8fEc3c4RsvyF4JbXZ2Ttp0Q';
+const SB_URL = 'https://vdjhrqcgymbgozmuiulc.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkamhycWNneW1iZ296bXVpdWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTI2MTMsImV4cCI6MjA5MzQyODYxM30.1Q5FWG7_0ptcqK3b3CFVmIFUzub-Vs9BpKE9xVW0vZ4';
 // Session ID de la app admin (misma que usa el sistema)
 const SESSION_ID = 'fh_default';
 
@@ -1134,56 +1134,34 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY);
 
 async function loadData() {
   try {
-    // Cargar productos de app_settings Y stock de tabla products en paralelo
-    const [settingsRes, stockRes] = await Promise.all([
-      sb.from('app_settings').select('data, updated_at').order('updated_at', { ascending: false }),
-      sb.from('products').select('legacy_id, stock')
-    ]);
+    const { data: rows, error } = await sb
+      .from('products')
+      .select('*')
+      .order('name');
 
-    if (settingsRes.error) throw settingsRes.error;
-    const rows = settingsRes.data || [];
-    if (!rows.length) { renderProducts([]); return; }
-
-    // Construir mapa de stock: { legacy_id -> stock }
-    const stockMap = {};
-    if (!stockRes.error && stockRes.data) {
-      stockRes.data.forEach(r => {
-        if (r.legacy_id !== null) stockMap[r.legacy_id] = r.stock ?? null;
-      });
-    }
-
-    // Tomar la sesión más reciente que tenga productos
-    let products = [];
-    let bizData = null;
-    for (const row of rows) {
-      if (row.data && Array.isArray(row.data.products) && row.data.products.length > 0) {
-        products = row.data.products;
-        bizData = row.data;
-        break;
-      }
-    }
-
-    if (bizData) {
-      if (bizData.shopWa) BIZ.wa = bizData.shopWa;
-      if (bizData.shopIg) BIZ.ig = bizData.shopIg;
-      if (bizData.shopSlogan) BIZ.slogan = bizData.shopSlogan;
-      if (bizData.shopAddr) BIZ.addr = bizData.shopAddr;
-      if (bizData.shopShipping) BIZ.shipping = bizData.shopShipping;
-    }
+    if (error) throw error;
+    if (!rows || !rows.length) { renderProducts([]); return; }
 
     applyBiz();
 
-    // Fusionar stock en cada producto
-    allProducts = products
-      .filter(p => p.name)
-      .map(p => ({
-        ...p,
-        stock: stockMap.hasOwnProperty(p.id) ? stockMap[p.id] : null
-      }));
+    // Mapear campos de la tabla products al formato esperado por la web
+    allProducts = rows.map(p => ({
+      id:                 p.id,
+      name:               p.name,
+      desc:               '',
+      tag:                p.tag || '',
+      price:              parseFloat(p.price) || 0,
+      cost:               parseFloat(p.cost) || 0,
+      stock:              p.stock ?? null,
+      photo:              p.photo || null,
+      discount:           0,
+      priceAfterDiscount: parseFloat(p.price) || 0,
+      wholesale:          0,
+      minQty:             0,
+    }));
 
     renderProducts(allProducts);
     buildFilters(allProducts);
-    // Hero images are static (img/hero1-3.jpg) — not replaced by products
     document.getElementById('statProducts').textContent = allProducts.length + '+';
   } catch(e) {
     console.warn('Error cargando datos:', e);
