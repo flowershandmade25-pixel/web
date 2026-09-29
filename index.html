@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fdf8f3">
 <title>Flowers Handmade · Detalles que perduran</title>
+<meta property="og:title" content="Flowers Handmade · Arma tu ramo en 3D">
+<meta property="og:description" content="Flores de cinta hechas a mano en Loja. Mira el diseño y pídelo en minutos.">
+<meta property="og:type" content="website">
 <meta name="description" content="Flores artesanales hechas a mano con cinta en Loja, Ecuador. Compra piezas listas o arma tu ramo personalizado en 3D y pídelo en minutos.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -326,6 +329,23 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;z-index:900;background:var(--bark);color:#fff;padding:12px 20px;border-radius:50px;font-size:14px;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
+.pill-photo{display:flex;align-items:center;gap:8px;padding:4px 14px 4px 4px}
+.pill-photo img{width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none}
+.real-thumb{display:flex;align-items:center;gap:10px;margin-top:10px;width:100%;border:1px solid var(--line);background:var(--cream);border-radius:12px;padding:6px;cursor:pointer;text-align:left;font-size:13px;color:var(--deep)}
+.real-thumb img{width:52px;height:52px;border-radius:8px;object-fit:cover;flex:none}
+.st-tools{flex-wrap:wrap;right:16px}
+@media (max-width:760px){.st-btn{padding:7px 10px;font-size:12px;min-height:34px}}
+.p360{position:absolute;right:10px;bottom:10px;background:rgba(61,33,24,.85);color:#fff;font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px}
+.spin360{position:absolute;inset:0;background-repeat:no-repeat;background-color:var(--nude);touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.spin360:active{cursor:grabbing}
+.spin360.loading::after{content:'';position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px;border-radius:50%;border:3px solid rgba(196,126,110,.25);border-top-color:var(--rose);animation:spin .9s linear infinite}
+.spin-hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:rgba(255,255,255,.9);color:var(--bark);font-size:12.5px;padding:6px 14px;border-radius:20px;pointer-events:none}
+.paper-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.paper-chip{border:1.5px solid rgba(196,126,110,.22);background:#fff;border-radius:14px;padding:6px 6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;min-height:44px}
+.paper-chip .pimgs{width:100%;aspect-ratio:1.3;border-radius:9px;background-size:cover;background-position:center;border:1px solid rgba(0,0,0,.08)}
+.paper-chip .pl{font-size:12.5px;line-height:1.15;color:var(--text)}
+.paper-chip small{font-size:11px;color:var(--muted)}
+.paper-chip[aria-pressed="true"]{border-color:var(--bark);box-shadow:inset 0 0 0 1.5px var(--bark)}
 /* ═════ tablet ═════ */
 @media (max-width:1080px){
   .nav{display:none}
@@ -495,6 +515,8 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
         <div class="st-tools">
           <button class="st-btn" id="dimsBtn" aria-pressed="true">📏 Medidas</button>
           <button class="st-btn" id="bgBtn" aria-pressed="false">◐ Fondo claro</button>
+          <button class="st-btn hidden" id="realBtn">📷 Foto real</button>
+          <button class="st-btn" id="shareBtn">🔗 Compartir</button>
           <button class="st-btn" id="photoBtn">📷 Foto HD</button>
         </div>
         <div class="st-hint">Arrastra para girar · pellizca para acercar</div>
@@ -536,6 +558,7 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
             <div class="lbl">Tipo de papel</div>
             <div class="chips" id="paperChips"></div>
             <div id="paperColorWrap"><div class="lbl"><span id="paperColorTitle">Color</span><small id="paperColorName"></small></div><div class="sws" id="paperSw"></div></div>
+            <div id="paperInnerWrap" class="hidden"><div class="lbl">Color interior <small id="paperInnerName"></small></div><div class="sws" id="paperInnerSw"></div></div>
             <div id="fieltroWrap"><div class="lbl">Fieltro interior <small id="fieltroName"></small></div><div class="sws" id="fieltroSw"></div></div>
             <div id="mallaWrap" style="margin-top:14px"><div class="togs" id="mallaTog"></div></div>
             <div class="nextrow"><button class="btn btn-line" data-prev>Atrás</button><button class="btn btn-dark" data-next>Siguiente: detalles</button></div>
@@ -602,7 +625,7 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
   <div class="wrap">
     <div class="ft">
       <div><div class="ft-brand">Flowers Handmade</div><p id="footerSlogan">Flores artesanales hechas con cinta de tela, papel y amor. Desde Loja para todo Ecuador.</p></div>
-      <div><h4>Tienda</h4><a href="#productos">Colección</a><a href="#personaliza">Arma tu ramo</a><a href="#como-comprar">Cómo comprar</a></div>
+      <div><h4>Tienda</h4><a href="#productos">Colección</a><a href="#personaliza">Arma tu ramo</a><a href="#como-comprar">Cómo comprar</a><a href="mayoristas/" id="wsLink" class="hidden">Venta por mayor para florerías</a></div>
       <div><h4>Contacto</h4><p>📍 <span id="footerAddr">Loja, Ecuador</span></p><a href="#" id="footerWa" data-wa="Hola Flowers Handmade! 🌸" target="_blank" rel="noopener">💬 WhatsApp</a><a href="#" id="footerIg" target="_blank" rel="noopener">📸 Instagram</a></div>
     </div>
     <div class="fb"><span>© <span id="year">2026</span> Flowers Handmade</span><span>Hecho con 🌸 en Loja, Ecuador</span></div>
@@ -634,6 +657,13 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
   </div>
 </div>
 
+<div class="ov" id="realPhoto" role="dialog" aria-modal="true" aria-label="Foto real">
+  <div class="pm" style="grid-template-columns:1fr;max-width:640px">
+    <button class="close" onclick="document.getElementById('realPhoto').classList.remove('open');document.body.style.overflow=''" aria-label="Cerrar">×</button>
+    <div class="pm-img" style="min-height:0;aspect-ratio:1"><img id="realImg" alt="Foto real del envase"></div>
+    <div class="pm-body" style="padding:16px 20px"><div class="pm-tag">Así se ve en la vida real</div><p class="pm-desc" id="realCap"></p><p class="hintline">El 3D es una guía: cada pieza se teje a mano y puede variar un poco.</p></div>
+  </div>
+</div>
 <div class="dbg" id="dbg"></div>
 <aside class="drawer" id="drawer" aria-label="Carrito" aria-hidden="true">
   <div class="d-head"><h3>Tu carrito</h3><button class="close" id="dClose" aria-label="Cerrar carrito">×</button></div>
@@ -714,40 +744,87 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
    DISEÑADOR 3D — catálogo de piezas, medidas reales y precios
    Escala: 1 unidad 3D = 20 cm
    ===================================================================== */
-const B={
-  // Tamaños de flor (diámetro en cm) y precio por flor en cada tamaño
-  flores:{
-    rosa:   {S:{cm:6, p:2.5},M:{cm:7, p:3},  L:{cm:9, p:4}},
-    girasol:{S:{cm:10,p:4},  M:{cm:12,p:5},  L:{cm:15,p:6.5}},
-    tulipan:{S:{cm:4.5,p:3}, M:{cm:5.5,p:3.5},L:{cm:7,p:4.5}}
-  },
-  papel:{liso:0,marmol:1,corazones:1,kraft:0,vintage:1},
-  extras:{lazo:1,paniculata:2,malla:1,corona:3,mariposas:2,luces:4,mensaje:5},
-  empaque:0.95   // qué tanto se puede llenar la boca del envase (1 = totalmente)
-};
+// Las reglas (tamaños, precios, límites, papeles, extras) NO viven en este archivo:
+// se cargan desde tu Supabase con applyConfig(). Sin configuración el diseñador no funciona.
+const B={flores:{rosa:{},girasol:{},tulipan:{}},papel:{},extras:{},empaque:0.95,on:{},formasOn:[true,true,true],sugeridos:[],ready:false};
 const CONTAINERS={
   ramo:{label:'Ramo',variants:{
-    redondo:{label:'Redondo',title:'Ramo redondo',price:5,max:30},
-    cono:{label:'En cono',title:'Ramo en cono',price:3,max:9}}},
+    redondo:{label:'Redondo',title:'Ramo redondo',price:0,max:0},
+    buchon:{label:'Buchón',title:'Buchón',price:0,max:0},
+    cascada:{label:'Cascada',title:'Ramo cascada',price:0,max:0},
+    corazon:{label:'Corazón',title:'Ramo corazón',price:0,max:0},
+    alargado:{label:'Alargado',title:'Ramo alargado',price:0,max:0},
+    cono:{label:'En cono',title:'Ramo en cono',price:0,max:0}}},
   caja:{label:'Caja',variants:{
-    redonda:{label:'Sombrerera',title:'Caja sombrerera',colorLabel:'Color de la caja',sizes:[{id:'S',d:15,h:12,p:6},{id:'M',d:20,h:15,p:8},{id:'L',d:25,h:17,p:10},{id:'XL',d:30,h:20,p:13}]},
-    corazon:{label:'Corazón',title:'Caja corazón',colorLabel:'Color de la caja',sizes:[{id:'S',d:20,h:9,p:8},{id:'M',d:26,h:11,p:10},{id:'L',d:32,h:13,p:13}]},
-    cuadrada:{label:'Cuadrada',title:'Caja cuadrada',colorLabel:'Color de la caja',sizes:[{id:'S',d:15,h:12,p:6},{id:'M',d:20,h:14,p:8},{id:'L',d:25,h:16,p:10}]},
-    cartera:{label:'Cartera',title:'Caja cartera',colorLabel:'Color de la caja',sizes:[{id:'U',d:20,dp:10,h:12,back:26,p:7}]}}},
+    redonda:{label:'Redonda',title:'Caja redonda',colorLabel:'Color de la caja',sizes:[]},
+    cuadrada:{label:'Cuadrada',title:'Caja cuadrada',colorLabel:'Color de la caja',sizes:[]},
+    rectangular:{label:'Rectangular',title:'Caja rectangular',colorLabel:'Color de la caja',sizes:[]},
+    hexagonal:{label:'Hexagonal',title:'Caja hexagonal',colorLabel:'Color de la caja',sizes:[]},
+    corazon:{label:'Corazón',title:'Caja corazón',colorLabel:'Color de la caja',sizes:[]},
+    acrilica:{label:'Acrílica',title:'Caja acrílica',colorLabel:'Color de la base',sizes:[]},
+    cartera:{label:'Cartera',title:'Caja cartera',colorLabel:'Color de la caja',sizes:[]}}},
   cupula:{label:'Cúpula',variants:{
-    esfera:{label:'Esfera',title:'Esfera acrílica',colorLabel:'Color de la base',sizes:[{id:'S',d:15,p:10},{id:'M',d:20,p:12}]},
-    campana:{label:'Campana',title:'Cúpula de cristal',colorLabel:'Color de la base',sizes:[{id:'S',d:14,h:26,p:13,max:3},{id:'M',d:18,h:32,p:15,max:5}]}}},
+    esfera:{label:'Esfera',title:'Esfera acrílica',colorLabel:'Color de la base',sizes:[]},
+    campana:{label:'Campana',title:'Cúpula de cristal',colorLabel:'Color de la base',sizes:[]}}},
   vaso:{label:'Vaso',variants:{
-    cono:{label:'Cono',title:'Cono decorado',colorLabel:'Color del cono',sizes:[{id:'U',d:12,h:24,p:5,max:3}]},
-    vidrio:{label:'Vidrio',title:'Florero de vidrio',colorLabel:'Tono del vidrio',sizes:[{id:'S',d:9,h:18,p:6,max:5},{id:'M',d:12,h:25,p:8,max:9}]},
-    ceramica:{label:'Cerámica',title:'Florero de cerámica',colorLabel:'Color de la cerámica',sizes:[{id:'S',d:10,h:20,p:8,max:5},{id:'M',d:13,h:28,p:10,max:9}]}}},
+    cono:{label:'Cono',title:'Cono decorado',colorLabel:'Color del cono',sizes:[]},
+    vidrio:{label:'Vidrio',title:'Florero de vidrio',colorLabel:'Tono del vidrio',sizes:[]},
+    ceramica:{label:'Cerámica',title:'Florero de cerámica',colorLabel:'Color de la cerámica',sizes:[]}}},
   cuadro:{label:'Cuadro',variants:{
-    marco:{label:'Con marco',title:'Cuadro',colorLabel:'Color del marco',sizes:[{id:'S',d:20,p:10},{id:'M',d:25,p:12},{id:'L',d:30,p:15}]}}}
+    marco:{label:'Con marco',title:'Cuadro',colorLabel:'Color del marco',sizes:[]}}}
 };
 const SIZE_NAMES={S:'Pequeña',M:'Mediana',L:'Grande',XL:'Extra grande',U:'Única'};
 const FLOWER_COLORS={Amarillo:'#f4c20d',Crema:'#f3e2b8',Durazno:'#f5b183',Coral:'#ec5a66',Rojo:'#b8142f',Vino:'#6e0f24',Rosa:'#f3a6bf',Fucsia:'#d8387a',Lila:'#c89ac6',Azul:'#1e6ea6',Celeste:'#8cc8ec',Blanco:'#f6f2ea'};
 const PAPER_COLORS={Blanco:'#f7f5f2',Crema:'#efe3cc',Negro:'#1d1b1c',Bordó:'#7a1f26',Rojo:'#c8202f',Rosa:'#f0c9cf',Lila:'#cdb8dc',Celeste:'#b9daf0','Verde salvia':'#a9b79a',Dorado:'#c9a86a'};
-const PAPER_TYPES={liso:'Liso',marmol:'Mármol',corazones:'Corazones',kraft:'Kraft',vintage:'Vintage'};
+/* ── Papel coreano: el mismo dibujo sirve para la muestra y para el 3D ── */
+const PAPER_TYPES={liso:'Liso mate',doblecara:'Doble cara',bicolor:'Filo dorado',metalizado:'Metalizado',degradado:'Degradado',corazones:'Corazones',puntos:'Puntos',letras:'Letras / Love',damasco:'Damasco',marmol:'Mármol',acuarela:'Acuarela',vintage:'Periódico',kraft:'Kraft',kraftflor:'Kraft con flores',tornasol:'Tornasol',translucido:'Translúcido'};
+const PAPER_COLORED=new Set(['liso','doblecara','bicolor','metalizado','degradado','corazones','puntos','letras','damasco','translucido']);
+function hexShade(h,k){const n=parseInt(String(h).slice(1),16);let r=n>>16&255,g=n>>8&255,b=n&255;const t=k<0?0:255,a=Math.abs(k);r=Math.round(r+(t-r)*a);g=Math.round(g+(t-g)*a);b=Math.round(b+(t-b)*a);return '#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1);}
+function prng(seed){let s=seed%2147483647;if(s<=0)s+=2147483646;return ()=>(s=s*16807%2147483647)/2147483647;}
+function heartPath2(x,cx,cy,s){x.beginPath();x.moveTo(cx,cy+s*0.3);x.bezierCurveTo(cx,cy,cx-s*0.5,cy,cx-s*0.5,cy+s*0.3);x.bezierCurveTo(cx-s*0.5,cy+s*0.6,cx,cy+s*0.8,cx,cy+s);x.bezierCurveTo(cx,cy+s*0.8,cx+s*0.5,cy+s*0.6,cx+s*0.5,cy+s*0.3);x.bezierCurveTo(cx+s*0.5,cy,cx,cy,cx,cy+s*0.3);}
+// Devuelve cómo dibujar cada textura: tamaño del lienzo, repeticiones y dibujo
+function paperArt(type,hex,hex2){
+  const kraftBase=(x,w,h)=>{x.fillStyle='#b89a74';x.fillRect(0,0,w,h);const r=prng(3);for(let i=0;i<w*h/25;i++){x.fillStyle=r()<0.5?'rgba(80,55,30,.08)':'rgba(255,240,220,.08)';x.fillRect(r()*w,r()*h,1+r()*3,1);}};
+  switch(type){
+    case 'liso':case 'metalizado':case 'translucido':return {w:4,h:4,draw:(x,w,h)=>{x.fillStyle=hex;x.fillRect(0,0,w,h);}};
+    case 'doblecara':return {w:64,h:64,draw:(x,w,h)=>{x.fillStyle=hex;x.fillRect(0,0,w,h);x.fillStyle=hex2||'#f7f5f2';x.beginPath();x.moveTo(w,0);x.lineTo(w,h);x.lineTo(0,h);x.fill();}};
+    case 'bicolor':return {w:64,h:512,draw:(x,w,h)=>{x.fillStyle=hex;x.fillRect(0,0,w,h);const g=x.createLinearGradient(0,0,0,26);g.addColorStop(0,'#f3dc8a');g.addColorStop(0.5,'#b8913f');g.addColorStop(1,'#e8cd7a');x.fillStyle=g;x.fillRect(0,0,w,20);x.fillStyle='rgba(255,255,255,.25)';x.fillRect(0,20,w,2);}};
+    case 'degradado':return {w:16,h:256,draw:(x,w,h)=>{const g=x.createLinearGradient(0,h,0,0);g.addColorStop(0,hexShade(hex,-0.25));g.addColorStop(0.55,hex);g.addColorStop(1,hexShade(hex,0.75));x.fillStyle=g;x.fillRect(0,0,w,h);}};
+    case 'corazones':return {w:256,h:256,rx:2,ry:2,draw:(x,w,h)=>{x.fillStyle='#fbf7f5';x.fillRect(0,0,w,h);x.strokeStyle=hex;x.lineWidth=2;
+      for(let i=0;i<=4;i++){x.beginPath();x.moveTo(i*64,0);x.lineTo(i*64-256,256);x.stroke();x.beginPath();x.moveTo(i*64,0);x.lineTo(i*64+256,256);x.stroke();}
+      for(let r=0;r<4;r++)for(let c=0;c<4;c++){heartPath2(x,c*64+32,r*64+16,34);if((r+c)%2){x.fillStyle=hex;x.fill();}else{x.lineWidth=3;x.stroke();}}}};
+    case 'puntos':return {w:128,h:128,rx:4,ry:4,draw:(x,w,h)=>{x.fillStyle=hex;x.fillRect(0,0,w,h);x.fillStyle='rgba(255,255,255,.92)';[[32,32],[96,96]].forEach(([cx,cy])=>{x.beginPath();x.arc(cx,cy,9,0,Math.PI*2);x.fill();});x.fillStyle='rgba(255,255,255,.55)';[[96,32],[32,96]].forEach(([cx,cy])=>{x.beginPath();x.arc(cx,cy,4,0,Math.PI*2);x.fill();});}};
+    case 'letras':return {w:512,h:512,rx:2,ry:2,draw:(x,w,h)=>{x.fillStyle=hex;x.fillRect(0,0,w,h);const ink=hexShade(hex,0).length&&(parseInt(hex.slice(1),16)>0x888888?'rgba(61,33,24,.55)':'rgba(255,255,255,.7)');
+      x.fillStyle=ink;const words=['Love','For you','Flowers','Happy day','with love','Bloom'];const r=prng(6);
+      for(let row=0;row<8;row++)for(let c=0;c<3;c++){x.save();x.translate(c*180+(row%2?80:0)+20,row*64+44);x.rotate(-0.18);x.font=`italic ${26+r()*14|0}px Georgia, serif`;x.fillText(words[(row*3+c)%words.length],0,0);x.restore();}}};
+    case 'damasco':return {w:256,h:256,rx:3,ry:3,draw:(x,w,h)=>{x.fillStyle=hex;x.fillRect(0,0,w,h);const lt=hexShade(hex,0.22);x.strokeStyle=lt;x.fillStyle=lt;x.lineWidth=3;
+      const motif=(cx,cy,s)=>{x.beginPath();x.moveTo(cx,cy-s);x.bezierCurveTo(cx+s*0.9,cy-s*0.6,cx+s*0.5,cy+s*0.2,cx,cy+s);x.bezierCurveTo(cx-s*0.5,cy+s*0.2,cx-s*0.9,cy-s*0.6,cx,cy-s);x.stroke();
+        x.beginPath();x.arc(cx,cy,s*0.18,0,Math.PI*2);x.fill();[-1,1].forEach(d=>{x.beginPath();x.moveTo(cx,cy+s*0.2);x.quadraticCurveTo(cx+d*s*1.1,cy+s*0.1,cx+d*s*0.9,cy-s*0.5);x.stroke();x.beginPath();x.arc(cx+d*s*0.9,cy-s*0.5,s*0.08,0,Math.PI*2);x.fill();});
+        x.beginPath();x.moveTo(cx-s*0.3,cy+s*1.05);x.quadraticCurveTo(cx,cy+s*0.8,cx+s*0.3,cy+s*1.05);x.stroke();};
+      motif(64,64,40);motif(192,192,40);motif(192,64,22);motif(64,192,22);}};
+    case 'marmol':return {w:512,h:512,draw:(x,w,h)=>{x.fillStyle='#f6f4f1';x.fillRect(0,0,w,h);const r=prng(8);
+      for(let i=0;i<22;i++){const g=i%3===0;x.strokeStyle=g?'rgba(201,162,78,.9)':'rgba(150,150,150,.25)';x.lineWidth=(g?1+r()*2.5:1+r()*4)*w/512;x.beginPath();let px=r()*w,py=0;x.moveTo(px,py);for(let k=0;k<5;k++){const nx=px+(r()-0.5)*w*0.4,ny=py+h/5;x.quadraticCurveTo(px+(r()-0.5)*w*0.3,py+h/10,nx,ny);px=nx;py=ny;}x.stroke();}}};
+    case 'acuarela':return {w:512,h:512,draw:(x,w,h)=>{x.fillStyle='#fbf7f4';x.fillRect(0,0,w,h);const r=prng(12),cols=['243,166,191','200,154,198','245,177,131','140,200,236','246,208,120'],k=w/512;
+      for(let i=0;i<60;i++){const cx=r()*w,cy=r()*h,rad=(30+r()*90)*k,g=x.createRadialGradient(cx,cy,0,cx,cy,rad),c=cols[i%cols.length];g.addColorStop(0,`rgba(${c},.34)`);g.addColorStop(0.7,`rgba(${c},.12)`);g.addColorStop(1,`rgba(${c},0)`);x.fillStyle=g;x.beginPath();x.ellipse(cx,cy,rad,rad*(0.5+r()*0.6),r()*3,0,Math.PI*2);x.fill();}}};
+    case 'vintage':return {w:512,h:512,draw:(x,w,h)=>{x.fillStyle='#ece2cf';x.fillRect(0,0,w,h);const r=prng(5),cw=w/4,lh=Math.max(3,h/57);
+      for(let col=0;col<4;col++)for(let y=lh*2;y<h;y+=lh){if(r()<0.06){x.fillStyle='rgba(60,45,35,.55)';x.fillRect(col*cw+cw*0.06,y,cw*0.78,lh*0.66);y+=lh*0.66;continue;}x.fillStyle='rgba(70,55,45,.3)';x.fillRect(col*cw+cw*0.06,y,cw*(0.3+r()*0.56),lh*0.33);}}};
+    case 'kraft':return {w:256,h:256,rx:2,ry:2,draw:kraftBase};
+    case 'kraftflor':return {w:256,h:256,rx:2,ry:2,draw:(x,w,h)=>{kraftBase(x,w,h);const k=w/256;x.strokeStyle='rgba(255,255,255,.88)';x.fillStyle='rgba(255,255,255,.88)';x.lineWidth=2.2*k;
+      const flor=(cx,cy,s)=>{x.beginPath();x.moveTo(cx,cy+s*0.2);x.quadraticCurveTo(cx+s*0.3,cy+s*1.4,cx-s*0.1,cy+s*2.4);x.stroke();for(let q=0;q<5;q++){const a=q*Math.PI*2/5;x.beginPath();x.ellipse(cx+Math.cos(a)*s*0.45,cy+Math.sin(a)*s*0.45,s*0.42,s*0.2,a,0,Math.PI*2);x.stroke();}x.beginPath();x.ellipse(cx+s*0.25,cy+s*1.3,s*0.35,s*0.12,-0.6,0,Math.PI*2);x.fill();};
+      flor(70*k,50*k,26*k);flor(190*k,150*k,22*k);}};
+    case 'tornasol':return {w:256,h:256,rx:2,ry:2,draw:(x,w,h)=>{const g=x.createLinearGradient(0,0,w,h);['#ffd6f0','#d6e8ff','#d9fff0','#fff5cf','#f0d9ff','#d6fbff'].forEach((c,i,a)=>g.addColorStop(i/(a.length-1),c));x.fillStyle=g;x.fillRect(0,0,w,h);
+      const r=prng(4);for(let i=0;i<40;i++){x.strokeStyle=`rgba(255,255,255,${0.2+r()*0.4})`;x.lineWidth=(1+r()*6)*w/256;x.beginPath();const y0=r()*h;x.moveTo(0,y0);x.bezierCurveTo(w*0.3,y0+(r()-.5)*h*0.3,w*0.7,y0+(r()-.5)*h*0.3,w,y0+(r()-.5)*h*0.25);x.stroke();}}};
+  }
+  return {w:4,h:4,draw:(x,w,h)=>{x.fillStyle=hex;x.fillRect(0,0,w,h);}};
+}
+// Muestra para el selector (no necesita 3D)
+const _swCache={};
+function paperSwatch(type,hex,hex2){const k=type+hex+(hex2||'');if(_swCache[k])return _swCache[k];try{const a=paperArt(type,hex,hex2),c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d');
+  const tw=Math.max(a.w,96),th=Math.max(a.h,96),t=document.createElement('canvas');t.width=a.w;t.height=a.h;a.draw(t.getContext('2d'),a.w,a.h);
+  x.drawImage(t,0,0,a.w,a.h,0,0,96*(a.w>=96?1:1),96);
+  if(type==='metalizado'){const g=x.createLinearGradient(0,0,96,96);g.addColorStop(0,'rgba(255,255,255,.55)');g.addColorStop(0.45,'rgba(255,255,255,0)');g.addColorStop(0.6,'rgba(0,0,0,.15)');g.addColorStop(1,'rgba(255,255,255,.35)');x.fillStyle=g;x.fillRect(0,0,96,96);}
+  if(type==='translucido'){x.globalAlpha=0.5;x.fillStyle='#fff';x.fillRect(0,0,96,96);x.globalAlpha=1;}
+  return _swCache[k]=c.toDataURL();}catch(e){return '';}}
 const FIELTRO={Crema:'#efe6d3',Blanco:'#f7f6f2',Amarillo:'#f3cf2a',Rosa:'#f4c3cf',Lila:'#d9c3e6',Celeste:'#bfe0f2'};
 const RIBBON={Dorado:'#cda75a',Crema:'#f1e6cf','Verde oliva':'#8f9a2c',Negro:'#151214',Rojo:'#b0122b',Rosa:'#f4c6d3',Lila:'#c6a6dc',Celeste:'#6fc3e8',Blanco:'#fbfbfb',Yute:'#b8966a'};
 const CROWN={Dorada:'#d4af37',Plateada:'#c8ccd2','Oro rosa':'#d8a08f'};
@@ -774,15 +851,16 @@ function sizeOf(c){const v=vdef(c);if(!v.sizes)return null;const k=c.container+'
 function paletteFor(c,v){return PAL[c+'.'+v]||PAL[c]||null;}
 function ccolorOf(cfg){const pal=paletteFor(cfg.container,cfg.variant);if(!pal)return null;const k=cfg.container+'.'+cfg.variant;const n=(cfg.ccolor&&cfg.ccolor[k]&&pal[cfg.ccolor[k]])?cfg.ccolor[k]:Object.keys(pal)[0];return {name:n,hex:pal[n]};}
 function feats(c,v){return {paper:c==='ramo',fieltro:c==='ramo'||(c==='caja'&&v==='redonda')||(c==='vaso'&&v==='cono'),malla:c==='ramo'||(c==='vaso'&&v==='cono'),
-  mensaje:c==='ramo'||c==='caja'||c==='cuadro',cinta:!((c==='caja'&&(v==='corazon'||v==='cartera'))||c==='cuadro'),color:!!paletteFor(c,v)};}
-const fcm=f=>B.flores[f.type][f.tier||'M'].cm;
+  mensaje:c==='ramo'||c==='caja'||c==='cuadro',cinta:!((c==='caja'&&(v==='corazon'||v==='cartera'||v==='acrilica'))||c==='cuadro'),color:!!paletteFor(c,v)};}
+function tierOf(f){const T=B.flores[f.type]||{};return T[f.tier]||T.M||Object.values(T)[0]||{cm:7,p:0};}
+const fcm=f=>tierOf(f).cm;
 
 /* ── capacidad según medidas reales ── */
 const HEART=(()=>{const a=[];for(let i=0;i<96;i++){const t=i/96*Math.PI*2;a.push([Math.pow(Math.sin(t),3),(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))/16+0.12]);}return a;})();
 const HEART_AREA=(()=>{let s=0;for(let i=0,j=HEART.length-1;i<HEART.length;j=i++)s+=(HEART[j][0]+HEART[i][0])*(HEART[j][1]-HEART[i][1]);return Math.abs(s/2);})();
 function mouth(cfg){ // área útil (cm²) y medida mínima de la boca
   const s=sizeOf(cfg),c=cfg.container,v=cfg.variant;if(!s)return null;
-  if(c==='caja'){if(v==='redonda')return {area:Math.PI*(s.d/2)**2,min:s.d};if(v==='corazon')return {area:HEART_AREA*(s.d/2)**2,min:s.d*0.62};if(v==='cuadrada')return {area:s.d*s.d,min:s.d};if(v==='cartera')return {area:s.d*s.dp*1.25,min:s.dp*1.6};}
+  if(c==='caja'){if(v==='redonda')return {area:Math.PI*(s.d/2)**2,min:s.d};if(v==='corazon')return {area:HEART_AREA*(s.d/2)**2,min:s.d*0.62};if(v==='cuadrada')return {area:s.d*s.d,min:s.d};if(v==='rectangular')return {area:s.d*s.dp,min:Math.min(s.d,s.dp)};if(v==='hexagonal')return {area:2.598*(s.d/2)**2,min:s.d*0.87};if(v==='acrilica')return {area:s.d*s.d*0.9,min:s.d*0.9};if(v==='cartera')return {area:s.d*s.dp*1.25,min:s.dp*1.6};}
   if(c==='cupula'&&v==='esfera')return {area:Math.PI*(s.d*0.42)**2,min:s.d*0.8};
   if(c==='cupula'&&v==='campana')return {area:Math.PI*(s.d*0.46)**2,min:s.d*0.85,max:s.max};
   if(c==='cuadro')return {area:(s.d*0.86)**2,min:s.d*0.8};
@@ -799,7 +877,7 @@ function capacity(cfg){
 }
 function dimsText(cfg){
   const s=sizeOf(cfg),c=cfg.container,v=cfg.variant;if(!s)return null;
-  if(c==='caja'){if(v==='redonda')return `Ø ${s.d} cm × ${s.h} cm de alto`;if(v==='cartera')return `${s.d} × ${s.dp} cm · ${s.back} cm de alto`;return `${s.d} × ${s.d} cm × ${s.h} cm de alto`;}
+  if(c==='caja'){if(v==='redonda')return `Ø ${s.d} cm × ${s.h} cm de alto`;if(v==='cartera')return `${s.d} × ${s.dp} cm · ${s.back} cm de alto`;if(v==='rectangular')return `${s.d} × ${s.dp} cm × ${s.h} cm de alto`;if(v==='hexagonal')return `Ø ${s.d} cm × ${s.h} cm de alto`;return `${s.d} × ${s.d} cm × ${s.h} cm de alto`;}
   if(c==='cupula')return v==='esfera'?`Ø ${s.d} cm`:`Ø ${s.d} cm × ${s.h} cm de alto`;
   if(c==='vaso')return `Boca Ø ${s.d} cm × ${s.h} cm de alto`;
   if(c==='cuadro')return `${s.d} × ${s.d} cm`;
@@ -810,25 +888,27 @@ function dimsText(cfg){
 const fmt=n=>'$'+Number(n).toFixed(2);
 function priceOf(cfg){
   const ft=feats(cfg.container,cfg.variant),v=vdef(cfg),s=sizeOf(cfg);let p=s?s.p:v.price;
-  cfg.flowers.forEach(f=>p+=B.flores[f.type][f.tier||'M'].p);
+  cfg.flowers.forEach(f=>p+=tierOf(f).p);
   if(ft.paper)p+=B.papel[cfg.paper.type]||0;
-  if(ft.malla&&cfg.malla)p+=B.extras.malla;
-  if(ft.mensaje&&cfg.mensaje)p+=B.extras.mensaje;
-  if(cfg.lazo.style!=='ninguno')p+=B.extras.lazo;
-  if(cfg.gyps)p+=B.extras.paniculata;if(cfg.corona)p+=B.extras.corona;if(cfg.mariposas)p+=B.extras.mariposas;if(cfg.luces)p+=B.extras.luces;
+  const X=k=>B.extras[k]||0;
+  if(ft.malla&&cfg.malla)p+=X('malla');
+  if(ft.mensaje&&cfg.mensaje)p+=X('mensaje');
+  if(cfg.lazo.style!=='ninguno')p+=X('lazo');
+  if(cfg.gyps)p+=X('paniculata');if(cfg.corona)p+=X('corona');if(cfg.mariposas)p+=X('mariposas');if(cfg.luces)p+=X('luces');
   return Math.round(p*100)/100;
 }
 function groupsOf(cfg){const g=[],map={};cfg.flowers.forEach(f=>{const k=[f.type,f.type==='girasol'?'':f.color,f.tier,f.type==='girasol'?'':f.open].join('|');if(!map[k]){map[k]={key:k,f,n:0,ids:[]};g.push(map[k]);}map[k].n++;map[k].ids.push(f.id);});return g;}
 function openName(f){const o=TYPES[f.type].open;if(!o)return '';let best=o[0];o.forEach(x=>{if(Math.abs(x[1]-f.open)<Math.abs(best[1]-f.open))best=x;});return best[0].toLowerCase();}
 function groupLabel(gr){const f=gr.f,t=TYPES[f.type];return `${gr.n} ${gr.n>1?t.plural:t.label.toLowerCase()}${f.type==='girasol'?'':' '+f.color.toLowerCase()} de ${fcm(f)} cm${t.open?' ('+openName(f)+')':''}`;}
-function titleOf(cfg){const s=sizeOf(cfg),v=vdef(cfg);return v.title+(v.sizes&&v.sizes.length>1?' de '+s.d+' cm':'');}
+function titleOf(cfg){const s=sizeOf(cfg),v=vdef(cfg);return v.title+(s&&v.sizes.length>1?' de '+s.d+' cm':'');}
+const sizeName=s=>s?(s.label||SIZE_NAMES[s.id]||s.id):'';
 function describe(cfg){
   const ft=feats(cfg.container,cfg.variant),v=vdef(cfg),parts=[],cc=ccolorOf(cfg),d=dimsText(cfg);
   if(d)parts.push(d);
   if(cfg.container==='ramo')parts.push('forma '+FORMAS[cfg.forma??1][0].toLowerCase());
   parts.push(groupsOf(cfg).map(groupLabel).join(', ')||'sin flores');
   if(ft.color&&cc)parts.push(`${(v.colorLabel||'color').replace(/^(Color|Tono) de(l| la)? ?/,'')} ${cc.name.toLowerCase()}`);
-  if(ft.paper)parts.push(`papel ${PAPER_TYPES[cfg.paper.type].toLowerCase()}${(cfg.paper.type==='liso'||cfg.paper.type==='corazones')?' '+cfg.paper.color.toLowerCase():''}`);
+  if(ft.paper)parts.push(`papel ${PAPER_TYPES[cfg.paper.type].toLowerCase()}${PAPER_COLORED.has(cfg.paper.type)?' '+cfg.paper.color.toLowerCase()+(cfg.paper.type==='doblecara'?' / '+String(cfg.paper.inner||'Blanco').toLowerCase():''):''}`);
   if(ft.fieltro&&cfg.fieltro)parts.push('fieltro '+cfg.fieltro.toLowerCase());
   if(ft.malla&&cfg.malla)parts.push('malla');
   if(cfg.lazo.style!=='ninguno')parts.push(`lazo ${LAZOS[cfg.lazo.style].toLowerCase()} ${cfg.lazo.color.toLowerCase()}`);
@@ -848,6 +928,84 @@ const PRESETS=[
   {name:'Corazón con corona',cfg:mk({container:'caja',variant:'corazon',sizes:{'caja.corazon':'M'},ccolor:{'caja.corazon':'Rosa'},corona:'Dorada',gyps:true,lazo:{style:'doble',color:'Rojo'}},[['rosa','Rojo',9]])},
   {name:'Cuadro girasol',cfg:mk({container:'cuadro',variant:'marco',sizes:{'cuadro.marco':'M'},lazo:{style:'simple',color:'Yute'}},[['girasol','Amarillo',1,{tier:'L'}]])}
 ];
+
+/* ── Tamaño automático del envase según las flores ── */
+const AUTO_SIZE=c=>c.container==='vaso'||(c.container==='cupula'&&c.variant==='campana');
+function autoSize(cfg,mode){
+  const V=vdef(cfg);if(!V.sizes||V.sizes.length<2)return null;const key=cfg.container+'.'+cfg.variant,cur=cfg.sizes[key],asc=V.sizes.slice().sort((a,b)=>a.d-b.d);
+  const test=id=>{cfg.sizes[key]=id;return capacity(cfg).ok;};
+  let pick=null;
+  if(mode==='fit'||AUTO_SIZE(cfg)){for(const z of asc)if(test(z.id)){pick=z;break;}}
+  else{cfg.sizes[key]=cur;if(capacity(cfg).ok)return null;for(const z of asc)if(z.d>=(sizeOf(cfg)||{d:0}).d&&test(z.id)){pick=z;break;}}
+  if(!pick){cfg.sizes[key]=cur;return null;}
+  cfg.sizes[key]=pick.id;return (cur!==pick.id)?pick:null;
+}
+// ¿Cuántas flores de este tipo caben si se permite agrandar el envase?
+function roomWithUpgrade(cfg,f){
+  const V=vdef(cfg),key=cfg.container+'.'+cfg.variant,cur=cfg.sizes[key];let best=capacity(cfg).fits(f);
+  if(V.sizes&&V.sizes.length>1){V.sizes.forEach(z=>{cfg.sizes[key]=z.id;best=Math.max(best,capacity(cfg).fits(f));});cfg.sizes[key]=cur;}
+  return best;
+}
+
+/* ── Reglas desde Supabase ── */
+function setMap(obj,src){if(!src||!Object.keys(src).length)return;Object.keys(obj).forEach(k=>delete obj[k]);Object.entries(src).forEach(([k,v])=>{if(k&&/^#[0-9a-f]{6}$/i.test(v))obj[k]=v;});}
+function applyConfig(c){
+  if(!c||typeof c!=='object'||!c.flores)return false;
+  B.empaque=Math.min(1.2,Math.max(0.5,+c.empaque||0.95));
+  Object.keys(TYPES).forEach(t=>{const f=c.flores[t]||{};B.flores[t]={};['S','M','L'].forEach(k=>{if(f[k]&&+f[k].cm>0)B.flores[t][k]={cm:+f[k].cm,p:+f[k].p||0};});B.on['f.'+t]=f.on!==false&&Object.keys(B.flores[t]).length>0;});
+  setMap(FLOWER_COLORS,c.coloresFlor);
+  Object.entries(CONTAINERS).forEach(([ck,C])=>Object.entries(C.variants).forEach(([vk,V])=>{
+    const e=(c.envases||{})[ck+'.'+vk]||{};V.on=e.on!==false;V.foto=typeof e.foto==='string'?e.foto:'';
+    if(Array.isArray(V.sizes)){V.sizes=(e.sizes||[]).filter(z=>z&&+z.d>0).map(z=>({id:String(z.id||'M'),label:z.label||'',d:+z.d,h:+z.h||0,dp:+z.dp||0,back:+z.back||0,p:+z.p||0,max:+z.max||0}));if(!V.sizes.length)V.on=false;}
+    else{V.price=+e.p||0;V.max=+e.max||0;if(!V.max)V.on=false;}
+  }));
+  Object.keys(B.papel).forEach(k=>delete B.papel[k]);
+  const tipos=(c.papel||{}).tipos||{};Object.keys(PAPER_TYPES).forEach(k=>{const t=tipos[k];if(t?t.on!==false:Object.keys(tipos).length>0)B.papel[k]=t?(+t.p||0):0;});
+  setMap(PAPER_COLORS,(c.papel||{}).colores);setMap(FIELTRO,c.fieltro);
+  Object.keys(B.extras).forEach(k=>delete B.extras[k]);Object.entries(c.extras||{}).forEach(([k,x])=>{if(x&&x.on!==false)B.extras[k]=+x.p||0;});
+  B.formasOn=[0,1,2].map(i=>!((c.formas||[])[i]&&c.formas[i].on===false));
+  (c.formas||[]).forEach((f,i)=>{if(f&&f.label&&FORMAS[i])FORMAS[i]=[String(f.label),String(f.desc||'')];});
+  B.sugeridos=Array.isArray(c.sugeridos)?c.sugeridos.filter(x=>x&&x.d):[];
+  B.ready=true;return true;
+}
+const containerOn=c=>Object.values(CONTAINERS[c].variants).some(v=>v.on);
+// Ajusta cualquier diseño (propio, sugerido o compartido) a las reglas vigentes
+function sanitize(cfg){
+  if(!CONTAINERS[cfg.container]||!containerOn(cfg.container))cfg.container=Object.keys(CONTAINERS).find(containerOn)||'ramo';
+  const vs=CONTAINERS[cfg.container].variants;if(!vs[cfg.variant]||!vs[cfg.variant].on)cfg.variant=Object.keys(vs).find(k=>vs[k].on)||Object.keys(vs)[0];
+  const V=vs[cfg.variant],key=cfg.container+'.'+cfg.variant;cfg.sizes=cfg.sizes||{};cfg.ccolor=cfg.ccolor||{};
+  if(V.sizes&&V.sizes.length&&!V.sizes.some(z=>z.id===cfg.sizes[key]))delete cfg.sizes[key];
+  cfg.flowers=(cfg.flowers||[]).filter(f=>TYPES[f.type]&&B.on['f.'+f.type]).map(f=>{const T=B.flores[f.type];if(!T[f.tier])f.tier=T.M?'M':Object.keys(T)[0];if(f.type!=='girasol'&&!FLOWER_COLORS[f.color])f.color=Object.keys(FLOWER_COLORS)[0];return f;});
+  if(!(cfg.paper&&cfg.paper.type in B.papel))cfg.paper={type:Object.keys(B.papel)[0]||'liso',color:(cfg.paper&&cfg.paper.color)||'Blanco'};
+  if(!PAPER_COLORS[cfg.paper.color])cfg.paper.color=Object.keys(PAPER_COLORS)[0];
+  if(!PAPER_COLORS[cfg.paper.inner])cfg.paper.inner=PAPER_COLORS.Blanco?'Blanco':Object.keys(PAPER_COLORS)[0];
+  if(cfg.fieltro&&!FIELTRO[cfg.fieltro])cfg.fieltro=Object.keys(FIELTRO)[0]||null;
+  if(!B.formasOn[cfg.forma??1])cfg.forma=B.formasOn.findIndex(Boolean);if(cfg.forma<0)cfg.forma=1;
+  if(!('lazo' in B.extras))cfg.lazo.style='ninguno';
+  ['gyps:paniculata','mariposas:mariposas','luces:luces','mensaje:mensaje','malla:malla'].forEach(p=>{const[a,b]=p.split(':');if(!(b in B.extras))cfg[a]=false;});
+  if(!('corona' in B.extras))cfg.corona=null;
+  // Si el tamaño no está definido o no alcanza, se elige el más pequeño donde entran las flores
+  if(V.sizes&&V.sizes.length&&(!cfg.sizes[key]||!capacity(cfg).ok)){const asc=V.sizes.slice().sort((a,b)=>a.d-b.d);let pick=asc[asc.length-1];
+    for(const z of asc){cfg.sizes[key]=z.id;if(capacity(cfg).ok){pick=z;break;}}cfg.sizes[key]=pick.id;}
+  return cfg;
+}
+function encodeDesign(cfg){
+  const k=cfg.container+'.'+cfg.variant;
+  const o={c:cfg.container,v:cfg.variant,s:(cfg.sizes||{})[k]||'',k:(cfg.ccolor||{})[k]||'',pt:cfg.paper.type,pc:cfg.paper.color,pi:cfg.paper.inner||'',fe:cfg.fieltro||'',m:cfg.malla?1:0,fo:cfg.forma??1,x:cfg.mix||0,
+    ls:cfg.lazo.style,lc:cfg.lazo.color,ci:cfg.cinta||'',g:cfg.gyps?1:0,co:cfg.corona||'',ma:cfg.mariposas?1:0,lu:cfg.luces?1:0,me:cfg.mensaje?1:0,t:cfg.mensaje?cfg.texto:'',
+    fl:groupsOf(cfg).map(x=>[x.f.type,x.f.type==='girasol'?'':x.f.color,x.f.tier,Math.round((x.f.open||0)*100),x.n])};
+  return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeDesign(code){
+  try{let b=String(code||'').trim().replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';const o=JSON.parse(decodeURIComponent(escape(atob(b))));
+    if(!o||!CONTAINERS[o.c]||!CONTAINERS[o.c].variants[o.v])return null;
+    const c=defaultCfg(),k=o.c+'.'+o.v;c.container=o.c;c.variant=o.v;if(o.s)c.sizes[k]=String(o.s);if(o.k)c.ccolor[k]=String(o.k);
+    c.paper={type:String(o.pt||'liso'),color:String(o.pc||'Blanco'),inner:o.pi?String(o.pi):'Blanco'};c.fieltro=o.fe?String(o.fe):null;c.malla=!!o.m;c.forma=+o.fo||0;c.mix=+o.x||0;
+    c.lazo={style:LAZOS[o.ls]?o.ls:'simple',color:RIBBON[o.lc]?o.lc:'Dorado'};c.cinta=RIBBON[o.ci]?o.ci:null;c.gyps=!!o.g;c.corona=CROWN[o.co]?o.co:null;c.mariposas=!!o.ma;c.luces=!!o.lu;c.mensaje=!!o.me;if(o.t)c.texto=String(o.t).slice(0,40);
+    c.flowers=[];let total=0;(Array.isArray(o.fl)?o.fl:[]).forEach(r=>{if(!Array.isArray(r))return;const[t,col,tier,op,n]=r;if(!TYPES[t])return;for(let i=0;i<Math.min(40,n|0)&&total<40;i++,total++)c.flowers.push(newFlower(t,String(col||'Amarillo'),{tier:String(tier||'M'),open:t==='girasol'?0:(+op||0)/100}));});
+    return c;}catch(e){return null;}
+}
+function designFromLink(s){const m=/[#&?]d=([A-Za-z0-9_-]+)/.exec(String(s||''));return m?m[1]:(/^[A-Za-z0-9_-]{20,}$/.test(String(s||'').trim())?String(s).trim():null);}
 
 /* =====================================================================
    3D (se ejecuta cuando three.js ya cargó)
@@ -878,17 +1036,24 @@ function glassMat(hex){return mat('gl'+hex,()=>new THREE.MeshPhysicalMaterial({c
 const fieltroMat=n=>mat('fe'+n,()=>new THREE.MeshStandardMaterial({color:lin(FIELTRO[n]||'#efe6d3'),vertexColors:true,roughness:0.95,side:DS,normalMap:fiberN(),normalScale:new THREE.Vector2(0.6,0.6)}));
 const LEAF='#56652f',STEM='#2f3b22';
 function heartPath(x,cx,cy,s){x.beginPath();x.moveTo(cx,cy+s*0.3);x.bezierCurveTo(cx,cy,cx-s*0.5,cy,cx-s*0.5,cy+s*0.3);x.bezierCurveTo(cx-s*0.5,cy+s*0.6,cx,cy+s*0.8,cx,cy+s);x.bezierCurveTo(cx,cy+s*0.8,cx+s*0.5,cy+s*0.6,cx+s*0.5,cy+s*0.3);x.bezierCurveTo(cx+s*0.5,cy,cx,cy,cx,cy+s*0.3);}
-function paperMat(p){
-  const hex=PAPER_COLORS[p.color]||'#f7f5f2',base={vertexColors:true,roughness:0.68,envMapIntensity:0.75,side:DS,normalMap:fiberN(),normalScale:new THREE.Vector2(0.18,0.18)};
-  if(p.type==='marmol')return mat('pm-mar',()=>new THREE.MeshStandardMaterial(Object.assign({},base,{roughness:0.4,map:tex('marmol',512,512,(x,w,h)=>{x.fillStyle='#f6f4f1';x.fillRect(0,0,w,h);const r=rng(8);
-    for(let i=0;i<22;i++){const g=i%3===0;x.strokeStyle=g?'rgba(201,162,78,.9)':'rgba(150,150,150,.25)';x.lineWidth=g?1+r()*2.5:1+r()*4;x.beginPath();let px=r()*w,py=0;x.moveTo(px,py);for(let k=0;k<5;k++){const nx=px+(r()-0.5)*200,ny=py+h/5;x.quadraticCurveTo(px+(r()-0.5)*160,py+h/10,nx,ny);px=nx;py=ny;}x.stroke();}})})));
-  if(p.type==='corazones')return mat('pm-cor'+hex,()=>new THREE.MeshStandardMaterial(Object.assign({},base,{map:tex('cor'+hex,256,256,(x,w,h)=>{x.fillStyle='#fbf7f5';x.fillRect(0,0,w,h);x.strokeStyle=hex;x.lineWidth=2;
-    for(let i=0;i<=4;i++){x.beginPath();x.moveTo(i*64,0);x.lineTo(i*64-256,256);x.stroke();x.beginPath();x.moveTo(i*64,0);x.lineTo(i*64+256,256);x.stroke();}
-    for(let r=0;r<4;r++)for(let c=0;c<4;c++){heartPath(x,c*64+32,r*64+16,34);if((r+c)%2){x.fillStyle=hex;x.fill();}else{x.lineWidth=3;x.stroke();}}},2,2)})));
-  if(p.type==='kraft')return mat('pm-kr',()=>new THREE.MeshStandardMaterial(Object.assign({},base,{roughness:0.9,normalScale:new THREE.Vector2(0.4,0.4),map:tex('kraft',256,256,(x,w,h)=>{x.fillStyle='#b89a74';x.fillRect(0,0,w,h);const r=rng(3);for(let i=0;i<2600;i++){x.fillStyle=r()<0.5?'rgba(80,55,30,.08)':'rgba(255,240,220,.08)';x.fillRect(r()*w,r()*h,1+r()*3,1);}},2,2)})));
-  if(p.type==='vintage')return mat('pm-vi',()=>new THREE.MeshStandardMaterial(Object.assign({},base,{roughness:0.8,map:tex('vint',512,512,(x,w,h)=>{x.fillStyle='#ece2cf';x.fillRect(0,0,w,h);const r=rng(5);
-    for(let col=0;col<4;col++)for(let y=20;y<h;y+=9){if(r()<0.06){x.fillStyle='rgba(60,45,35,.55)';x.fillRect(col*128+8,y,100,6);y+=6;continue;}x.fillStyle='rgba(70,55,45,.3)';x.fillRect(col*128+8,y,40+r()*72,3);}})})));
-  return mat('pm-l'+hex,()=>new THREE.MeshStandardMaterial(Object.assign({},base,{color:lin(hex),roughness:p.color==='Dorado'?0.3:0.5,metalness:p.color==='Dorado'?0.55:0})));
+function paperMat(p,side){
+  const hex=PAPER_COLORS[p.color]||'#f7f5f2',hex2=PAPER_COLORS[p.inner]||'#f7f5f2',t=p.type in PAPER_TYPES?p.type:'liso',sd=side==null?DS:side;
+  const base={vertexColors:true,roughness:0.66,envMapIntensity:0.75,side:sd,normalMap:fiberN(),normalScale:new THREE.Vector2(0.18,0.18)};
+  const art=(ht)=>{const a=paperArt(t,ht,hex2);return a.w<=4?null:tex('pa-'+t+ht+hex2,a.w,a.h,a.draw,a.rx,a.ry);};
+  const key='pm-'+t+hex+(t==='doblecara'?hex2:'')+'-'+sd;
+  if(t==='tornasol')return mat(key,()=>new THREE.MeshPhysicalMaterial({vertexColors:true,side:sd,transparent:true,opacity:0.72,depthWrite:false,roughness:0.12,metalness:0.25,clearcoat:1,clearcoatRoughness:0.05,envMapIntensity:1.6,map:art(hex)}));
+  if(t==='translucido')return mat(key,()=>new THREE.MeshStandardMaterial(Object.assign(base,{color:lin(hexShade(hex,0.35)),transparent:true,opacity:0.58,depthWrite:false,roughness:0.9,normalScale:new THREE.Vector2(0.5,0.5)})));
+  if(t==='metalizado')return mat(key,()=>new THREE.MeshStandardMaterial(Object.assign(base,{color:lin(hex),metalness:0.75,roughness:0.28,envMapIntensity:1.3,normalScale:new THREE.Vector2(0.35,0.35)})));
+  if(t==='liso'||t==='doblecara')return mat(key,()=>new THREE.MeshStandardMaterial(Object.assign(base,{color:lin(hex),roughness:p.color==='Dorado'?0.3:0.62,metalness:p.color==='Dorado'?0.55:0})));
+  const rough={kraft:0.9,kraftflor:0.9,marmol:0.42,vintage:0.8,acuarela:0.7,damasco:0.62,degradado:0.6,bicolor:0.55}[t]||0.64;
+  return mat(key,()=>new THREE.MeshStandardMaterial(Object.assign(base,{map:art(hex),roughness:rough},t.startsWith('kraft')?{normalScale:new THREE.Vector2(0.4,0.4)}:{})));
+}
+// Agrega una hoja de papel; si es doble cara, cada lado lleva su color
+function paperSheet(g,geo,p){
+  if(p.type!=='doblecara'){g.add(new THREE.Mesh(geo,paperMat(p)));return;}
+  // la cara trasera de la geometría es la que mira hacia afuera del ramo
+  g.add(new THREE.Mesh(geo,paperMat(p,THREE.BackSide)));
+  g.add(new THREE.Mesh(geo,paperMat({type:'liso',color:p.inner||'Blanco'},THREE.FrontSide)));
 }
 function meshMat(){return mat('malla',()=>new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.7,side:DS,alphaTest:0.5,map:tex('malla',256,256,(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);x.globalCompositeOperation='destination-out';
   for(let r=0;r<8;r++)for(let c=-1;c<9;c++){const cx=c*32+(r%2?16:0)+16,cy=r*32+16;x.beginPath();for(let k=0;k<6;k++){const a=Math.PI/6+k*Math.PI/3;x.lineTo(cx+12.5*Math.cos(a),cy+12.5*Math.sin(a));}x.fill();}},5,4)}));}
@@ -990,7 +1155,7 @@ function buildCluster(cfg,o){
   if(o.inside)pts=gridIn(n,s,o.inside);
   else{pts=circleArrange(n,s,!!o.msg);if(o.fitR&&n){const e=Math.max(...pts.map((p,i)=>Math.hypot(p[0],p[1])+rads[i]*0.55));if(e>o.fitR){const k=Math.max(0.62,o.fitR/e);pts=pts.map(p=>[p[0]*k,p[1]*k]);}}}
   let maxR=0,ring=0,drop=0;const heads=[];
-  pts.forEach(([x,z],i)=>{const f=fl[i],rr=Math.hypot(x,z),y=-o.dome*rr*rr,obj=makeFlower(f);obj.position.set(x,y,z);const tl=Math.min(0.6,rr*0.9)*(o.tiltK==null?1:o.tiltK);orient(obj,x,z,tl,r()*6.28);g.add(obj);heads.push({p:new THREE.Vector3(x,y,z),r:rads[i]});maxR=Math.max(maxR,rr+rads[i]);ring=Math.max(ring,rr);});
+  pts.forEach(([x,z],i)=>{const f=fl[i],rr=Math.hypot(x,z),y=-o.dome*rr*rr+(o.yfn?o.yfn(x,z,i):0),obj=makeFlower(f);obj.position.set(x,y,z);const tl=Math.min(0.6,rr*0.9)*(o.tiltK==null?1:o.tiltK);orient(obj,x,z,tl,r()*6.28);g.add(obj);heads.push({p:new THREE.Vector3(x,y,z),r:rads[i]});maxR=Math.max(maxR,rr+rads[i]);ring=Math.max(ring,rr);});
   let top=null;if(o.msg){const m=makeMsgDisc(cfg.texto);m.position.set(0,cm(3.5),cm(0.4));g.add(m);top=[0,cm(8),-cm(0.6)];}
   else if(heads.length){let c=heads[0];heads.forEach(h=>{if(h.p.lengthSq()<c.p.lengthSq())c=h;});top=[c.p.x,c.p.y+c.r*0.45+0.02,c.p.z];}
   addExtras(g,heads,top,cfg,29);return {group:g,radius:Math.max(maxR,o.msg?cm(5):0,cm(4)),avg,ring,heads,low:Math.min(0,...heads.map((h,i)=>h.p.y-h.r*Math.sin(Math.min(0.6,Math.hypot(h.p.x,h.p.z)*0.9)*(o.tiltK==null?1:o.tiltK))*0.85))};}
@@ -1006,31 +1171,41 @@ function buildStemmed(cfg,mouthY,lift,fromY,maxR){
 /* envases con medidas reales */
 function bowAt(g,cfg,x,y,z,w,rot){const b=makeBow(cfg.lazo.style,cfg.lazo.color,w);if(b){b.position.set(x,y,z);if(rot)b.rotation.set(rot[0],rot[1],rot[2]);g.add(b);}}
 function buildRamo(cfg){
-  const g=new THREE.Group(),pm=paperMat(cfg.paper),o=Math.max(0,Math.min(2,cfg.forma??1)),r=rng(11);
+  const g=new THREE.Group(),pm=paperMat(cfg.paper),o=Math.max(0,Math.min(2,cfg.forma??1)),r=rng(11),v=cfg.variant;
   const dome=[0.9,0.6,0.35][o],tilt=[0.75,1,1.35][o],flare=[cm(0.6),cm(3.2),cm(7)][o],lip=[cm(4.5),cm(6),cm(7)][o],spacing=[1.72,1.82,1.95][o];
   if(cfg.variant==='cono'){
     const cl=buildCluster(cfg,{dome:dome*0.8,tiltK:tilt*0.8,msg:cfg.mensaje,spacing}),Rc=cl.radius,Yf=Math.max(cm(18),Rc*2.1);
     const prof={Yf,r:y=>y<=Yf?cm(0.7)+(Rc+cm(0.6)-cm(0.7))*Math.pow(y/Yf,0.92):Rc+cm(0.6)+flare*1.2*Math.pow((y-Yf)/lip,1.4)};
-    g.add(new THREE.Mesh(wrapGeo(-1.5*Math.PI,2*Math.PI,prof,Yf+lip*1.25,0.5,3),pm));
-    const p2={Yf,r:y=>prof.r(y)+cm(0.25)};g.add(new THREE.Mesh(wrapGeo(-1.5*Math.PI+0.9,Math.PI*1.3,p2,Yf+lip*1.05,0.35,5),pm));
+    paperSheet(g,wrapGeo(-1.5*Math.PI,2*Math.PI,prof,Yf+lip*1.25,0.5,3),cfg.paper);
+    const p2={Yf,r:y=>prof.r(y)+cm(0.25)};paperSheet(g,wrapGeo(-1.5*Math.PI+0.9,Math.PI*1.3,p2,Yf+lip*1.05,0.35,5),cfg.paper);
     if(cfg.malla)for(let k=0;k<2;k++){const pm2={Yf,r:y=>prof.r(y)*0.985};g.add(new THREE.Mesh(wrapGeo(-Math.PI/2-1.1+k*1.1,1.5,pm2,Yf+lip*1.1,0.3,20+k),meshMat()));}
     if(cfg.fieltro)for(let k=0;k<6;k++){const pf={Yf,r:y=>prof.r(y)*0.95};g.add(new THREE.Mesh(wrapGeo(k*1.047+0.2,1.35,pf,Yf+cm(2.6),0.4,40+k),fieltroMat(cfg.fieltro)));}
     const fillM=cfg.fieltro?fieltroMat(cfg.fieltro):pm,cap=new THREE.Mesh(new THREE.CircleGeometry(prof.r(Yf-cm(1))*0.97,40),fillM);aoColors(cap.geometry,1);cap.rotation.x=-Math.PI/2;cap.position.y=Yf-cm(1);g.add(cap);
     cl.group.position.y=Yf-cl.low+cm(0.5);g.add(cl.group);
     const by=Yf*0.42,rf=prof.r(by)+cm(0.3);if(cfg.cinta){const t=new THREE.Mesh(new THREE.TorusGeometry(rf,cm(0.35),8,56),ribbonMat(cfg.cinta));t.rotation.x=Math.PI/2;t.scale.z=1;t.position.y=by;g.add(t);}
     bowAt(g,cfg,0,by,rf+cm(0.6),10);return {group:g,dims:null};}
-  // ramo redondo: mango + cuerpo que se abre hasta el borde exacto de las flores + borde de papel
-  const cl=buildCluster(cfg,{dome,tiltK:tilt,msg:cfg.mensaje,spacing}),Rc=cl.radius+cm(0.4),neckY=cm(11),neckR=cm(2.6);
-  const Yf=neckY+Math.max(cm(7),(Rc-neckR)*0.9);
-  const prof={Yf,r:y=>y<=neckY?neckR*(0.8+0.2*y/neckY):y<=Yf?neckR+(Rc-neckR)*Math.pow(Math.sin((y-neckY)/(Yf-neckY)*Math.PI/2),1.15):Rc+flare*Math.pow((y-Yf)/lip,1.5)};
-  const N=7;for(let k=0;k<N;k++){const a0=k*Math.PI*2/N-0.72+(r()-0.5)*0.15,span=1.5,front=Math.max(0,Math.sin(a0+span/2)),pk={Yf,r:y=>prof.r(y)*(1+0.012*k)+cm(0.15)*k};
-    g.add(new THREE.Mesh(wrapGeo(a0,span,pk,Yf+lip*(1-0.55*front)*(0.9+r()*0.2),0.32,60+k),pm));}
-  if(cfg.malla)for(let k=0;k<4;k++){const pk={Yf,r:y=>prof.r(y)*0.99};g.add(new THREE.Mesh(wrapGeo(k*Math.PI/2+0.35,1.9,pk,Yf+lip*0.85,0.28,80+k),meshMat()));}
-  if(cfg.fieltro)for(let k=0;k<6;k++){const pk={Yf,r:y=>prof.r(y)*0.955};g.add(new THREE.Mesh(wrapGeo(k*1.047+0.4,1.4,pk,Yf+cm(2.4)+lip*0.15,0.42,90+k),fieltroMat(cfg.fieltro)));}
+  // Formas con envoltura redonda: cada una acomoda las flores distinto
+  const n=cfg.flowers.length,avgR=n?cfg.flowers.reduce((a,f)=>a+fRad(f),0)/n:cm(3.5);
+  const P={dome,tiltK:tilt,msg:cfg.mensaje,spacing},W={sheets:7,lipK:1,flareK:1,backK:0.55,layers:1};
+  if(v==='buchon'){Object.assign(P,{dome:dome*1.45+0.25,tiltK:tilt*1.25,spacing:spacing*0.94});Object.assign(W,{sheets:9,lipK:1.15,flareK:1.5,layers:2});}
+  if(v==='corazon'){const K=Math.sqrt(Math.max(1,n)*Math.PI*avgR*avgR/(HEART_AREA*0.62))+avgR*0.3,Kin=K*0.9;
+    Object.assign(P,{dome:0.08,tiltK:0.35,inside:(x,z)=>inPoly(x/Kin,-z/Kin,HEART)});Object.assign(W,{flareK:0.8});}
+  if(v==='cascada'){const Rx=Math.sqrt(Math.max(1,n)*Math.PI*avgR*avgR/(Math.PI*1.7*0.72))+avgR*0.4;
+    Object.assign(P,{dome:dome*0.8,tiltK:tilt*1.2,inside:(x,z)=>{const zz=(z-Rx*0.35)/(z>Rx*0.35?Rx*1.35:Rx);return (x/Rx)**2+zz*zz<=1;},yfn:(x,z)=>-Math.max(0,z-Rx*0.15)*0.55});Object.assign(W,{backK:0.75});}
+  if(v==='alargado'){Object.assign(P,{dome:dome*1.8+0.5,tiltK:tilt*0.7,spacing:spacing*0.9,yfn:(x,z,i)=>((i*37)%11)/11*cm(4)});Object.assign(W,{lipK:1.8,backK:0.7,sheets:6});}
+  const cl=buildCluster(cfg,P),Rc=cl.radius+cm(0.4),neckY=cm(11),neckR=cm(2.6);
+  const Yf=neckY+Math.max(cm(7),(Rc-neckR)*0.9),L=lip*W.lipK,F=flare*W.flareK;
+  const prof={Yf,r:y=>y<=neckY?neckR*(0.8+0.2*y/neckY):y<=Yf?neckR+(Rc-neckR)*Math.pow(Math.sin((y-neckY)/(Yf-neckY)*Math.PI/2),1.15):Rc+F*Math.pow((y-Yf)/L,1.5)};
+  for(let layer=0;layer<W.layers;layer++)for(let k=0;k<W.sheets;k++){const a0=k*Math.PI*2/W.sheets-0.72+(r()-0.5)*0.15+layer*0.35,span=Math.PI*2/W.sheets*1.75,front=Math.max(0,Math.sin(a0+span/2)),
+    pk={Yf,r:y=>prof.r(y)*(1+0.012*k+0.03*layer)+cm(0.15)*k},hh=Yf+L*(1-W.backK*front)*(0.9+r()*0.2)*(layer?0.85:1);
+    paperSheet(g,wrapGeo(a0,span,pk,hh,0.32,60+k+layer*20),cfg.paper);}
+  if(cfg.malla)for(let k=0;k<4;k++){const pk={Yf,r:y=>prof.r(y)*0.99};g.add(new THREE.Mesh(wrapGeo(k*Math.PI/2+0.35,1.9,pk,Yf+L*0.85,0.28,80+k),meshMat()));}
+  if(cfg.fieltro)for(let k=0;k<6;k++){const pk={Yf,r:y=>prof.r(y)*0.955};g.add(new THREE.Mesh(wrapGeo(k*1.047+0.4,1.4,pk,Yf+cm(2.4)+L*0.15,0.42,90+k),fieltroMat(cfg.fieltro)));}
   const fillM=cfg.fieltro?fieltroMat(cfg.fieltro):pm,cap=new THREE.Mesh(new THREE.CircleGeometry(prof.r(Yf-cm(1.2))*0.97,48),fillM);aoColors(cap.geometry,1);cap.rotation.x=-Math.PI/2;cap.position.y=Yf-cm(1.2);g.add(cap);
-  cl.group.position.y=Yf-cl.low+cm(0.6);g.add(cl.group);
-  // tallos que asoman bajo el mango
-  const stems=new THREE.Group(),sm=plain(STEM,0.55);for(let k=0;k<Math.min(9,3+cfg.flowers.length);k++){const a=k*2.4,rr=neckR*0.55*Math.sqrt((k+0.5)/9);const st=new THREE.Mesh(new THREE.CylinderGeometry(cm(0.28),cm(0.3),cm(4.5),8),sm);st.position.set(Math.cos(a)*rr,-cm(1.6),Math.sin(a)*rr);stems.add(st);}
+  // en cascada, las flores de adelante cuelgan por fuera del papel
+  const lowB=v==='cascada'?Math.min(0,...cl.heads.filter(h=>h.p.z<=0).map(h=>h.p.y-h.r*0.5)):cl.low;
+  cl.group.position.y=Yf-lowB+cm(0.6);g.add(cl.group);
+  const stems=new THREE.Group(),sm=plain(STEM,0.55);for(let k=0;k<Math.min(9,3+n);k++){const a=k*2.4,rr=neckR*0.55*Math.sqrt((k+0.5)/9);const st=new THREE.Mesh(new THREE.CylinderGeometry(cm(0.28),cm(0.3),cm(4.5),8),sm);st.position.set(Math.cos(a)*rr,-cm(1.6),Math.sin(a)*rr);stems.add(st);}
   g.add(stems);
   const ny=neckY*0.92,rn=prof.r(ny)+cm(0.35);if(cfg.cinta){const t=new THREE.Mesh(new THREE.TorusGeometry(rn,cm(0.45),8,56),ribbonMat(cfg.cinta));t.rotation.x=Math.PI/2;t.scale.set(1,1,1.6);t.position.y=ny;g.add(t);}
   bowAt(g,cfg,0,ny,rn+cm(0.6),11);
@@ -1044,10 +1219,30 @@ function buildCaja(cfg){
     const mo=new THREE.Mesh(new THREE.ShapeGeometry(heartShape(K*0.98)),mossMat());mo.rotation.x=-Math.PI/2;mo.position.y=H+cm(0.25);g.add(mo);
     cl.group.position.y=H+cm(1.6);g.add(cl.group);bowAt(g,cfg,0,H*0.55,0.94*K+cm(0.8),s.d*0.4);
     return {group:g,dims:{w:s.d,h:s.h,frontZ:0.94*K,round:false}};}
-  if(v==='cuadrada'||v==='cartera'){const W=cm(s.d),D=cm(v==='cartera'?s.dp:s.d),H=cm(s.h);
+  if(v==='hexagonal'){const R=cm(s.d)/2,H=cm(s.h),a6=Math.PI/6;
+    const hexIn=(x,z)=>{const q=Math.abs(x),w=Math.abs(z);return q<=R*0.84*0.866&&(0.5*q+0.866*w)<=R*0.84*0.866;};
+    const cl=buildCluster(cfg,{dome:0.2,tiltK:0.5,msg:cfg.mensaje,inside:(x,z)=>hexIn(z,x)});
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(R,R,H,6),bm);body.rotation.y=a6;body.position.y=H/2;g.add(body);
+    const lidH=Math.min(cm(3),H*0.28),lid=new THREE.Mesh(new THREE.CylinderGeometry(R+cm(0.5),R+cm(0.5),lidH,6),bm);lid.rotation.y=a6;lid.position.y=lidH/2;g.add(lid);
+    if(cfg.cinta){const b=new THREE.Mesh(new THREE.CylinderGeometry(R+cm(0.15),R+cm(0.15),cm(1.2),6,1,true),ribbonMat(cfg.cinta));b.rotation.y=a6;b.position.y=H*0.5;g.add(b);}
+    bowAt(g,cfg,0,H*0.5,R*0.866+cm(0.7),s.d*0.45);
+    const mo=new THREE.Mesh(new THREE.CircleGeometry(R-cm(0.2),6),mossMat());mo.rotation.x=-Math.PI/2;mo.position.y=H+cm(0.1);g.add(mo);
+    cl.group.position.y=H+cm(1.6);g.add(cl.group);return {group:g,dims:{w:s.d,h:s.h,frontZ:R*0.866,round:true}};}
+  if(v==='acrilica'){const W=cm(s.d),H=cm(s.h),bh=Math.min(cm(3),H*0.25);
+    const cl=buildCluster(Object.assign({},cfg,{mensaje:false}),{dome:0.05,tiltK:0.25,inside:(x,z)=>Math.abs(x)<=W/2*0.78&&Math.abs(z)<=W/2*0.78});
+    const base=new THREE.Mesh(new THREE.BoxGeometry(W+cm(0.6),bh,W+cm(0.6)),bm);base.position.y=bh/2;g.add(base);
+    const mo=new THREE.Mesh(new THREE.PlaneGeometry(W-cm(0.3),W-cm(0.3)),mossMat());mo.rotation.x=-Math.PI/2;mo.position.y=bh+cm(0.05);g.add(mo);
+    const gm=glassMat('#ffffff'),walls=new THREE.Mesh(new THREE.BoxGeometry(W,H-bh,W),gm);walls.position.y=bh+(H-bh)/2;g.add(walls);
+    const edges=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(W,H-bh,W)),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.55}));edges.position.copy(walls.position);g.add(edges);
+    cl.group.position.y=bh+cm(0.8);
+    const maxTop=H-bh-cm(1.2),bb=new THREE.Box3().setFromObject(cl.group),hgt=bb.max.y-bb.min.y;if(hgt>maxTop&&hgt>0)cl.group.scale.setScalar(Math.max(0.6,maxTop/hgt));
+    g.add(cl.group);
+    if(cfg.lazo.style!=='ninguno'){const rb=ribbonMat(cfg.lazo.color);[0,Math.PI/2].forEach(a=>{const t=new THREE.Mesh(new THREE.BoxGeometry(W+cm(0.2),cm(0.15),cm(1.4)),rb);t.rotation.y=a;t.position.y=H+cm(0.08);g.add(t);});bowAt(g,cfg,0,H+cm(1.6),0,s.d*0.5,[-1.1,0,0]);}
+    return {group:g,dims:{w:s.d,h:s.h,frontZ:W/2,round:false}};}
+  if(v==='cuadrada'||v==='cartera'||v==='rectangular'){const W=cm(s.d),D=cm(v==='cuadrada'?s.d:s.dp),H=cm(s.h);
     const cl=buildCluster(Object.assign({},cfg,{mensaje:v==='cartera'?false:cfg.mensaje}),{dome:0.1,tiltK:0.35,msg:v!=='cartera'&&cfg.mensaje,inside:(x,z)=>Math.abs(x)<=W/2*0.8&&Math.abs(z)<=D/2*0.8});
     const body=new THREE.Mesh(new THREE.BoxGeometry(W,H,D),bm);body.position.y=H/2;g.add(body);
-    if(v==='cuadrada'){const lid=new THREE.Mesh(new THREE.BoxGeometry(W+cm(1),Math.min(cm(3.4),H*0.3),D+cm(1)),bm);lid.position.y=Math.min(cm(3.4),H*0.3)/2;g.add(lid);
+    if(v!=='cartera'){const lid=new THREE.Mesh(new THREE.BoxGeometry(W+cm(1),Math.min(cm(3.4),H*0.3),D+cm(1)),bm);lid.position.y=Math.min(cm(3.4),H*0.3)/2;g.add(lid);
       if(cfg.cinta){const b=new THREE.Mesh(new THREE.BoxGeometry(W+cm(0.25),cm(1.4),D+cm(0.25)),ribbonMat(cfg.cinta));b.position.y=H*0.5;g.add(b);}bowAt(g,cfg,0,H*0.5,D/2+cm(0.8),s.d*0.45);}
     else{const BH=cm(s.back),sh=new THREE.Shape();sh.moveTo(-W/2,0);sh.lineTo(W/2,0);sh.lineTo(W/2,BH);sh.lineTo(-W/2,BH);sh.lineTo(-W/2,0);const hole=new THREE.Path(),hr=cm(2);hole.absarc(0,BH-cm(3.4),hr,0,Math.PI,false);hole.lineTo(-hr,BH-cm(5));hole.lineTo(hr,BH-cm(5));hole.lineTo(hr,BH-cm(3.4));sh.holes.push(hole);
       const back=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:cm(0.4),bevelEnabled:false}),bm);back.position.z=-D/2-cm(0.4);g.add(back);
@@ -1221,6 +1416,17 @@ function applyBiz(){
   $('year').textContent=new Date().getFullYear();
 }
 
+/* ── Qué ve el cliente final (se configura en tu sistema → Mis webs) ── */
+let HIDDEN=new Set();
+function applyChannels(t){
+  HIDDEN=new Set((t.ocultos||[]).map(String));
+  const off=(sel,on)=>document.querySelectorAll(sel).forEach(e=>e.classList.toggle('hidden',!on));
+  const col=t.coleccion!==false,dis=t.disenador!==false;
+  off('#productos',col);off('a[href="#productos"]',col);
+  off('#personaliza',dis);off('a[href="#personaliza"]',dis);
+  if(!dis&&col){const h=document.querySelector('.hero-ctas');if(h&&!h.querySelector('[data-colcta]'))h.insertAdjacentHTML('afterbegin','<a href="#productos" class="btn btn-dark" data-colcta>Ver colección</a>');}
+  const st=document.querySelectorAll('.steps li')[0];if(st&&!dis)st.querySelector('p').textContent='Agrega piezas de nuestra colección al carrito.';
+}
 /* ── Catálogo ── */
 let allProducts=[];
 const cat={q:'',tag:'all',price:'all',sort:'featured',only:true,shown:SHOP.porPagina};
@@ -1230,7 +1436,9 @@ async function loadData(){
     if(!sb) throw new Error('sin supabase');
     const {data:rows,error}=await sb.from('products').select('id,name,price,stock,tag,photo').order('name'); // solo lo público: nunca costos
     if(error) throw error;
-    allProducts=(rows||[]).map(p=>({id:p.id,name:p.name||'Pieza artesanal',tag:(p.tag||'').trim(),price:parseFloat(p.price)||0,stock:p.stock??null,photo:p.photo||null,desc:p.description||p.desc||''}));
+    let media={};try{const r=await sb.rpc('get_product_media');if(!r.error&&r.data&&r.data.items)media=r.data.items;}catch(e){}
+    try{const r=await sb.rpc('get_store_channels');if(!r.error&&r.data&&r.data.tienda)applyChannels(r.data.tienda);}catch(e){}
+    allProducts=(rows||[]).filter(p=>!HIDDEN.has(String(p.id))).map(p=>({id:p.id,name:p.name||'Pieza artesanal',tag:(p.tag||'').trim(),price:parseFloat(p.price)||0,stock:p.stock??null,photo:p.photo||null,desc:p.description||p.desc||'',spin:media[String(p.id)]&&media[String(p.id)].spin?media[String(p.id)]:null}));
   }catch(e){console.warn('Error cargando productos',e);allProducts=[];}
   lastLoad=Date.now();buildCatFilters();renderCatalog();reconcileCart();
   const n=allProducts.filter(inStock).length;if(n)$('heroCount').textContent=n+' piezas listas para regalar';
@@ -1278,7 +1486,7 @@ function renderCatalog(){
   grid.innerHTML=show.map(p=>{const ok=inStock(p);return `
     <article class="pcard" data-id="${esc(p.id)}" id="producto-${esc(p.id)}">
       <div class="pimg">${p.photo?`<img src="${esc(p.photo)}" alt="${esc(p.name)}" loading="lazy" decoding="async">`:'<div class="ph">🌸</div>'}
-        ${p.tag?`<span class="ptag">${esc(p.tag)}</span>`:''}${ok?'':'<div class="pout"><span>Agotado</span></div>'}</div>
+        ${p.tag?`<span class="ptag">${esc(p.tag)}</span>`:''}${p.spin?'<span class="p360">🔄 360°</span>':''}${ok?'':'<div class="pout"><span>Agotado</span></div>'}</div>
       <div class="pbody"><div class="pname">${esc(p.name)}</div>
         <div class="pmeta"><span class="pprice">${money(p.price)}</span>${stockTxt(p)}</div>
         <div class="pbtns">${ok?`<button class="padd" data-add="${esc(p.id)}">Agregar</button>`:`<button class="padd" data-open="${esc(p.id)}">Ver</button>`}
@@ -1299,11 +1507,34 @@ $('sort').onchange=e=>{cat.sort=e.target.value;renderCatalog();};
 $('onlyStock').onchange=e=>{cat.only=e.target.checked;cat.shown=SHOP.porPagina;renderCatalog();};
 $('moreBtn').onclick=()=>{cat.shown+=SHOP.porPagina;renderCatalog();};
 
+/* ── Vista 360° (24 cuadros en una sola imagen) ── */
+function spinViewer(el, m){
+  if(el.__spin) el.__spin.stop();
+  const n = m.n || 24, cols = m.cols || 6, rows = Math.ceil(n/cols);
+  el.classList.add('spin360','loading');
+  el.style.backgroundImage = `url("${m.spin}")`; el.style.backgroundSize = `${cols*100}% ${rows*100}%`;
+  const pre = new Image(); pre.onload = () => el.classList.remove('loading'); pre.src = m.spin;
+  let f = 0, auto = true, dx = null, f0 = 0, raf = 0, last = 0;
+  const show = i => { f = ((i % n) + n) % n; const c = f % cols, r = Math.floor(f / cols);
+    el.style.backgroundPosition = `${cols>1 ? c/(cols-1)*100 : 0}% ${rows>1 ? r/(rows-1)*100 : 0}%`; };
+  show(0);
+  const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tick = ts => { raf = requestAnimationFrame(tick); if(!auto || still) return; if(ts - last > 115){ last = ts; show(f + 1); } };
+  raf = requestAnimationFrame(tick);
+  el.onpointerdown = e => { auto = false; dx = e.clientX; f0 = f; try{ el.setPointerCapture(e.pointerId); }catch(_){} };
+  el.onpointermove = e => { if(dx === null) return; show(f0 - Math.round((e.clientX - dx) / Math.max(1, el.clientWidth) * n * 1.1)); };
+  el.onpointerup = el.onpointercancel = () => { dx = null; };
+  el.__spin = { stop(){ cancelAnimationFrame(raf); } };
+  return el.__spin;
+}
+
+
 /* ── Modal de producto ── */
 let lastFocus=null;
 function openProduct(id){
   const p=findP(id);if(!p)return;lastFocus=document.activeElement;
   $('pmImg').innerHTML=p.photo?`<img src="${esc(p.photo)}" alt="${esc(p.name)}">`:'<div class="ph" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:60px;opacity:.4">🌸</div>';
+  if(p.spin){const v=document.createElement('div');v.className='spin360';v.setAttribute('role','img');v.setAttribute('aria-label',p.name+', vista 360°. Desliza para girar');$('pmImg').innerHTML='';$('pmImg').appendChild(v);const hint=document.createElement('div');hint.className='spin-hint';hint.textContent='↔ Desliza para girar';$('pmImg').appendChild(hint);spinViewer(v,p.spin);}
   $('pmTag').textContent=p.tag||'Flowers Handmade';$('pmName').textContent=p.name;$('pmStock').innerHTML=stockTxt(p);
   $('pmDesc').textContent=p.desc||'Pieza artesanal elaborada a mano con cinta de tela y otros materiales. Un regalo único creado en Loja, Ecuador.';
   $('pmPrice').textContent=money(p.price);
@@ -1314,7 +1545,7 @@ function openProduct(id){
   openOv('pmodal');
 }
 function openOv(id){$(id).classList.add('open');document.body.style.overflow='hidden';const c=$(id).querySelector('.close');if(c)setTimeout(()=>c.focus(),30);updateBar();}
-function closeOv(id){$(id).classList.remove('open');if(!document.querySelector('.ov.open')&&!$('drawer').classList.contains('open'))document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus();updateBar();}
+function closeOv(id){const sv=$(id).querySelector('.spin360');if(sv&&sv.__spin)sv.__spin.stop();$(id).classList.remove('open');if(!document.querySelector('.ov.open')&&!$('drawer').classList.contains('open'))document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus();updateBar();}
 $('pmClose').onclick=()=>closeOv('pmodal');
 $('pmodal').addEventListener('click',e=>{if(e.target===$('pmodal'))closeOv('pmodal');});
 
@@ -1453,10 +1684,15 @@ if('IntersectionObserver' in window){
 /* ── Carga diferida del diseñador 3D (la página abre rápido en el celular) ── */
 let builderLoading=false;
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+/* Reglas del diseñador (tamaños, precios, límites…) guardadas en tu Supabase */
+const configReady=(async()=>{
+  try{if(!sb)return false;const {data,error}=await sb.rpc('get_designer_config');if(error)throw error;return applyConfig(data);}
+  catch(e){console.warn('Configuración del diseñador no disponible:',e.message||e);return false;}
+})();
 function loadBuilder(){
   if(builderLoading)return;builderLoading=true;
-  loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js')
-    .then(()=>loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js'))
+  Promise.all([configReady,loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js')
+    .then(()=>loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js'))])
     .then(()=>{if(window.initBuilder)window.initBuilder();})
     .catch(()=>{$('stMsg').innerHTML='<div>No pudimos cargar el diseñador. Revisa tu conexión y recarga la página.</div>';});
 }
@@ -1467,21 +1703,42 @@ document.querySelectorAll('a[href="#personaliza"]').forEach(a=>a.addEventListene
 let lastLoad=0;
 // Si el cliente vuelve a la pestaña después de un rato, se actualizan precios y stock
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-lastLoad>120000)loadData();});
+// Diseño compartido por link (…#d=código)
+(function(){const code=designFromLink(location.hash);if(!code)return;window.__fhShared=code;history.replaceState(null,'',location.pathname+location.search+'#personaliza');
+  loadBuilder();setTimeout(()=>{const s=$('personaliza');if(s&&s.scrollIntoView)s.scrollIntoView({behavior:'auto'});},300);})();
+window.addEventListener('hashchange',()=>{const code=designFromLink(location.hash);if(!code)return;history.replaceState(null,'',location.pathname+location.search+'#personaliza');
+  if(window.FHBuilder)window.FHBuilder.shared(code);else{window.__fhShared=code;loadBuilder();}});
+// Enlace discreto al sitio mayorista (lo activas desde tu sistema → Mayoristas)
+if(sb)sb.rpc('get_wholesale_showcase').then(({data})=>{if(data&&data.settings&&data.settings.enlaceTienda)$('wsLink').classList.remove('hidden');}).catch(()=>{});
 applyBiz();saveCart();loadData();
 
 /* =====================================================================
    DISEÑADOR · interfaz por pasos
    ===================================================================== */
-let state=clone(PRESETS[4].cfg);state.flowers.forEach(f=>f.id=uid());
+let state=null;
 let editingId=null,step='envase',addForm={type:'rosa',color:'Rojo',tier:'M',open:0.55,qty:1};
 const stageEl=$('stage');
 
-/* ideas para empezar (no necesitan 3D) */
-(function(){const el=$('starters');PRESETS.forEach(p=>{const b=document.createElement('button');b.type='button';b.className='pill';b.innerHTML=`${esc(p.name)} <small>${fmt(priceOf(p.cfg))}</small>`;
-  b.onclick=()=>{if(window.FHBuilder)window.FHBuilder.load(p.cfg);else{state=clone(p.cfg);state.flowers.forEach(f=>f.id=uid());}};el.appendChild(b);});})();
+/* ideas para empezar: las que configuras en tu sistema (con foto real), o las de base */
+function starterList(){
+  const list=B.sugeridos.map(x=>{const c=decodeDesign(x.d);return c?{name:x.name||'Diseño',cfg:c,foto:x.foto||''}:null;}).filter(Boolean);
+  return (list.length?list:PRESETS.map(p=>({name:p.name,cfg:clone(p.cfg),foto:''}))).map(x=>{sanitize(x.cfg);return x;}).filter(x=>x.cfg.flowers.length&&capacity(x.cfg).ok);
+}
+function renderStarters(){
+  const el=$('starters');el.innerHTML='';
+  starterList().forEach(p=>{const b=document.createElement('button');b.type='button';b.className='pill'+(p.foto?' pill-photo':'');
+    b.innerHTML=(p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy">`:'')+`<span>${esc(p.name)} <small>${fmt(priceOf(p.cfg))}</small></span>`;
+    b.onclick=()=>{if(window.FHBuilder)window.FHBuilder.load(p.cfg);};el.appendChild(b);});
+}
 
 window.initBuilder=function(){
+  if(!B.ready){$('stMsg').innerHTML='<div>El diseñador no está disponible en este momento.<br><small style="font-family:Jost,sans-serif;font-size:14px">Escríbenos por WhatsApp y armamos tu pedido juntos.</small></div>';return;}
+  renderStarters();
+  const st0=starterList();state=clone((st0[4]||st0[0]||{cfg:mk({},[])}).cfg);state.flowers.forEach(f=>f.id=uid());sanitize(state);
+  if(!B.on['f.'+addForm.type])addForm.type=Object.keys(TYPES).find(t=>B.on['f.'+t])||'rosa';
+  if(!FLOWER_COLORS[addForm.color])addForm.color=Object.keys(FLOWER_COLORS)[0];
   const E=makeEngine(),view=$('view');
+  let lastKey='',tw=null;
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance',preserveDrawingBuffer:true});
   const mobile=window.matchMedia('(max-width:760px)').matches;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,mobile?1.75:2));
@@ -1503,7 +1760,7 @@ window.initBuilder=function(){
   let visible=true;if('IntersectionObserver' in window)new IntersectionObserver(es=>{visible=es[0].isIntersecting;},{rootMargin:'100px'}).observe(stageEl);
   function resize(){const w=view.clientWidth,h=view.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
   (window.ResizeObserver?new ResizeObserver(resize).observe(view):window.addEventListener('resize',resize));resize();
-  (function loop(){requestAnimationFrame(loop);if(!visible)return;controls.update();renderer.render(scene,camera);})();
+  (function loop(){requestAnimationFrame(loop);if(!visible)return;stepTween();controls.update();renderer.render(scene,camera);})();
 
   function applyBg(){stageEl.classList.toggle('light',!dark);$('bgBtn').setAttribute('aria-pressed',String(!dark));$('bgBtn').textContent=dark?'◐ Fondo claro':'◐ Fondo oscuro';
     ground.material.opacity=dark?0.55:0.28;pool.visible=dark;rim.intensity=dark?0.9:0.45;hemi.intensity=dark?0.45:0.6;refreshDims();}
@@ -1514,10 +1771,25 @@ window.initBuilder=function(){
     product.traverse(o=>{if(o.isMesh){const tr=o.material&&o.material.transparent&&!o.material.alphaTest;o.castShadow=!tr&&!o.userData.noShadow;o.receiveShadow=!tr;}});scene.add(product);
     const b=new THREE.Box3().setFromObject(product),sz=b.getSize(new THREE.Vector3()),r=Math.max(sz.x,sz.y,sz.z)*0.9+0.2;
     Object.assign(key.shadow.camera,{left:-r,right:r,top:r,bottom:-r,near:0.1,far:12});key.shadow.camera.updateProjectionMatrix();
-    if(resetCam)E.fitCam(camera,controls,product,state.container==='cuadro',0,1.08);
+    frame(resetCam==='force');
     refreshDims();updateInfo();
   }
-  let rbT;const soon=()=>{clearTimeout(rbT);rbT=setTimeout(()=>rebuild(false),40);};
+  let rbT;const soon=()=>{clearTimeout(rbT);rbT=setTimeout(()=>rebuild(false),30);};
+  function frame(force){
+    const k=state.container+'.'+state.variant,b=new THREE.Box3().setFromObject(product);if(b.isEmpty())return;
+    const c=b.getCenter(new THREE.Vector3()),sz=b.getSize(new THREE.Vector3()),tan=Math.tan(camera.fov*Math.PI/360),wide=Math.max(sz.x,sz.z);
+    const need=(Math.max((sz.y/2)/tan,(wide/2)/tan/camera.aspect)*1.35+wide/2)*1.08,cur=camera.position.distanceTo(controls.target);
+    const same=k===lastKey&&!force&&tw!==false;lastKey=k;
+    let dir=same?camera.position.clone().sub(controls.target).normalize():new THREE.Vector3(0,state.container==='cuadro'?0.12:0.5,1).normalize();
+    // mismo envase: solo se aleja si hace falta, así un tamaño más chico se VE más chico
+    const d=same?Math.max(need,Math.min(cur,need*2.4)):need;
+    const toT=same?new THREE.Vector3(c.x,Math.min(c.y,controls.target.y+(c.y-controls.target.y)),c.z):c;
+    if(same&&Math.abs(d-cur)<1e-3&&toT.distanceTo(controls.target)<1e-3)return;
+    tw={t0:performance.now(),dur:tw===null?0:(reduced?0:450),fromT:controls.target.clone(),fromP:camera.position.clone(),toT:toT.clone(),toP:toT.clone().addScaledVector(dir,d)};
+    controls.minDistance=need*0.3;controls.maxDistance=Math.max(need*2.6,d*1.2);
+  }
+  function stepTween(){if(!tw||tw===false)return;const k=tw.dur?Math.min(1,(performance.now()-tw.t0)/tw.dur):1,e=1-Math.pow(1-k,3);
+    controls.target.lerpVectors(tw.fromT,tw.toT,e);camera.position.lerpVectors(tw.fromP,tw.toP,e);if(k>=1)tw=0;}
   let thumbR=null,tScene=null,tCam=null;
   function thumbnail(){try{if(!thumbR){thumbR=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});thumbR.outputEncoding=THREE.sRGBEncoding;thumbR.setSize(300,300,false);
       tScene=new THREE.Scene();tScene.environment=E.makeEnv(thumbR);tScene.add(new THREE.HemisphereLight(0xfff4ee,0x2a1a14,0.6));const k=new THREE.DirectionalLight(0xffffff,1);k.position.set(2,4,3);tScene.add(k);const rl=new THREE.DirectionalLight(0xffe2d6,0.8);rl.position.set(-3,2.5,-3);tScene.add(rl);tCam=new THREE.PerspectiveCamera(32,1,0.02,60);}
@@ -1543,31 +1815,33 @@ window.initBuilder=function(){
 
   function renderEnvase(){
     const c=state.container,v=state.variant,vd=vdef(state),ft=feats(c,v);
-    chips($('contChips'),Object.entries(CONTAINERS).map(([k,x])=>[k,x.label]),c,k=>{state.container=k;state.variant=Object.keys(CONTAINERS[k].variants)[0];changed(true);});
-    const vars=Object.entries(CONTAINERS[c].variants);chips($('varChips'),vars.map(([k,x])=>[k,x.label]),v,k=>{state.variant=k;changed(true);});hide('varChips',vars.length<2);
+    chips($('contChips'),Object.entries(CONTAINERS).filter(([k])=>containerOn(k)).map(([k,x])=>[k,x.label]),c,k=>{state.container=k;state.variant=Object.keys(CONTAINERS[k].variants).find(v=>CONTAINERS[k].variants[v].on);sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');});
+    const vars=Object.entries(CONTAINERS[c].variants).filter(([,x])=>x.on);chips($('varChips'),vars.map(([k,x])=>[k,x.label]),v,k=>{state.variant=k;sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');});hide('varChips',vars.length<2);
     const sz=sizeOf(state);hide('sizeWrap',!vd.sizes);
-    hide('formaWrap',c!=='ramo');if(c==='ramo')chips($('formaChips'),FORMAS.map((f,i)=>[i,f[0],f[1]]),state.forma??1,i=>{state.forma=i;renderEnvase();updateInfo();rebuild(true);});
-    if(vd.sizes){chips($('sizeChips'),vd.sizes.map(s=>[s.id,SIZE_NAMES[s.id],(s.dp?`${s.d}×${s.dp} cm`:`${s.d} cm`)+' · '+fmt(s.p)]),sz.id,id=>{state.sizes[c+'.'+v]=id;changed(true);});}
+    hide('formaWrap',c!=='ramo'||B.formasOn.filter(Boolean).length<2);if(c==='ramo')chips($('formaChips'),FORMAS.map((f,i)=>[i,f[0],f[1]]).filter(x=>B.formasOn[x[0]]),state.forma??1,i=>{state.forma=i;renderEnvase();updateInfo();rebuild(true);});
+    if(vd.sizes){chips($('sizeChips'),vd.sizes.map(s=>{const nm=sizeName(s),dm=s.dp?`${s.d}×${s.dp} cm`:`${s.d} cm`;return [s.id,nm,(/cm/.test(nm)?'':dm+' · ')+fmt(s.p)];}),sz.id,id=>{state.sizes[c+'.'+v]=id;changed(true);});}
     const cap=capacity(state),m=sz&&mouth(state),ex=state.flowers[0]||{type:'rosa',tier:'M'};
+    if(vd.sizes&&AUTO_SIZE(state))$('sizeChips').insertAdjacentHTML('beforeend','<div class="hintline" style="width:100%">✨ Se ajusta solo a la cantidad de flores que elijas.</div>');
     let info=dimsText(state)?`<b>${esc(dimsText(state))}</b><br>`:'';
-    if(cap.mode==='area'){const fits=t=>{let n=Math.floor(cap.cap/(Math.PI*(B.flores[t].M.cm/2)**2)+1e-6);if(cap.maxN)n=Math.min(n,cap.maxN);return n;};
-      info+=`Caben aprox. ${fits('rosa')} rosas de ${B.flores.rosa.M.cm} cm o ${fits('girasol')} girasol${fits('girasol')!==1?'es':''} de ${B.flores.girasol.M.cm} cm.`;}
+    if(cap.mode==='area'){const ref=Object.keys(TYPES).filter(t=>B.on['f.'+t]).slice(0,2).map(t=>{const T=tierOf({type:t,tier:'M'});let n=Math.floor(cap.cap/(Math.PI*(T.cm/2)**2)+1e-6);if(cap.maxN)n=Math.min(n,cap.maxN);return `${n} ${n!==1?TYPES[t].plural:TYPES[t].label.toLowerCase()} de ${T.cm} cm`;});
+      info+=`Caben aprox. ${ref.join(' o ')}.`;}
     else info+=vd.sizes?`Lleva hasta ${cap.max} flores con tallo.`:`Ramo de hasta ${cap.max} flores. El tamaño final depende de las flores que elijas.`;
+    if(vd.foto)info+=`<button type="button" class="real-thumb" onclick="FHBuilder.photo()"><img src="${esc(vd.foto)}" alt=""><span>Ver foto real de este envase</span></button>`;
     $('sizeInfo').innerHTML=info;
     hide('ccolorWrap',!ft.color);if(ft.color){const cc=ccolorOf(state);$('ccolorTitle').textContent=vd.colorLabel||'Color';$('ccolorName').textContent=cc.name;sws($('ccolorSw'),paletteFor(c,v),cc.name,n=>{state.ccolor[c+'.'+v]=n;renderEnvase();soon();});}
   }
   function renderFlores(){
     const f=addForm,t=TYPES[f.type],cap=capacity(state);
-    chips($('aType'),Object.entries(TYPES).map(([k,x])=>[k,x.label]),f.type,k=>{f.type=k;if(!TYPES[k].open)f.open=0;else if(!TYPES[k].open.some(o=>o[1]===f.open))f.open=TYPES[k].open[1]?TYPES[k].open[1][1]:TYPES[k].open[0][1];if(k==='girasol')f.color='Amarillo';renderFlores();});
+    chips($('aType'),Object.entries(TYPES).filter(([k])=>B.on['f.'+k]).map(([k,x])=>[k,x.label]),f.type,k=>{f.type=k;if(!B.flores[k][f.tier])f.tier=B.flores[k].M?'M':Object.keys(B.flores[k])[0];if(!TYPES[k].open)f.open=0;else if(!TYPES[k].open.some(o=>o[1]===f.open))f.open=TYPES[k].open[1]?TYPES[k].open[1][1]:TYPES[k].open[0][1];if(k==='girasol')f.color='Amarillo';renderFlores();});
     hide('aColorWrap',f.type==='girasol');$('aColorName').textContent=f.color;sws($('aColor'),FLOWER_COLORS,f.color,n=>{f.color=n;renderFlores();});
     chips($('aSize'),Object.entries(B.flores[f.type]).map(([k,x])=>[k,`${x.cm} cm`,fmt(x.p)]),f.tier,k=>{f.tier=k;renderFlores();});
     hide('aOpenWrap',!t.open);if(t.open)chips($('aOpen'),t.open.map(([l,v])=>[v,l]),f.open,v=>{f.open=v;renderFlores();});
-    const probe=newFlower(f.type,f.color,{tier:f.tier,open:f.open}),room=cap.fits(probe);
+    const probe=newFlower(f.type,f.color,{tier:f.tier,open:f.open}),room=roomWithUpgrade(state,probe);
     if(f.qty>Math.max(1,room))f.qty=Math.max(1,room);
     $('aQty').textContent=f.qty;$('aMinus').disabled=f.qty<=1;$('aPlus').disabled=f.qty>=room;
-    $('aAdd').disabled=room<1;$('aAdd').textContent=room<1?'Ya no caben más':`Agregar ${f.qty} · ${fmt(B.flores[f.type][f.tier].p*f.qty)}`;
+    $('aAdd').disabled=room<1;$('aAdd').textContent=room<1?'Ya no caben más':`Agregar ${f.qty} · ${fmt(tierOf(f).p*f.qty)}`;
     const big=cap.mode==='area'&&fcm(probe)>mouth(state).min;
-    $('aHint').textContent=big?`Esta flor de ${fcm(probe)} cm no entra en este envase. Elige un tamaño menor o un envase más grande.`:room<1?'El envase está lleno. Elige uno más grande en el paso 1 o quita flores.':`Caben ${room} más de este tamaño.`;
+    $('aHint').textContent=big?`Esta flor de ${fcm(probe)} cm no entra en este envase. Elige un tamaño menor o un envase más grande.`:room<1?'El envase más grande ya está lleno. Quita flores o elige otro envase.':(cap.fits(probe)<f.qty&&!AUTO_SIZE(state)?`Si agregas más, la caja se agranda sola. Caben hasta ${room} más.`:`Caben ${room} más de este tamaño.`);
     // capacidad
     const pct=Math.min(1.5,cap.pct||0),el=$('cap');el.classList.toggle('warn',pct>0.85&&cap.ok);el.classList.toggle('over',!cap.ok);
     $('capBar').style.width=Math.min(100,pct*100)+'%';
@@ -1578,35 +1852,42 @@ window.initBuilder=function(){
     if(!gs.length)ul.innerHTML='<li class="hintline">Aún no agregas flores. Elige una arriba y toca “Agregar”.</li>';
     gs.forEach(g=>{const li=document.createElement('li');li.className='grp';const fl=g.f,T=TYPES[fl.type];
       li.innerHTML=`<span class="dot" style="background:${fl.type==='girasol'?'radial-gradient(circle,#4a2e17 36%,#f4c20d 40%)':FLOWER_COLORS[fl.color]}"></span>
-        <span class="grp-t">${T.label}${fl.type==='girasol'?'':' '+esc(fl.color.toLowerCase())}<small>${fcm(fl)} cm${T.open?' · '+openName(fl):''} · ${fmt(B.flores[fl.type][fl.tier].p)} c/u</small></span>
+        <span class="grp-t">${T.label}${fl.type==='girasol'?'':' '+esc(fl.color.toLowerCase())}<small>${fcm(fl)} cm${T.open?' · '+openName(fl):''} · ${fmt(tierOf(fl).p)} c/u</small></span>
         <span class="stepper"><button type="button" data-m aria-label="Quitar una">−</button><span>${g.n}</span><button type="button" data-p aria-label="Agregar una">+</button></span><button type="button" class="x" data-x aria-label="Quitar todas">×</button>`;
-      li.querySelector('[data-m]').onclick=()=>{const id=g.ids[g.ids.length-1];state.flowers=state.flowers.filter(x=>x.id!==id);changed();};
-      const plus=li.querySelector('[data-p]');plus.disabled=cap.fits(fl)<1;plus.onclick=()=>{state.flowers.push(Object.assign({},fl,{id:uid()}));changed();};
-      li.querySelector('[data-x]').onclick=()=>{state.flowers=state.flowers.filter(x=>!g.ids.includes(x.id));changed();};ul.appendChild(li);});
+      li.querySelector('[data-m]').onclick=()=>{const id=g.ids[g.ids.length-1];state.flowers=state.flowers.filter(x=>x.id!==id);flowersChanged();};
+      const plus=li.querySelector('[data-p]');plus.disabled=roomWithUpgrade(state,fl)<1;plus.onclick=()=>{state.flowers.push(Object.assign({},fl,{id:uid()}));flowersChanged();};
+      li.querySelector('[data-x]').onclick=()=>{state.flowers=state.flowers.filter(x=>!g.ids.includes(x.id));flowersChanged();};ul.appendChild(li);});
     hide('mixBtn',gs.length<2);hide('clearBtn',!gs.length);
   }
   $('aMinus').onclick=()=>{addForm.qty=Math.max(1,addForm.qty-1);renderFlores();};
   $('aPlus').onclick=()=>{addForm.qty++;renderFlores();};
-  $('aAdd').onclick=()=>{const f=addForm;for(let i=0;i<f.qty;i++)state.flowers.push(newFlower(f.type,f.color,{tier:f.tier,open:f.type==='girasol'?0:f.open}));f.qty=1;changed(true);toast('Flores agregadas');};
+  $('aAdd').onclick=()=>{const f=addForm;for(let i=0;i<f.qty;i++)state.flowers.push(newFlower(f.type,f.color,{tier:f.tier,open:f.type==='girasol'?0:f.open}));f.qty=1;flowersChanged();};
   $('mixBtn').onclick=()=>{state.mix=(state.mix||0)+1;soon();};
-  $('clearBtn').onclick=()=>{state.flowers=[];changed(true);};
+  $('clearBtn').onclick=()=>{state.flowers=[];flowersChanged();};
   function renderPapel(){
     const ft=feats(state.container,state.variant);hide('paperChips',!ft.paper);hide('paperColorWrap',!ft.paper);document.querySelector('[data-step="papel"] .lbl').classList.toggle('hidden',!ft.paper);
-    if(ft.paper){chips($('paperChips'),Object.entries(PAPER_TYPES).map(([k,l])=>[k,l,B.papel[k]?'+'+fmt(B.papel[k]):'incluido']),state.paper.type,k=>{state.paper.type=k;renderPapel();soon();updateInfo();});
-      const col=state.paper.type==='liso'||state.paper.type==='corazones';hide('paperColorWrap',!col);$('paperColorTitle').textContent=state.paper.type==='corazones'?'Color de los corazones':'Color del papel';$('paperColorName').textContent=state.paper.color;
-      sws($('paperSw'),PAPER_COLORS,state.paper.color,n=>{state.paper.color=n;renderPapel();soon();});}
+    if(ft.paper){const pc=$('paperChips');pc.innerHTML='';pc.className='paper-grid';
+      Object.entries(PAPER_TYPES).filter(([k])=>k in B.papel).forEach(([k,l])=>{const b=document.createElement('button');b.type='button';b.className='paper-chip';b.setAttribute('aria-pressed',String(state.paper.type===k));
+        const hx=PAPER_COLORS[state.paper.color]||'#f7f5f2',sw=paperSwatch(k,PAPER_COLORED.has(k)?hx:'#ffffff',PAPER_COLORS[state.paper.inner]);
+        b.innerHTML=`<span class="pimgs" style="background-image:url('${sw}')"></span><span class="pl">${esc(l)}</span><small>${B.papel[k]?'+'+fmt(B.papel[k]):'incluido'}</small>`;
+        b.onclick=()=>{state.paper.type=k;renderPapel();rebuild(false);};pc.appendChild(b);});
+      const col=PAPER_COLORED.has(state.paper.type);hide('paperColorWrap',!col);$('paperColorTitle').textContent=state.paper.type==='corazones'?'Color de los corazones':state.paper.type==='puntos'?'Color de fondo':'Color del papel';$('paperColorName').textContent=state.paper.color;
+      sws($('paperSw'),PAPER_COLORS,state.paper.color,n=>{state.paper.color=n;renderPapel();rebuild(false);});
+      hide('paperInnerWrap',state.paper.type!=='doblecara');if(state.paper.type==='doblecara'){$('paperInnerName').textContent=state.paper.inner||'Blanco';sws($('paperInnerSw'),PAPER_COLORS,state.paper.inner||'Blanco',n=>{state.paper.inner=n;renderPapel();rebuild(false);});}}
     hide('fieltroWrap',!ft.fieltro);$('fieltroName').textContent=state.fieltro||'Sin fieltro';sws($('fieltroSw'),FIELTRO,state.fieltro,n=>{state.fieltro=n;renderPapel();soon();},'Sin fieltro');
-    hide('mallaWrap',!ft.malla);togs($('mallaTog'),[[state.malla,'Malla blanca','+'+fmt(B.extras.malla),()=>{state.malla=!state.malla;renderPapel();soon();updateInfo();}]]);
+    hide('mallaWrap',!ft.malla||!('malla' in B.extras));togs($('mallaTog'),[[state.malla,'Malla blanca','+'+fmt(B.extras.malla||0),()=>{state.malla=!state.malla;renderPapel();soon();updateInfo();}]]);
   }
   function renderDetalles(){
     const ft=feats(state.container,state.variant);
-    chips($('lazoChips'),Object.entries(LAZOS).map(([k,l])=>[k,l]),state.lazo.style,k=>{state.lazo.style=k;renderDetalles();soon();updateInfo();});
+    chips($('lazoChips'),Object.entries(LAZOS).filter(([k])=>k==='ninguno'||'lazo' in B.extras).map(([k,l])=>[k,l]),state.lazo.style,k=>{state.lazo.style=k;renderDetalles();soon();updateInfo();});
     hide('lazoSw',state.lazo.style==='ninguno');sws($('lazoSw'),RIBBON,state.lazo.color,n=>{state.lazo.color=n;renderDetalles();soon();});
     hide('cintaWrap',!ft.cinta);$('cintaName').textContent=state.cinta||'Sin cinta';sws($('cintaSw'),RIBBON,state.cinta,n=>{state.cinta=n;renderDetalles();soon();},'Sin cinta');
     const P=k=>'+'+fmt(B.extras[k]),tg=(k,fn)=>()=>{fn();renderDetalles();soon();updateInfo();};
-    const items=[[state.gyps,'Paniculata seca',P('paniculata'),tg('g',()=>state.gyps=!state.gyps)],[state.corona,'Corona',P('corona'),tg('c',()=>state.corona=state.corona?null:'Dorada')],
-      [state.mariposas,'Mariposas doradas',P('mariposas'),tg('m',()=>state.mariposas=!state.mariposas)],[state.luces,'Luces LED',P('luces'),tg('l',()=>state.luces=!state.luces)]];
-    if(ft.mensaje)items.push([state.mensaje,'Mensaje personalizado',P('mensaje'),tg('t',()=>state.mensaje=!state.mensaje)]);
+    const all=[['paniculata',state.gyps,'Paniculata seca',()=>state.gyps=!state.gyps],['corona',state.corona,'Corona',()=>state.corona=state.corona?null:'Dorada'],
+      ['mariposas',state.mariposas,'Mariposas doradas',()=>state.mariposas=!state.mariposas],['luces',state.luces,'Luces LED',()=>state.luces=!state.luces]];
+    if(ft.mensaje)all.push(['mensaje',state.mensaje,'Mensaje personalizado',()=>state.mensaje=!state.mensaje]);
+    const items=all.filter(x=>x[0] in B.extras).map(([k,on,l,fn])=>[on,l,P(k),tg(k,fn)]);
+    document.querySelector('[data-step="detalles"] #extras').previousElementSibling.classList.toggle('hidden',!items.length);
     togs($('extras'),items);
     hide('coronaWrap',!state.corona);if(state.corona)chips($('coronaChips'),Object.keys(CROWN).map(k=>[k,k]),state.corona,k=>{state.corona=k;renderDetalles();soon();});
     hide('msgWrap',!(ft.mensaje&&state.mensaje));$('msgTxt').value=state.texto;$('msgNote').textContent=state.variant==='cartera'?'Va impreso en dorado en el frente de la caja.':'Va grabado en un disco de acrílico espejo de 8 cm.';
@@ -1616,11 +1897,28 @@ window.initBuilder=function(){
     const p=priceOf(state),cap=capacity(state);$('stPrice').textContent=fmt(p);$('pfPrice').textContent=fmt(p);
     $('stTitle').textContent=titleOf(state);$('stDims').textContent=[dimsText(state),state.flowers.length?Object.entries(state.flowers.reduce((a,f)=>(a[f.type]=(a[f.type]||0)+1,a),{})).map(([t,n])=>`${n} ${n>1?TYPES[t].plural:TYPES[t].label.toLowerCase()}`).join(' + '):''].filter(Boolean).join(' · ');
     const warn=!cap.ok?(cap.big?'Una flor es más grande que la boca del envase':'No caben todas las flores en este tamaño'):'';$('stWarn').textContent=warn;hide('stWarn',!warn);
+    hide('realBtn',!vdef(state).foto);
     $('stMsg').classList.toggle('hidden',state.flowers.length>0);if(!state.flowers.length)$('stMsg').innerHTML='<div>Agrega tus flores en el paso 2</div>';
     const b=$('addCart');b.disabled=!state.flowers.length||!cap.ok;b.textContent=!state.flowers.length?'Agrega flores':!cap.ok?'Ajusta el tamaño':editingId?'Guardar cambios':'Agregar al carrito';
   }
   function renderAll(){renderTabs();renderEnvase();renderFlores();renderPapel();renderDetalles();updateInfo();}
-  function changed(resetCam){renderAll();rebuild(!!resetCam);}
+  function changed(resetCam){renderAll();rebuild(resetCam);}
+  // Cuando cambian las flores, el envase se ajusta solo (vasos siempre; cajas si ya no caben)
+  function flowersChanged(){
+    const before=sizeOf(state),pick=autoSize(state);
+    if(pick&&before&&pick.id!==before.id){const n=state.flowers.length;toast(AUTO_SIZE(state)?`El envase se ajustó a ${sizeName(pick)} para ${n} flor${n>1?'es':''}`:`Cambiamos a ${sizeName(pick)} para que entren tus flores`);}
+    changed(true);
+  }
+  function shareUrl(){return location.href.split('#')[0]+'#d='+encodeDesign(state);}
+  $('shareBtn').onclick=async()=>{
+    if(!state.flowers.length){toast('Agrega flores antes de compartir');return;}
+    const url=shareUrl(),text=`Mira el ramo que te armé en Flowers Handmade 🌸 (${fmt(priceOf(state))})`;
+    if(navigator.share){try{await navigator.share({title:'Mi diseño · Flowers Handmade',text,url});return;}catch(e){if(e&&e.name==='AbortError')return;}}
+    try{await navigator.clipboard.writeText(url);toast('🔗 Link copiado. Pégalo en WhatsApp o donde quieras');}
+    catch(e){window.open('https://wa.me/?text='+encodeURIComponent(text+'\n'+url),'_blank','noopener');}
+  };
+  function photo(){const v=vdef(state);if(!v.foto)return;$('realImg').src=v.foto;$('realCap').textContent=titleOf(state)+' · foto real de referencia';openOv('realPhoto');}
+  $('realBtn').onclick=photo;
   $('dimsBtn').onclick=()=>{showDims=!showDims;$('dimsBtn').setAttribute('aria-pressed',String(showDims));refreshDims();};
   $('bgBtn').onclick=()=>{dark=!dark;applyBg();};
   /* Foto HD: render grande con sombras finas, fondo de estudio y marca */
@@ -1660,11 +1958,13 @@ window.initBuilder=function(){
     if(editingId){window.FHCart.replace(editingId,item);editingId=null;toast('Cambios guardados');}else{window.FHCart.add(item);toast('Diseño agregado al carrito 🌸');}
     updateInfo();window.FHCart.open();
   };
-  window.FHBuilder={load(cfg,editId){state=clone(cfg);state.flowers.forEach(f=>{if(!f.id)f.id=uid();});editingId=editId||null;step='flores';changed(true);controls.autoRotate=!reduced;
+  window.FHBuilder={load(cfg,editId){state=sanitize(clone(cfg));state.flowers.forEach(f=>{if(!f.id)f.id=uid();});editingId=editId||null;step='flores';changed('force');controls.autoRotate=!reduced;
       const s=$('personaliza');if(s.scrollIntoView)s.scrollIntoView({behavior:reduced?'auto':'smooth'});},
-    edit(it){this.load(it.cfg,it.id);},get state(){return state;},E};
+    edit(it){this.load(it.cfg,it.id);},photo,
+    shared(code){const c=decodeDesign(code);if(!c){toast('Este link de diseño no es válido');return;}sanitize(c);this.load(c);step='flores';renderAll();setTimeout(()=>toast('💝 Te compartieron este diseño. Puedes cambiarlo o pedirlo tal cual'),600);},get state(){return state;},E};
   if(document.fonts&&document.fonts.load)document.fonts.load('80px "Great Vibes"').then(()=>{Object.keys(E.T).forEach(k=>{if(k.startsWith('msg')||k.startsWith('decal'))delete E.T[k];});if(state.mensaje)rebuild(false);});
   applyBg();renderAll();rebuild(true);
+  if(window.__fhShared){const c=window.__fhShared;window.__fhShared=null;window.FHBuilder.shared(c);}
 };
 
 })();
