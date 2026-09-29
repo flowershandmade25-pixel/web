@@ -161,7 +161,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--hh);backgrou
 .stage.light .st-msg{color:var(--deep)}
 .spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spin .9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.st-warn{position:absolute;left:50%;top:84px;transform:translateX(-50%);background:#b3372a;color:#fff;font-size:13px;padding:8px 16px;border-radius:50px;white-space:nowrap;pointer-events:none;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.st-warn{position:absolute;left:50%;top:84px;transform:translateX(-50%);background:#b3372a;color:#fff;font-size:13px;padding:8px 16px;border-radius:50px;white-space:nowrap;pointer-events:auto;cursor:pointer;z-index:4;max-width:92%;overflow:hidden;text-overflow:ellipsis}
 
 .panel{display:flex;flex-direction:column;min-height:0;background:var(--cream);border-left:1px solid var(--line)}
 .tabs{display:flex;border-bottom:1px solid var(--line);background:#fff;flex:none}
@@ -346,6 +346,19 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
 .paper-chip .pl{font-size:12.5px;line-height:1.15;color:var(--text)}
 .paper-chip small{font-size:11px;color:var(--muted)}
 .paper-chip[aria-pressed="true"]{border-color:var(--bark);box-shadow:inset 0 0 0 1.5px var(--bark)}
+.b-launch{display:none}
+.st-close{display:none}
+html,body{overflow-x:clip}
+.nav a.nav-ws{border:1.5px solid rgba(61,33,24,.2);border-radius:50px;padding:7px 14px}
+.ws-band-sec{padding:0 0 8px}
+.ws-band{display:flex;align-items:center;gap:16px;text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px 22px;transition:box-shadow .2s,transform .2s}
+.ws-band:hover{box-shadow:0 12px 30px rgba(61,33,24,.1);transform:translateY(-2px)}
+.ws-band-ic{font-size:30px;width:56px;height:56px;border-radius:16px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;flex:none}
+.ws-band-t{flex:1;display:flex;flex-direction:column;gap:3px}
+.ws-band-t b{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--bark);line-height:1.15}
+.ws-band-t span{font-size:14px;color:var(--deep)}
+.ws-band-go{flex:none;background:#6b3fa0;color:#fff;border-radius:50px;padding:12px 20px;font-size:13.5px;font-weight:500;white-space:nowrap}
+@media (max-width:760px){.ws-band{flex-direction:column;text-align:center;padding:18px}.ws-band-go{width:100%}}
 /* ═════ tablet ═════ */
 @media (max-width:1080px){
   .nav{display:none}
@@ -378,17 +391,36 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
   .pstock{font-size:10.5px}
   .padd{min-height:40px;font-size:12.5px}
   .pwa{width:40px;height:40px}
-  .builder{grid-template-columns:1fr;height:auto;min-height:0;border-radius:20px;overflow:visible}
-  .stage{position:sticky;top:var(--hh);z-index:15;height:46vh;height:46svh;min-height:280px;border-radius:20px 20px 0 0;overflow:hidden}
+  .b-launch{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;background:linear-gradient(160deg,#4a2c22,#2a1811);color:#fff;border-radius:22px;padding:26px 20px 18px;margin-bottom:12px}
+  .b-launch-art{display:flex;gap:6px;font-size:40px;line-height:1;margin-bottom:4px}
+  .b-launch h3{font-family:'Cormorant Garamond',serif;font-size:25px;font-weight:400;line-height:1.15}
+  .b-launch p{font-size:14px;color:rgba(255,255,255,.78);line-height:1.5;max-width:30ch}
+  .b-launch .btn{background:#fff;color:var(--bark);width:100%;min-height:52px;font-size:15px;margin-top:4px}
+  .b-launch-sub{font-size:12.5px;color:rgba(255,255,255,.65);margin-top:6px}
+  .b-starters{flex-wrap:wrap;overflow:visible;justify-content:center;margin-bottom:0}
+  .builder{display:none}
+  body.fs-open{overflow:hidden}
+  body.fs-open .mbar,body.fs-open .float-wa{display:none}
+  .builder.fs{display:flex;flex-direction:column;position:fixed;inset:0;z-index:400;height:100vh;height:100dvh;border-radius:0;border:0;box-shadow:none;overflow:hidden;background:var(--cream);grid-template-columns:none}
+  .builder.fs .stage{flex:0 0 auto;height:42vh;height:42dvh;min-height:220px;position:relative;top:auto;border-radius:0;padding-top:env(safe-area-inset-top,0px)}
+  .builder.fs .st-close{display:flex;position:absolute;left:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:3;width:42px;height:42px;border-radius:50%;border:none;background:rgba(0,0,0,.35);color:#fff;font-size:18px;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .builder.fs .stage.light .st-close{background:rgba(255,255,255,.85);color:var(--bark)}
+  .builder.fs .st-top{left:62px;top:calc(12px + env(safe-area-inset-top,0px))}
+  .builder.fs .panel{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;border-radius:0;border:0}
+  .builder.fs .tabs{position:static;top:auto;flex:none}
+  .builder.fs .tab{min-height:50px;padding:8px 2px}
+  .builder.fs .pscroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:14px 14px 18px}
+  .builder.fs .pfoot{position:static;flex:none;border-radius:0}
+  .builder.fs .nextrow{position:sticky;bottom:-18px;background:linear-gradient(transparent,var(--cream) 30%);padding:14px 0 4px;margin-top:14px}
+  .builder.fs .stepper button{width:44px;height:46px}
+  .builder.fs .grp .stepper button{width:40px;height:40px}
   .st-top{left:14px;right:14px;top:12px}
   .st-title{font-size:21px}.st-price{font-size:23px}.st-dims{font-size:12px}
   .st-hint{display:none}
   .st-tools{left:10px;bottom:10px}
   .st-warn{top:auto;bottom:58px;font-size:12px}
   .panel{border-left:0;border-radius:0 0 20px 20px}
-  .tabs{position:sticky;top:calc(var(--hh) + max(46vh, 280px));top:calc(var(--hh) + max(46svh, 280px));z-index:14}
-  .pscroll{overflow:visible;padding:16px 14px 18px}
-  .pfoot{position:sticky;bottom:0;z-index:14;border-radius:0 0 20px 20px}
+
   .togs{grid-template-columns:1fr}
   .steps,.feats{grid-template-columns:1fr}
   .ft{grid-template-columns:1fr}
@@ -409,6 +441,7 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
   .co-side{padding:22px 16px calc(24px + env(safe-area-inset-bottom,0px))}
   .two{grid-template-columns:1fr}
   .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  body.fs-open .toast{bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:500}
 }
 @media (max-width:360px){.grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
@@ -427,6 +460,7 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
       <a href="#personaliza">Arma tu ramo</a>
       <a href="#como-comprar">Cómo comprar</a>
       <a href="#nosotros">Nosotros</a>
+      <a href="https://flowershandmade25-pixel.github.io/web/mayoristas/" data-ws class="nav-ws">Mayoristas</a>
     </nav>
     <div class="hdr-right">
       <a class="btn btn-wa hdr-wa" data-wa="Hola Flowers Handmade! 🌸 Quiero hacer un pedido" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</a>
@@ -440,6 +474,7 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
   <a href="#personaliza">Arma tu ramo en 3D</a>
   <a href="#como-comprar">Cómo comprar</a>
   <a href="#nosotros">Nosotros</a>
+  <a href="https://flowershandmade25-pixel.github.io/web/mayoristas/" data-ws>🏪 Venta por mayor (florerías)</a>
   <a href="#" data-wa="Hola Flowers Handmade! 🌸 Quiero hacer un pedido" target="_blank" rel="noopener">Pedir por WhatsApp</a>
 </div>
 
@@ -502,10 +537,18 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
       <h2 class="sec-title">Arma tu ramo <em>en 3D</em></h2>
       <p class="sec-sub">Elige el envase y su tamaño real, agrega tus flores y míralo antes de pedirlo. Lo tejemos a mano tal como lo diseñes.</p>
     </div>
+    <div class="b-launch" id="bLaunch">
+      <div class="b-launch-art" aria-hidden="true"><span>🌹</span><span>🌻</span><span>🌷</span></div>
+      <h3>Diseña tu regalo en pantalla completa</h3>
+      <p>Elige envase, flores y papel paso a paso. Lo ves en 3D antes de pedirlo.</p>
+      <button type="button" class="btn btn-dark" id="openDesigner">Abrir el diseñador</button>
+      <div class="b-launch-sub">o empieza desde una idea:</div>
+    </div>
     <div class="b-starters" id="starters" aria-label="Ideas para empezar"></div>
-    <div class="builder">
+    <div class="builder" id="builder" role="region" aria-label="Diseñador 3D">
       <div class="stage" id="stage">
         <div id="view"></div>
+        <button type="button" class="st-close" id="bClose" aria-label="Cerrar el diseñador">✕</button>
         <div class="st-top">
           <div><div class="st-title" id="stTitle">Diseñador 3D</div><div class="st-dims" id="stDims"></div></div>
           <div class="st-price" id="stPrice"></div>
@@ -607,6 +650,16 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
   </div>
 </section>
 
+<section class="sec ws-band-sec" data-ws>
+  <div class="wrap">
+    <a class="ws-band" href="https://flowershandmade25-pixel.github.io/web/mayoristas/">
+      <span class="ws-band-ic" aria-hidden="true">🏪</span>
+      <span class="ws-band-t"><b>¿Tienes una florería o emprendimiento?</b><span>Compra flores de cinta sueltas, cajas a medida y materiales por mayor.</span></span>
+      <span class="ws-band-go">Ir a la web mayorista →</span>
+    </a>
+  </div>
+</section>
+
 <section class="sec" id="contacto">
   <div class="wrap">
     <div class="banner">
@@ -625,7 +678,7 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
   <div class="wrap">
     <div class="ft">
       <div><div class="ft-brand">Flowers Handmade</div><p id="footerSlogan">Flores artesanales hechas con cinta de tela, papel y amor. Desde Loja para todo Ecuador.</p></div>
-      <div><h4>Tienda</h4><a href="#productos">Colección</a><a href="#personaliza">Arma tu ramo</a><a href="#como-comprar">Cómo comprar</a><a href="mayoristas/" id="wsLink" class="hidden">Venta por mayor para florerías</a></div>
+      <div><h4>Tienda</h4><a href="#productos">Colección</a><a href="#personaliza">Arma tu ramo</a><a href="#como-comprar">Cómo comprar</a><a href="https://flowershandmade25-pixel.github.io/web/mayoristas/" data-ws>Venta por mayor para florerías →</a></div>
       <div><h4>Contacto</h4><p>📍 <span id="footerAddr">Loja, Ecuador</span></p><a href="#" id="footerWa" data-wa="Hola Flowers Handmade! 🌸" target="_blank" rel="noopener">💬 WhatsApp</a><a href="#" id="footerIg" target="_blank" rel="noopener">📸 Instagram</a></div>
     </div>
     <div class="fb"><span>© <span id="year">2026</span> Flowers Handmade</span><span>Hecho con 🌸 en Loja, Ecuador</span></div>
@@ -929,13 +982,40 @@ const PRESETS=[
   {name:'Cuadro girasol',cfg:mk({container:'cuadro',variant:'marco',sizes:{'cuadro.marco':'M'},lazo:{style:'simple',color:'Yute'}},[['girasol','Amarillo',1,{tier:'L'}]])}
 ];
 
+/* Empaquetado de flores de distintos tamaños (sin THREE, se puede probar aparte).
+   rads: radios en orden de colocación · opts.inside(x,z): límite del envase · opts.hole: radio libre al centro */
+function packPositions(rads,opts){
+  opts=opts||{};const n=rads.length;if(!n)return [];
+  const rmin=Math.min(...rads),rmax=Math.max(...rads),area=rads.reduce((a,r)=>a+r*r,0),hole=opts.hole||0;
+  const L=Math.sqrt(area)*1.75+rmax*2+hole*2,step=Math.max(rmin*0.34,L/46),N=Math.ceil(L/step);
+  const cand=[];for(let j=-N;j<=N;j++){const z=j*step*0.866;for(let i=-N;i<=N;i++){const x=(i+(j&1?0.5:0))*step,d=Math.hypot(x,z);
+    if(d>L)continue;if(opts.inside&&!opts.inside(x,z))continue;cand.push([x,z,d+Math.atan2(z,x)*1e-6]);}}
+  cand.sort((a,b)=>a[2]-b[2]);
+  if(!cand.length)return rads.map(()=>[0,0]);
+  // rejilla para revisar solo las flores vecinas (mucho más rápido en celulares)
+  const cs=rmax*2,grid=new Map(),P=[],key=(x,z)=>Math.floor(x/cs)+','+Math.floor(z/cs);
+  const score=(x,z,r)=>{let m=hole?Math.hypot(x,z)/(r*0.6+hole):Infinity;const gx=Math.floor(x/cs),gz=Math.floor(z/cs);
+    for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const l=grid.get((gx+a)+','+(gz+b));if(!l)continue;for(const k of l){const q=P[k],v=Math.hypot(x-q[0],z-q[1])/(r+q[2]);if(v<m)m=v;}}return m;};
+  const TH=[0.92,0.84,0.76,0.68];
+  for(let i=0;i<n;i++){const r=rads[i],first=[null,null,null,null];let best=null,bv=-1,pick=null;
+    for(const c of cand){const v=score(c[0],c[1],r);if(v>=TH[0]){pick=c;break;}
+      for(let t=1;t<TH.length;t++)if(!first[t]&&v>=TH[t])first[t]=c;if(v>bv){bv=v;best=c;}}
+    if(!pick)pick=first[1]||first[2]||first[3]||best;
+    const idx=P.length;P.push([pick[0],pick[1],r]);const k=key(pick[0],pick[1]);if(!grid.has(k))grid.set(k,[]);grid.get(k).push(idx);}
+  // ramos: se centra el conjunto (el ajuste es mínimo al agregar una flor)
+  if(!opts.inside&&!hole&&n>1){const cx=P.reduce((a,p)=>a+p[0],0)/n,cz=P.reduce((a,p)=>a+p[1],0)/n;P.forEach(p=>{p[0]-=cx;p[1]-=cz;});}
+  return P.map(p=>[p[0],p[1]]);
+}
+
 /* ── Tamaño automático del envase según las flores ── */
 const AUTO_SIZE=c=>c.container==='vaso'||(c.container==='cupula'&&c.variant==='campana');
 function autoSize(cfg,mode){
   const V=vdef(cfg);if(!V.sizes||V.sizes.length<2)return null;const key=cfg.container+'.'+cfg.variant,cur=cfg.sizes[key],asc=V.sizes.slice().sort((a,b)=>a.d-b.d);
   const test=id=>{cfg.sizes[key]=id;return capacity(cfg).ok;};
   let pick=null;
+  const user=cfg.userSizes&&V.sizes.find(z=>z.id===cfg.userSizes[key]),floor=user?user.d:0;
   if(mode==='fit'||AUTO_SIZE(cfg)){for(const z of asc)if(test(z.id)){pick=z;break;}}
+  else if(mode==='shrink'){const curD=(V.sizes.find(z=>z.id===cur)||{d:0}).d;for(const z of asc)if(z.d>=floor&&z.d<=curD&&test(z.id)){pick=z;break;}}
   else{cfg.sizes[key]=cur;if(capacity(cfg).ok)return null;for(const z of asc)if(z.d>=(sizeOf(cfg)||{d:0}).d&&test(z.id)){pick=z;break;}}
   if(!pick){cfg.sizes[key]=cur;return null;}
   cfg.sizes[key]=pick.id;return (cur!==pick.id)?pick:null;
@@ -1136,9 +1216,13 @@ function addExtras(g,heads,top,cfg,seed){const r=rng(seed);if(!heads.length)retu
   if(cfg.corona&&top){const c=makeCrown(CROWN[cfg.corona]||CROWN.Dorada);c.position.set(top[0],top[1],top[2]);c.rotation.x=0.2;g.add(c);}}
 
 /* acomodo: las flores se ajustan a la boca real del envase */
-function orderFlowers(cfg){const gs=groupsOf(cfg).map(x=>cfg.flowers.filter(f=>x.ids.includes(f.id)));const out=[];
-  if(cfg.mix){const all=cfg.flowers.slice(),r=rng(cfg.mix*7919+3);for(let i=all.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[all[i],all[j]]=[all[j],all[i]];}return all;}
-  let left=true;while(left){left=false;gs.forEach(a=>{if(a.length){out.push(a.shift());left=true;}});}return out;}
+function orderFlowers(cfg){
+  // Orden estable: en el orden en que se agregaron (la primera va al centro).
+  // Así, al agregar o quitar una flor, las demás no cambian de lugar.
+  let all=cfg.flowers.slice();
+  if(cfg.mix){const r=rng(cfg.mix*7919+3);for(let i=all.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[all[i],all[j]]=[all[j],all[i]];}}
+  return all;
+}
 function circleArrange(n,s,skip){
   if(!skip&&n===1)return[[0,0]];if(!skip&&n===2)return[[-0.5*s,0],[0.5*s,0]];
   if(!skip&&n===3){const p=[];for(let k=0;k<3;k++){const a=k*2.094+Math.PI/2;p.push([Math.cos(a)*0.58*s,Math.sin(a)*0.58*s]);}return p;}
@@ -1150,10 +1234,14 @@ function gridIn(n,s,inside){for(let f=1;f>=0.62;f-=0.04){const sp=s*f,pts=[];for
   const p=circleArrange(n,s*0.62,false);return p;}
 const Yax=new THREE.Vector3(0,1,0);
 function orient(o,x,z,tilt,spin){const a=Math.atan2(z,x),qt=new THREE.Quaternion(),qs=new THREE.Quaternion();if(x===0&&z===0)qt.setFromAxisAngle(new THREE.Vector3(1,0,0),tilt);else qt.setFromAxisAngle(new THREE.Vector3(-Math.sin(a),0,Math.cos(a)),-tilt);qs.setFromAxisAngle(Yax,spin);o.quaternion.copy(qt).multiply(qs);}
+const PACK_MEMO=new Map();
 function buildCluster(cfg,o){
   const fl=orderFlowers(cfg),g=new THREE.Group(),n=fl.length,rads=fl.map(fRad),avg=n?rads.reduce((a,b)=>a+b,0)/n:0.15,s=avg*(o.spacing||1.9),r=rng(17);let pts;
-  if(o.inside)pts=gridIn(n,s,o.inside);
-  else{pts=circleArrange(n,s,!!o.msg);if(o.fitR&&n){const e=Math.max(...pts.map((p,i)=>Math.hypot(p[0],p[1])+rads[i]*0.55));if(e>o.fitR){const k=Math.max(0.62,o.fitR/e);pts=pts.map(p=>[p[0]*k,p[1]*k]);}}}
+  // cada flor ocupa su lugar según su tamaño real; los pétalos pueden rozarse un poco, como en un arreglo real
+  const sp=(o.spacing||1.9)/1.9,rmx=n?Math.max(...rads):0,inside=o.inside||(o.fitR?((x,z)=>Math.hypot(x,z)<=Math.max(o.fitR*0.35,o.fitR-rmx*0.45)):null);
+  // se recuerda el acomodo: cambiar colores o adornos no vuelve a calcularlo
+  const mkey=[rads.map(x=>x.toFixed(4)).join(','),cfg.container,cfg.variant,(sizeOf(cfg)||{}).id||'',o.msg?1:0,sp,cfg.forma??1].join('|');
+  pts=PACK_MEMO.get(mkey);if(!pts){pts=packPositions(rads.map(r=>r*sp),{inside,hole:o.msg?cm(4.2):0});PACK_MEMO.set(mkey,pts);if(PACK_MEMO.size>40)PACK_MEMO.delete(PACK_MEMO.keys().next().value);}
   let maxR=0,ring=0,drop=0;const heads=[];
   pts.forEach(([x,z],i)=>{const f=fl[i],rr=Math.hypot(x,z),y=-o.dome*rr*rr+(o.yfn?o.yfn(x,z,i):0),obj=makeFlower(f);obj.position.set(x,y,z);const tl=Math.min(0.6,rr*0.9)*(o.tiltK==null?1:o.tiltK);orient(obj,x,z,tl,r()*6.28);g.add(obj);heads.push({p:new THREE.Vector3(x,y,z),r:rads[i]});maxR=Math.max(maxR,rr+rads[i]);ring=Math.max(ring,rr);});
   let top=null;if(o.msg){const m=makeMsgDisc(cfg.texto);m.position.set(0,cm(3.5),cm(0.4));g.add(m);top=[0,cm(8),-cm(0.6)];}
@@ -1161,7 +1249,7 @@ function buildCluster(cfg,o){
   addExtras(g,heads,top,cfg,29);return {group:g,radius:Math.max(maxR,o.msg?cm(5):0,cm(4)),avg,ring,heads,low:Math.min(0,...heads.map((h,i)=>h.p.y-h.r*Math.sin(Math.min(0.6,Math.hypot(h.p.x,h.p.z)*0.9)*(o.tiltK==null?1:o.tiltK))*0.85))};}
 function stemBetween(a,b,rad){const d=new THREE.Vector3().subVectors(b,a),L=d.length(),m=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad*1.15,L,8),plain(STEM,0.6));m.position.copy(a).addScaledVector(d,0.5);m.quaternion.setFromUnitVectors(Yax,d.normalize());return m;}
 function buildStemmed(cfg,mouthY,lift,fromY,maxR){
-  const fl=orderFlowers(cfg),g=new THREE.Group(),n=fl.length,rads=fl.map(fRad),avg=n?rads.reduce((a,b)=>a+b,0)/n:0.15,s=avg*1.9;let pts=circleArrange(n,s,false),r=rng(23),heads=[];
+  const fl=orderFlowers(cfg),g=new THREE.Group(),n=fl.length,rads=fl.map(fRad),avg=n?rads.reduce((a,b)=>a+b,0)/n:0.15,s=avg*1.9;let pts=packPositions(rads.map(x=>x*0.95),{}),r=rng(23),heads=[];
   if(maxR&&n){const e=Math.max(...pts.map((p,i)=>Math.hypot(p[0],p[1])+rads[i]));if(e>maxR){const k=Math.max(0.55,maxR/e);pts=pts.map(p=>[p[0]*k,p[1]*k]);}}
   let topY=mouthY;
   pts.forEach(([x,z],i)=>{const rr=Math.hypot(x,z),hy=mouthY+lift-0.45*rr*rr+(n>3&&i===0?cm(1):0)+(r()-0.5)*cm(1);const head=new THREE.Vector3(x,hy,z);g.add(stemBetween(new THREE.Vector3(x*0.15,fromY,z*0.15),head,cm(0.25)));
@@ -1422,6 +1510,7 @@ function applyChannels(t){
   HIDDEN=new Set((t.ocultos||[]).map(String));
   const off=(sel,on)=>document.querySelectorAll(sel).forEach(e=>e.classList.toggle('hidden',!on));
   const col=t.coleccion!==false,dis=t.disenador!==false;
+  off('[data-ws]',t.mayoristas!==false);
   off('#productos',col);off('a[href="#productos"]',col);
   off('#personaliza',dis);off('a[href="#personaliza"]',dis);
   if(!dis&&col){const h=document.querySelector('.hero-ctas');if(h&&!h.querySelector('[data-colcta]'))h.insertAdjacentHTML('afterbegin','<a href="#productos" class="btn btn-dark" data-colcta>Ver colección</a>');}
@@ -1586,7 +1675,7 @@ function renderCart(){
     row.querySelector('[data-m]').onclick=()=>{if(it.qty>1){it.qty--;saveCart();}};
     row.querySelector('[data-p]').onclick=()=>{if(it.kind==='stock'&&it.stock!=null&&it.qty>=it.stock){toast(`Solo hay ${it.stock} disponible${it.stock>1?'s':''}`);return;}it.qty++;saveCart();};
     row.querySelector('[data-r]').onclick=()=>{cart=cart.filter(x=>x!==it);saveCart();};
-    const ed=row.querySelector('[data-e]');if(ed)ed.onclick=()=>{closeDrawer();if(window.FHBuilder)window.FHBuilder.edit(it);else toast('El diseñador se está cargando…');};
+    const ed=row.querySelector('[data-e]');if(ed)ed.onclick=()=>{closeDrawer();if(isPhone())openDesigner(it.cfg,it.id);else if(window.FHBuilder)window.FHBuilder.edit(it);else toast('El diseñador se está cargando…');};
     body.appendChild(row);
   });
   body.querySelectorAll('[data-closecart]').forEach(a=>a.onclick=()=>closeDrawer());
@@ -1676,7 +1765,7 @@ $('burger').onclick=()=>{const m=$('mmenu'),o=!m.classList.contains('open');m.cl
 $('mmenu').addEventListener('click',e=>{if(e.target.closest('a')){$('mmenu').classList.remove('open');$('burger').setAttribute('aria-expanded','false');}});
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('checkout').classList.contains('open'))closeOv('checkout');else if($('pmodal').classList.contains('open'))closeOv('pmodal');else if($('drawer').classList.contains('open'))closeDrawer();});
 let inBuilder=false;
-function updateBar(){const hide=inBuilder||$('drawer').classList.contains('open')||!!document.querySelector('.ov.open');$('mbar').classList.toggle('hide',hide);}
+function updateBar(){const hide=(FHD&&FHD.open)||inBuilder||$('drawer').classList.contains('open')||!!document.querySelector('.ov.open');$('mbar').classList.toggle('hide',hide);}
 if('IntersectionObserver' in window){
   new IntersectionObserver(es=>{inBuilder=es[0].isIntersecting;updateBar();},{rootMargin:'-30% 0px -30% 0px'}).observe($('personaliza'));
 }
@@ -1700,16 +1789,37 @@ if('IntersectionObserver' in window){new IntersectionObserver((es,o)=>{if(es[0].
 else loadBuilder();
 document.querySelectorAll('a[href="#personaliza"]').forEach(a=>a.addEventListener('click',loadBuilder));
 
+/* ── Celular: el diseñador se abre como una pantalla propia (sin desplazar la página) ── */
+const isPhone=()=>window.matchMedia('(max-width:760px)').matches;
+var FHD={open:false};
+function openDesigner(cfg,editId){
+  loadBuilder();$('builder').classList.add('fs');document.body.classList.add('fs-open');FHD.open=true;updateBar();
+  if(!(history.state&&history.state.fhb))history.pushState({fhb:1},'',location.pathname+location.search+'#disenar');
+  let tries=0;const ready=()=>{if(window.FHBuilder){if(cfg)window.FHBuilder.load(cfg,editId||null);window.FHBuilder.refit();}else if(tries++<200)setTimeout(ready,100);};
+  requestAnimationFrame(ready);
+}
+function closeDesigner(fromPop){
+  if(!FHD.open)return;FHD.open=false;$('builder').classList.remove('fs');document.body.classList.remove('fs-open');updateBar();
+  if(!fromPop&&history.state&&history.state.fhb)history.back();
+}
+window.FHDesigner={open:openDesigner,close:()=>closeDesigner(false),phone:isPhone,get isOpen(){return FHD.open;}};
+$('openDesigner').onclick=()=>openDesigner();
+$('bClose').onclick=()=>closeDesigner(false);
+window.addEventListener('popstate',()=>{if(FHD.open&&!(history.state&&history.state.fhb))closeDesigner(true);});
+document.querySelectorAll('a[href="#personaliza"]').forEach(a=>a.addEventListener('click',e=>{if(isPhone()){e.preventDefault();openDesigner();}}));
+window.addEventListener('resize',()=>{if(FHD.open&&!isPhone())closeDesigner(false);});
+if(location.hash==='#disenar'&&isPhone()){history.replaceState(null,'',location.pathname+location.search);openDesigner();}
+
 let lastLoad=0;
 // Si el cliente vuelve a la pestaña después de un rato, se actualizan precios y stock
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-lastLoad>120000)loadData();});
 // Diseño compartido por link (…#d=código)
 (function(){const code=designFromLink(location.hash);if(!code)return;window.__fhShared=code;history.replaceState(null,'',location.pathname+location.search+'#personaliza');
-  loadBuilder();setTimeout(()=>{const s=$('personaliza');if(s&&s.scrollIntoView)s.scrollIntoView({behavior:'auto'});},300);})();
+  loadBuilder();if(isPhone())openDesigner();else setTimeout(()=>{const s=$('personaliza');if(s&&s.scrollIntoView)s.scrollIntoView({behavior:'auto'});},300);})();
 window.addEventListener('hashchange',()=>{const code=designFromLink(location.hash);if(!code)return;history.replaceState(null,'',location.pathname+location.search+'#personaliza');
   if(window.FHBuilder)window.FHBuilder.shared(code);else{window.__fhShared=code;loadBuilder();}});
 // Enlace discreto al sitio mayorista (lo activas desde tu sistema → Mayoristas)
-if(sb)sb.rpc('get_wholesale_showcase').then(({data})=>{if(data&&data.settings&&data.settings.enlaceTienda)$('wsLink').classList.remove('hidden');}).catch(()=>{});
+// El acceso a la web mayorista se ve siempre, salvo que lo apagues en tu sistema → Mis webs
 applyBiz();saveCart();loadData();
 
 /* =====================================================================
@@ -1728,7 +1838,7 @@ function renderStarters(){
   const el=$('starters');el.innerHTML='';
   starterList().forEach(p=>{const b=document.createElement('button');b.type='button';b.className='pill'+(p.foto?' pill-photo':'');
     b.innerHTML=(p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy">`:'')+`<span>${esc(p.name)} <small>${fmt(priceOf(p.cfg))}</small></span>`;
-    b.onclick=()=>{if(window.FHBuilder)window.FHBuilder.load(p.cfg);};el.appendChild(b);});
+    b.onclick=()=>{if(window.FHDesigner&&window.FHDesigner.phone())window.FHDesigner.open(p.cfg);else if(window.FHBuilder)window.FHBuilder.load(p.cfg);};el.appendChild(b);});
 }
 
 window.initBuilder=function(){
@@ -1809,7 +1919,7 @@ window.initBuilder=function(){
     st.forEach(([k,l],i)=>{const b=document.createElement('button');b.type='button';b.className='tab';b.setAttribute('role','tab');b.setAttribute('aria-selected',String(step===k));b.innerHTML=`<b>${i+1}</b>${l}`;b.onclick=()=>go(k);el.appendChild(b);});
     document.querySelectorAll('.step').forEach(s=>s.classList.toggle('hidden',s.dataset.step!==step));
     document.querySelectorAll('.step').forEach(s=>{const i=st.findIndex(x=>x[0]===s.dataset.step),n=s.querySelector('[data-next]');if(n){const nx=st[i+1];n.classList.toggle('hidden',!nx);if(nx)n.textContent='Siguiente: '+nx[1].toLowerCase();}});}
-  function go(k){step=k;renderTabs();const p=$('pscroll');p.scrollTop=0;if(window.matchMedia('(max-width:760px)').matches){const t=$('tabs').getBoundingClientRect().top;if(t<0||t>window.innerHeight*0.8)$('tabs').scrollIntoView({block:'start',behavior:reduced?'auto':'smooth'});}}
+  function go(k){step=k;renderTabs();const p=$('pscroll');p.scrollTop=0;if(window.matchMedia('(max-width:760px)').matches&&!(window.FHDesigner&&window.FHDesigner.isOpen)){const t=$('tabs').getBoundingClientRect().top;if(t<0||t>window.innerHeight*0.8)$('tabs').scrollIntoView({block:'start',behavior:reduced?'auto':'smooth'});}}
   document.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>{const st=steps(),i=st.findIndex(x=>x[0]===step);if(st[i+1])go(st[i+1][0]);});
   document.querySelectorAll('[data-prev]').forEach(b=>b.onclick=()=>{const st=steps(),i=st.findIndex(x=>x[0]===step);if(i>0)go(st[i-1][0]);});
 
@@ -1819,7 +1929,7 @@ window.initBuilder=function(){
     const vars=Object.entries(CONTAINERS[c].variants).filter(([,x])=>x.on);chips($('varChips'),vars.map(([k,x])=>[k,x.label]),v,k=>{state.variant=k;sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');});hide('varChips',vars.length<2);
     const sz=sizeOf(state);hide('sizeWrap',!vd.sizes);
     hide('formaWrap',c!=='ramo'||B.formasOn.filter(Boolean).length<2);if(c==='ramo')chips($('formaChips'),FORMAS.map((f,i)=>[i,f[0],f[1]]).filter(x=>B.formasOn[x[0]]),state.forma??1,i=>{state.forma=i;renderEnvase();updateInfo();rebuild(true);});
-    if(vd.sizes){chips($('sizeChips'),vd.sizes.map(s=>{const nm=sizeName(s),dm=s.dp?`${s.d}×${s.dp} cm`:`${s.d} cm`;return [s.id,nm,(/cm/.test(nm)?'':dm+' · ')+fmt(s.p)];}),sz.id,id=>{state.sizes[c+'.'+v]=id;changed(true);});}
+    if(vd.sizes){chips($('sizeChips'),vd.sizes.map(s=>{const nm=sizeName(s),dm=s.dp?`${s.d}×${s.dp} cm`:`${s.d} cm`;return [s.id,nm,(/cm/.test(nm)?'':dm+' · ')+fmt(s.p)];}),sz.id,id=>{state.sizes[c+'.'+v]=id;state.userSizes=state.userSizes||{};state.userSizes[c+'.'+v]=id;changed(true);});}
     const cap=capacity(state),m=sz&&mouth(state),ex=state.flowers[0]||{type:'rosa',tier:'M'};
     if(vd.sizes&&AUTO_SIZE(state))$('sizeChips').insertAdjacentHTML('beforeend','<div class="hintline" style="width:100%">✨ Se ajusta solo a la cantidad de flores que elijas.</div>');
     let info=dimsText(state)?`<b>${esc(dimsText(state))}</b><br>`:'';
@@ -1854,16 +1964,16 @@ window.initBuilder=function(){
       li.innerHTML=`<span class="dot" style="background:${fl.type==='girasol'?'radial-gradient(circle,#4a2e17 36%,#f4c20d 40%)':FLOWER_COLORS[fl.color]}"></span>
         <span class="grp-t">${T.label}${fl.type==='girasol'?'':' '+esc(fl.color.toLowerCase())}<small>${fcm(fl)} cm${T.open?' · '+openName(fl):''} · ${fmt(tierOf(fl).p)} c/u</small></span>
         <span class="stepper"><button type="button" data-m aria-label="Quitar una">−</button><span>${g.n}</span><button type="button" data-p aria-label="Agregar una">+</button></span><button type="button" class="x" data-x aria-label="Quitar todas">×</button>`;
-      li.querySelector('[data-m]').onclick=()=>{const id=g.ids[g.ids.length-1];state.flowers=state.flowers.filter(x=>x.id!==id);flowersChanged();};
+      li.querySelector('[data-m]').onclick=()=>{const id=g.ids[g.ids.length-1];state.flowers=state.flowers.filter(x=>x.id!==id);flowersChanged(true);};
       const plus=li.querySelector('[data-p]');plus.disabled=roomWithUpgrade(state,fl)<1;plus.onclick=()=>{state.flowers.push(Object.assign({},fl,{id:uid()}));flowersChanged();};
-      li.querySelector('[data-x]').onclick=()=>{state.flowers=state.flowers.filter(x=>!g.ids.includes(x.id));flowersChanged();};ul.appendChild(li);});
+      li.querySelector('[data-x]').onclick=()=>{state.flowers=state.flowers.filter(x=>!g.ids.includes(x.id));flowersChanged(true);};ul.appendChild(li);});
     hide('mixBtn',gs.length<2);hide('clearBtn',!gs.length);
   }
   $('aMinus').onclick=()=>{addForm.qty=Math.max(1,addForm.qty-1);renderFlores();};
   $('aPlus').onclick=()=>{addForm.qty++;renderFlores();};
   $('aAdd').onclick=()=>{const f=addForm;for(let i=0;i<f.qty;i++)state.flowers.push(newFlower(f.type,f.color,{tier:f.tier,open:f.type==='girasol'?0:f.open}));f.qty=1;flowersChanged();};
   $('mixBtn').onclick=()=>{state.mix=(state.mix||0)+1;soon();};
-  $('clearBtn').onclick=()=>{state.flowers=[];flowersChanged();};
+  $('clearBtn').onclick=()=>{state.flowers=[];flowersChanged(true);};
   function renderPapel(){
     const ft=feats(state.container,state.variant);hide('paperChips',!ft.paper);hide('paperColorWrap',!ft.paper);document.querySelector('[data-step="papel"] .lbl').classList.toggle('hidden',!ft.paper);
     if(ft.paper){const pc=$('paperChips');pc.innerHTML='';pc.className='paper-grid';
@@ -1896,17 +2006,18 @@ window.initBuilder=function(){
   function updateInfo(){
     const p=priceOf(state),cap=capacity(state);$('stPrice').textContent=fmt(p);$('pfPrice').textContent=fmt(p);
     $('stTitle').textContent=titleOf(state);$('stDims').textContent=[dimsText(state),state.flowers.length?Object.entries(state.flowers.reduce((a,f)=>(a[f.type]=(a[f.type]||0)+1,a),{})).map(([t,n])=>`${n} ${n>1?TYPES[t].plural:TYPES[t].label.toLowerCase()}`).join(' + '):''].filter(Boolean).join(' · ');
-    const warn=!cap.ok?(cap.big?'Una flor es más grande que la boca del envase':'No caben todas las flores en este tamaño'):'';$('stWarn').textContent=warn;hide('stWarn',!warn);
+    const warn=!cap.ok?(cap.big?'Una flor es más grande que la boca del envase · tocar para ajustar':'No caben todas las flores · tocar para ajustar'):'';$('stWarn').textContent=warn;hide('stWarn',!warn);
     hide('realBtn',!vdef(state).foto);
     $('stMsg').classList.toggle('hidden',state.flowers.length>0);if(!state.flowers.length)$('stMsg').innerHTML='<div>Agrega tus flores en el paso 2</div>';
-    const b=$('addCart');b.disabled=!state.flowers.length||!cap.ok;b.textContent=!state.flowers.length?'Agrega flores':!cap.ok?'Ajusta el tamaño':editingId?'Guardar cambios':'Agregar al carrito';
+    const extra=cap.ok?0:trimPlan().removed;
+    const b=$('addCart');b.disabled=!state.flowers.length;b.dataset.fix=cap.ok?'':'1';b.textContent=!state.flowers.length?'Agrega flores':!cap.ok?(extra?`Quitar ${extra} que no cabe${extra>1?'n':''}`:'Ajusta el tamaño'):editingId?'Guardar cambios':'Agregar al carrito';
   }
   function renderAll(){renderTabs();renderEnvase();renderFlores();renderPapel();renderDetalles();updateInfo();}
   function changed(resetCam){renderAll();rebuild(resetCam);}
   // Cuando cambian las flores, el envase se ajusta solo (vasos siempre; cajas si ya no caben)
-  function flowersChanged(){
-    const before=sizeOf(state),pick=autoSize(state);
-    if(pick&&before&&pick.id!==before.id){const n=state.flowers.length;toast(AUTO_SIZE(state)?`El envase se ajustó a ${sizeName(pick)} para ${n} flor${n>1?'es':''}`:`Cambiamos a ${sizeName(pick)} para que entren tus flores`);}
+  function flowersChanged(removed){
+    const before=sizeOf(state),pick=autoSize(state,removed?'shrink':null);
+    if(pick&&before&&pick.id!==before.id){const n=state.flowers.length;toast(AUTO_SIZE(state)?`El envase se ajustó a ${sizeName(pick)} para ${n} flor${n!==1?'es':''}`:removed?`La caja volvió a ${sizeName(pick)}`:`Cambiamos a ${sizeName(pick)} para que entren tus flores`);}
     changed(true);
   }
   function shareUrl(){return location.href.split('#')[0]+'#d='+encodeDesign(state);}
@@ -1952,15 +2063,27 @@ window.initBuilder=function(){
         const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);toast('Foto descargada');
       },'image/png');},40);
   };
+  // Si al cambiar de envase ya no caben todas, se prueba el tamaño más grande y se quitan solo las que sobran (las últimas agregadas)
+  function trimPlan(){
+    const c=clone(state);c.flowers.forEach((f,i)=>f.id=state.flowers[i].id);autoSize(c,'fit');let removed=0;
+    const m=mouth(c);if(m){const big=c.flowers.filter(f=>fcm(f)>m.min);if(big.length){c.flowers=c.flowers.filter(f=>fcm(f)<=m.min);removed+=big.length;}}
+    while(c.flowers.length&&!capacity(c).ok){c.flowers.pop();removed++;}
+    return {cfg:c,removed};
+  }
+  function trimToFit(){const p=trimPlan();if(!p.removed&&capacity(state).ok)return;state.flowers=p.cfg.flowers.map(f=>state.flowers.find(x=>x.id===f.id)).filter(Boolean);state.sizes=p.cfg.sizes;
+    toast(p.removed?`Quitamos ${p.removed} flor${p.removed>1?'es':''} para que todo entre en ${titleOf(state)}`:'Listo, ya entra todo');changed(true);}
+  $('stWarn').addEventListener('click',()=>{if(!capacity(state).ok)trimToFit();});
   $('addCart').onclick=()=>{
+    if($('addCart').dataset.fix){trimToFit();return;}
     const cap=capacity(state);if(!state.flowers.length||!cap.ok)return;
     const item={kind:'custom',id:editingId||('c'+uid()),cfg:clone(state),title:'Personalizado · '+titleOf(state),desc:describe(state),price:priceOf(state),qty:1,thumb:thumbnail()};
     if(editingId){window.FHCart.replace(editingId,item);editingId=null;toast('Cambios guardados');}else{window.FHCart.add(item);toast('Diseño agregado al carrito 🌸');}
-    updateInfo();window.FHCart.open();
+    updateInfo();if(window.FHDesigner&&window.FHDesigner.isOpen)window.FHDesigner.close();window.FHCart.open();
   };
   window.FHBuilder={load(cfg,editId){state=sanitize(clone(cfg));state.flowers.forEach(f=>{if(!f.id)f.id=uid();});editingId=editId||null;step='flores';changed('force');controls.autoRotate=!reduced;
-      const s=$('personaliza');if(s.scrollIntoView)s.scrollIntoView({behavior:reduced?'auto':'smooth'});},
-    edit(it){this.load(it.cfg,it.id);},photo,
+      if(!(window.FHDesigner&&window.FHDesigner.isOpen)){const s=$('personaliza');if(s.scrollIntoView)s.scrollIntoView({behavior:reduced?'auto':'smooth'});}},
+    edit(it){if(window.FHDesigner&&window.FHDesigner.phone()){window.FHDesigner.open(it.cfg,it.id);return;}this.load(it.cfg,it.id);},photo,
+    refit(){resize();frame('force');},
     shared(code){const c=decodeDesign(code);if(!c){toast('Este link de diseño no es válido');return;}sanitize(c);this.load(c);step='flores';renderAll();setTimeout(()=>toast('💝 Te compartieron este diseño. Puedes cambiarlo o pedirlo tal cual'),600);},get state(){return state;},E};
   if(document.fonts&&document.fonts.load)document.fonts.load('80px "Great Vibes"').then(()=>{Object.keys(E.T).forEach(k=>{if(k.startsWith('msg')||k.startsWith('decal'))delete E.T[k];});if(state.mensaje)rebuild(false);});
   applyBg();renderAll();rebuild(true);
