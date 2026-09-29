@@ -359,6 +359,13 @@ html,body{overflow-x:clip}
 .ws-band-t span{font-size:14px;color:var(--deep)}
 .ws-band-go{flex:none;background:#6b3fa0;color:#fff;border-radius:50px;padding:12px 20px;font-size:13.5px;font-weight:500;white-space:nowrap}
 @media (max-width:760px){.ws-band{flex-direction:column;text-align:center;padding:18px}.ws-band-go{width:100%}}
+.spin360.quiet::after{display:none}
+.spin360.quiet.loading{background-image:none!important;background-color:transparent}
+.pimg .spin360{z-index:1}
+.pimg .ptag,.pimg .p360,.pimg .pout{z-index:2}
+.pm-media{position:absolute;left:12px;top:12px;z-index:3;display:flex;gap:4px;background:rgba(255,255,255,.92);border-radius:50px;padding:4px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.pm-media button{border:none;background:none;border-radius:50px;padding:8px 14px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;min-height:36px}
+.pm-media button[aria-selected="true"]{background:var(--bark);color:#fff}
 /* ═════ tablet ═════ */
 @media (max-width:1080px){
   .nav{display:none}
@@ -1531,6 +1538,7 @@ async function loadData(){
   }catch(e){console.warn('Error cargando productos',e);allProducts=[];}
   lastLoad=Date.now();buildCatFilters();renderCatalog();reconcileCart();
   const n=allProducts.filter(inStock).length;if(n)$('heroCount').textContent=n+' piezas listas para regalar';
+  if(!window.__fhHash){window.__fhHash=1;window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#producto-')){const p=findP(h.slice(10));if(p)openProduct(p.id);}});}
   const h=location.hash;if(h.startsWith('#producto-')){const id=h.replace('#producto-','');const p=findP(id);if(p)setTimeout(()=>openProduct(p.id),300);}
 }
 const inStock=p=>p.stock===null||p.stock===undefined||p.stock>0;
@@ -1559,9 +1567,11 @@ function filtered(){
     return true;});
   const s=cat.sort;
   list.sort((a,b)=>s==='price-asc'?a.price-b.price:s==='price-desc'?b.price-a.price:s==='name'?a.name.localeCompare(b.name,'es'):
-    (inStock(b)-inStock(a))||((b.photo?1:0)-(a.photo?1:0))||a.name.localeCompare(b.name,'es'));
+    (inStock(b)-inStock(a))||((b.spin?1:0)-(a.spin?1:0))||((b.photo?1:0)-(a.photo?1:0))||a.name.localeCompare(b.name,'es'));
   return list;
 }
+// Link directo al producto (al abrirlo, la tienda muestra esa pieza)
+const productUrl=p=>location.origin+location.pathname+'#producto-'+p.id;
 function stockTxt(p){if(p.stock===null||p.stock===undefined)return '';if(p.stock<=0)return '<span class="pstock no">Agotado</span>';if(p.stock<=3)return `<span class="pstock low">Últimas ${p.stock}</span>`;return '<span class="pstock ok">Disponible</span>';}
 function renderCatalog(){
   const list=filtered(),grid=$('grid'),show=list.slice(0,cat.shown);
@@ -1574,15 +1584,16 @@ function renderCatalog(){
   }
   grid.innerHTML=show.map(p=>{const ok=inStock(p);return `
     <article class="pcard" data-id="${esc(p.id)}" id="producto-${esc(p.id)}">
-      <div class="pimg">${p.photo?`<img src="${esc(p.photo)}" alt="${esc(p.name)}" loading="lazy" decoding="async">`:'<div class="ph">🌸</div>'}
+      <div class="pimg"${p.spin?` data-spin="${esc(p.id)}"`:''}>${p.photo?`<img src="${esc(p.photo)}" alt="${esc(p.name)}" loading="lazy" decoding="async">`:'<div class="ph">🌸</div>'}
         ${p.tag?`<span class="ptag">${esc(p.tag)}</span>`:''}${p.spin?'<span class="p360">🔄 360°</span>':''}${ok?'':'<div class="pout"><span>Agotado</span></div>'}</div>
       <div class="pbody"><div class="pname">${esc(p.name)}</div>
         <div class="pmeta"><span class="pprice">${money(p.price)}</span>${stockTxt(p)}</div>
         <div class="pbtns">${ok?`<button class="padd" data-add="${esc(p.id)}">Agregar</button>`:`<button class="padd" data-open="${esc(p.id)}">Ver</button>`}
-          <a class="pwa" target="_blank" rel="noopener" aria-label="Pedir ${esc(p.name)} por WhatsApp" href="${waLink(`Hola Flowers Handmade! 🌸 Me interesa: *${p.name}* (${money(p.price)})`)}">${WAICON}</a></div></div>
+          <a class="pwa" target="_blank" rel="noopener" aria-label="Pedir ${esc(p.name)} por WhatsApp" href="${waLink(`Hola Flowers Handmade! 🌸 Me interesa: *${p.name}* (${money(p.price)})\n${productUrl(p)}`)}">${WAICON}</a></div></div>
     </article>`;}).join('');
   const more=list.length>show.length;$('moreWrap').classList.toggle('hidden',!more);
   $('moreTxt').textContent=`Mostrando ${show.length} de ${list.length}`;
+  startCardSpins();
 }
 function resetFilters(){cat.q='';cat.tag='all';cat.price='all';cat.only=true;cat.shown=SHOP.porPagina;$('q').value='';$('qClear').classList.add('hidden');$('onlyStock').checked=true;buildCatFilters();renderCatalog();}
 $('grid').addEventListener('click',e=>{
@@ -1597,7 +1608,8 @@ $('onlyStock').onchange=e=>{cat.only=e.target.checked;cat.shown=SHOP.porPagina;r
 $('moreBtn').onclick=()=>{cat.shown+=SHOP.porPagina;renderCatalog();};
 
 /* ── Vista 360° (24 cuadros en una sola imagen) ── */
-function spinViewer(el, m){
+function spinViewer(el, m, opts){
+  opts = opts || {};
   if(el.__spin) el.__spin.stop();
   const n = m.n || 24, cols = m.cols || 6, rows = Math.ceil(n/cols);
   el.classList.add('spin360','loading');
@@ -1610,27 +1622,50 @@ function spinViewer(el, m){
   const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const tick = ts => { raf = requestAnimationFrame(tick); if(!auto || still) return; if(ts - last > 115){ last = ts; show(f + 1); } };
   raf = requestAnimationFrame(tick);
+  if(opts.interactive !== false){
   el.onpointerdown = e => { auto = false; dx = e.clientX; f0 = f; try{ el.setPointerCapture(e.pointerId); }catch(_){} };
   el.onpointermove = e => { if(dx === null) return; show(f0 - Math.round((e.clientX - dx) / Math.max(1, el.clientWidth) * n * 1.1)); };
   el.onpointerup = el.onpointercancel = () => { dx = null; };
-  el.__spin = { stop(){ cancelAnimationFrame(raf); } };
+  }
+  el.__spin = { stop(){ cancelAnimationFrame(raf); raf = 0; }, play(){ if(!raf) raf = requestAnimationFrame(tick); } };
   return el.__spin;
 }
 
 
+/* Las tarjetas con 360° giran solas cuando están en pantalla (se pausan al salir, para cuidar la batería) */
+let spinIO=null;
+function startCardSpins(){
+  const els=[...document.querySelectorAll('#grid .pimg[data-spin]')];if(!els.length)return;
+  const run=box=>{const p=findP(box.dataset.spin);if(!p||!p.spin)return;let v=box.querySelector('.spin360');
+    if(!v){v=document.createElement('div');v.className='spin360 quiet';v.setAttribute('aria-hidden','true');box.insertBefore(v,box.firstChild.nextSibling);spinViewer(v,p.spin,{interactive:false});}else if(v.__spin)v.__spin.play();};
+  const stop=box=>{const v=box.querySelector('.spin360');if(v&&v.__spin)v.__spin.stop();};
+  if(!('IntersectionObserver' in window)){els.forEach(run);return;}
+  if(spinIO)spinIO.disconnect();
+  spinIO=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?run(e.target):stop(e.target)),{rootMargin:'120px'});
+  els.forEach(el=>spinIO.observe(el));
+}
 /* ── Modal de producto ── */
 let lastFocus=null;
+function renderMedia(p,mode){
+  const box=$('pmImg'),old=box.querySelector('.spin360');if(old&&old.__spin)old.__spin.stop();box.innerHTML='';
+  if(mode==='spin'&&p.spin){const v=document.createElement('div');v.className='spin360';v.setAttribute('role','img');v.setAttribute('aria-label',p.name+', vista 360°. Desliza para girar');box.appendChild(v);
+    const h=document.createElement('div');h.className='spin-hint';h.textContent='↔ Desliza para girar';box.appendChild(h);spinViewer(v,p.spin);}
+  else if(p.photo){const im=document.createElement('img');im.src=p.photo;im.alt=p.name;box.appendChild(im);}
+  else box.innerHTML='<div class="ph" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:60px;opacity:.4">🌸</div>';
+  if(p.spin&&p.photo){const t=document.createElement('div');t.className='pm-media';t.setAttribute('role','tablist');
+    [['spin','🔄 360°'],['photo','📷 Foto']].forEach(([k,l])=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',String(mode===k));b.textContent=l;b.onclick=e=>{e.stopPropagation();renderMedia(p,k);};t.appendChild(b);});
+    box.appendChild(t);}
+}
 function openProduct(id){
   const p=findP(id);if(!p)return;lastFocus=document.activeElement;
-  $('pmImg').innerHTML=p.photo?`<img src="${esc(p.photo)}" alt="${esc(p.name)}">`:'<div class="ph" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:60px;opacity:.4">🌸</div>';
-  if(p.spin){const v=document.createElement('div');v.className='spin360';v.setAttribute('role','img');v.setAttribute('aria-label',p.name+', vista 360°. Desliza para girar');$('pmImg').innerHTML='';$('pmImg').appendChild(v);const hint=document.createElement('div');hint.className='spin-hint';hint.textContent='↔ Desliza para girar';$('pmImg').appendChild(hint);spinViewer(v,p.spin);}
+  renderMedia(p,p.spin?'spin':'photo');
   $('pmTag').textContent=p.tag||'Flowers Handmade';$('pmName').textContent=p.name;$('pmStock').innerHTML=stockTxt(p);
   $('pmDesc').textContent=p.desc||'Pieza artesanal elaborada a mano con cinta de tela y otros materiales. Un regalo único creado en Loja, Ecuador.';
   $('pmPrice').textContent=money(p.price);
   const ok=inStock(p);$('pmAdd').disabled=!ok;$('pmAdd').textContent=ok?'Agregar al carrito':'Agotado';
   $('pmAdd').onclick=()=>{if(addStock(p.id,true)){closeOv('pmodal');openDrawer();}};
-  $('pmWa').href=waLink(`Hola Flowers Handmade! 🌸 Me interesa: *${p.name}* (${money(p.price)}). ¿Me ayudan con el pedido?`);
-  $('pmShare').onclick=()=>{const url=location.href.split('#')[0]+'#producto-'+p.id;if(navigator.share)navigator.share({title:p.name,text:'Mira esta pieza de Flowers Handmade 🌸',url}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast('Link copiado'));};
+  $('pmWa').href=waLink(`Hola Flowers Handmade! 🌸 Me interesa: *${p.name}* (${money(p.price)}). ¿Me ayudan con el pedido?\n${productUrl(p)}`);
+  $('pmShare').onclick=()=>{const url=productUrl(p);if(navigator.share)navigator.share({title:p.name,text:'Mira esta pieza de Flowers Handmade 🌸',url}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast('Link copiado'));};
   openOv('pmodal');
 }
 function openOv(id){$(id).classList.add('open');document.body.style.overflow='hidden';const c=$(id).querySelector('.close');if(c)setTimeout(()=>c.focus(),30);updateBar();}
@@ -1731,7 +1766,7 @@ $('coForm').onsubmit=e=>{
   const num='FH-'+String(Date.now()).slice(-6),t=totals(),L=[];
   L.push(`🌸 *NUEVO PEDIDO ${num}*`,'');
   L.push('*🛍 Productos*');
-  cart.forEach((it,i)=>{L.push(`${i+1}. ${itemName(it)} × ${it.qty} — ${money(it.price*it.qty)}${it.kind==='stock'?' (catálogo)':''}`);if(it.kind==='custom')L.push(`   ${it.desc}`);});
+  cart.forEach((it,i)=>{L.push(`${i+1}. ${itemName(it)} × ${it.qty} — ${money(it.price*it.qty)}${it.kind==='stock'?' (catálogo)':''}`);if(it.kind==='stock')L.push(`   ${productUrl({id:it.pid})}`);if(it.kind==='custom'){L.push(`   ${it.desc}`);try{L.push(`   Ver diseño en 3D: ${location.origin+location.pathname}#d=${encodeDesign(it.cfg)}`);}catch(e){}}});
   L.push('',`Subtotal: ${money(t.s)}`,`Envío: ${t.pend?'a coordinar':t.e?money(t.e):'gratis'}`,`*TOTAL: ${money(t.t)}${t.pend?' + envío':''}*`,'');
   L.push('*👤 Cliente*',`Nombre: ${v('coName')}`,`WhatsApp: ${v('coPhone')}`,'');
   L.push('*🚚 Entrega*',`Tipo: ${s.label}`);
