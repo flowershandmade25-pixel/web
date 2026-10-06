@@ -469,6 +469,199 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
 .ws-acct b{font-size:13px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ws-grid.showcase .ws-body{gap:4px}
 @media (max-width:760px){.ws-stats{order:-1}.ws-hero .hero-grid{padding-top:22px}}
+/* ═════ celular: textos e imágenes más compactos y cómodos de leer ═════ */
+@media (max-width:760px){
+  body{font-size:14px}
+  .logo-name{font-size:14px}
+  .hero h1{font-size:clamp(28px,8.4vw,38px)}
+  .hero p{font-size:14px;line-height:1.6}
+  .hero-kicker,.eyebrow{font-size:11px}
+  .hero-ctas .btn{padding:12px 18px;font-size:13.5px;min-height:46px}
+  .hero-perks{font-size:12px}
+  .sec{padding:30px 0}
+  .sec-head{margin-bottom:18px}
+  .sec-title{font-size:clamp(25px,7.4vw,32px)}
+  .sec-sub{font-size:13.5px;line-height:1.6}
+  .btn{font-size:13px;padding:12px 18px;min-height:44px}
+  .sel{height:44px;font-size:12.5px}
+  .search input{height:44px}
+  .pill{font-size:12.5px;padding:7px 12px;min-height:36px}
+  .results{font-size:12px}
+  .pname{font-size:15px}
+  .pprice{font-size:17px}
+  .ptag{font-size:10px;padding:3px 8px}
+  .padd{font-size:12px;min-height:38px}
+  .pwa{width:38px;height:38px}
+  .steps li,.feat{padding:16px}
+  .steps h3,.feat h3{font-size:18px}
+  .steps p,.feat p{font-size:13px}
+  .steps li::before{font-size:30px}
+  .banner{padding:36px 16px}
+  .banner h2{font-size:26px}
+  .banner p{font-size:13.5px}
+  .ws-band-t b{font-size:19px}.ws-band-t span{font-size:13px}
+  .ft p,.ft a{font-size:13px}
+  /* diseñador */
+  .b-launch h3{font-size:21px}.b-launch p{font-size:13px}.b-launch-art{font-size:32px}
+  .builder.fs .stage{height:36vh;height:36dvh;min-height:200px}
+  .st-title{font-size:17px}.st-price{font-size:19px}.st-dims{font-size:11px;margin-top:2px}
+  .st-btn{font-size:11px;padding:5px 9px;min-height:30px}
+  .st-warn{font-size:11px;padding:6px 12px}
+  .builder.fs .st-close{width:36px;height:36px;font-size:15px}
+  .builder.fs .st-top{left:54px}
+  .tab{font-size:11px}.tab b{font-size:14px}
+  .builder.fs .tab{min-height:42px;padding:5px 2px}
+  .builder.fs .pscroll{padding:12px 12px 16px}
+  .lbl{font-size:10.5px;margin:14px 0 7px;letter-spacing:1.1px}
+  .lbl small{font-size:11.5px}
+  .chips{gap:6px}
+  .chip{font-size:12.5px;padding:7px 10px;min-height:38px;border-radius:12px}
+  .chip small{font-size:10.5px}
+  .seg{gap:6px}
+  .sws{gap:8px}.sw{width:30px;height:30px}
+  .info,.hintline{font-size:12px}
+  .cap-top{font-size:12px}
+  .addbox{padding:12px}
+  .grp{padding:6px 6px 6px 10px}.grp-t{font-size:12.5px}.grp-t small{font-size:11px}
+  .dot{width:18px;height:18px}
+  .tog{font-size:12.5px;min-height:44px;padding:8px 10px}
+  .tog small{font-size:11px}
+  .paper-grid{grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px}
+  .paper-chip .pl{font-size:11px}.paper-chip small{font-size:10px}
+  .nextrow .btn{font-size:12.5px;padding:10px 14px;min-height:40px}
+  .pfoot{gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
+  .pf-price{font-size:21px}.pf-price small{font-size:10px}
+  .pfoot .btn{font-size:13px}
+  /* producto, carrito y compra */
+  .pm-name{font-size:22px!important}.pm-price{font-size:25px}.pm-desc{font-size:13px}
+  .pm-media button{font-size:12px;padding:6px 11px;min-height:32px}
+  .spin-hint{font-size:11.5px}
+  .d-head h3{font-size:23px}
+  .ci-n{font-size:15.5px}.ci-d{font-size:11.5px}.ci-p{font-size:16.5px}
+  .d-sub b{font-size:23px}
+  .co-main h2{font-size:27px}.fs legend{font-size:18px}
+  .fld label{font-size:12.5px}
+  .opt{font-size:13.5px;padding:11px 12px}
+  .tot .big{font-size:23px}
+  .toast{font-size:13px;padding:10px 16px}
+  .mbar .btn{font-size:13px;min-height:46px}
+}
+/* teléfonos pequeños o de baja resolución */
+@media (max-width:400px){
+  body{font-size:13.5px}
+  .hero h1{font-size:27px}
+  .sec-title{font-size:24px}
+  .builder.fs .stage{height:33vh;height:33dvh;min-height:180px}
+  .st-title{font-size:15.5px}.st-price{font-size:17px}
+  .chip{padding:6px 8px;font-size:12px}
+  .tab{font-size:10.5px}
+  .paper-grid{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}
+  .pf-price{font-size:19px}
+}
+@media (max-width:760px){
+  .ws-head h3{font-size:24px}.ws-head span{font-size:13px}
+  .ws-name{font-size:15px}.ws-price b{font-size:18px}.ws-cat{font-size:10px}
+  .ws-perks span{font-size:13px}.ws-perks b{font-size:22px}
+  .ws-box{padding:16px}.ws-tabs button{font-size:13px;min-height:40px}
+  .ws-ok h3{font-size:23px}.ws-custom h4,.ws-order h4{font-size:19px}
+}
+/* ───── Diseñador de cajas ───── */
+.bx{--bxk:var(--bark,#3d2118);--bxr:var(--rose,#c47e6e);--bxl:var(--line,rgba(196,126,110,.2));--bxm:var(--muted,#8a7068);--bxc:var(--cream,#fdf8f3);font-family:inherit}
+.bx-launch{display:none}
+.bx-app{display:grid;grid-template-columns:minmax(0,1fr) 390px;height:min(720px,calc(100vh - 120px));min-height:560px;border:1px solid var(--bxl);border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 20px 60px rgba(61,33,24,.1)}
+.bx-stage{position:relative;background:radial-gradient(ellipse 80% 70% at 50% 40%,#ffffff 0%,#f4ece6 60%,#e6d6cb 100%);min-height:0}
+.bx-view{position:absolute;inset:0}.bx-view canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.bx-top{position:absolute;left:18px;right:18px;top:14px;display:flex;justify-content:space-between;gap:10px;pointer-events:none;color:var(--bxk)}
+.bx-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;line-height:1.1}
+.bx-dims{font-size:12.5px;color:var(--bxm);margin-top:3px}
+.bx-price{font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;white-space:nowrap}
+.bx-tools{position:absolute;left:14px;bottom:14px;display:flex;gap:6px;flex-wrap:wrap}
+.bx-chipbtn{border:1px solid rgba(61,33,24,.18);background:rgba(255,255,255,.88);color:var(--bxk);border-radius:50px;padding:7px 12px;font-size:12.5px;cursor:pointer;min-height:34px;font-family:inherit}
+.bx-chipbtn[aria-pressed="true"]{background:var(--bxk);color:#fff}
+.bx-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--bxm);font-size:14px;pointer-events:none}
+.bx-msg[hidden]{display:none}
+.bx-spin{width:32px;height:32px;border-radius:50%;border:3px solid var(--bxl);border-top-color:var(--bxr);animation:bxs .9s linear infinite}@keyframes bxs{to{transform:rotate(360deg)}}
+.bx-close{display:none}
+.bx-panel{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--bxl);background:var(--bxc)}
+.bx-tabs{display:flex;background:#fff;border-bottom:1px solid var(--bxl);flex:none}
+.bx-tabs button{flex:1;border:none;background:none;padding:10px 2px 9px;font-size:12px;font-weight:500;color:var(--bxm);cursor:pointer;border-bottom:2.5px solid transparent;display:flex;flex-direction:column;align-items:center;gap:1px;font-family:inherit;min-height:48px}
+.bx-tabs button b{font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;font-weight:500}
+.bx-tabs button[aria-selected="true"]{color:var(--bxk);border-bottom-color:var(--bxr)}
+.bx-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 16px 18px;overscroll-behavior:contain}
+.bx-lbl{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--bxr);font-weight:600;margin:16px 0 8px;display:flex;justify-content:space-between;gap:8px}
+.bx-lbl:first-child{margin-top:0}.bx-lbl small{text-transform:none;letter-spacing:0;color:var(--bxm);font-weight:400;font-size:12px}
+.bx-shapes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bx-shape{border:1.5px solid var(--bxl);background:#fff;border-radius:14px;padding:10px;cursor:pointer;display:grid;grid-template-columns:40px 1fr;grid-template-rows:auto auto;column-gap:8px;text-align:left;color:var(--bxk);font-family:inherit;align-items:center}
+.bx-shape svg{grid-row:span 2;color:var(--bxr)}.bx-shape b{font-size:13.5px}.bx-shape small{font-size:11px;color:var(--bxm);line-height:1.25}
+.bx-shape[aria-pressed="true"]{border-color:var(--bxk);box-shadow:inset 0 0 0 1.5px var(--bxk)}
+.bx-chips{display:flex;flex-wrap:wrap;gap:6px}
+.bx-chip{border:1.5px solid var(--bxl);background:#fff;border-radius:12px;padding:8px 11px;font-size:13px;cursor:pointer;color:var(--bxk);min-height:40px;text-align:left;font-family:inherit;line-height:1.2}
+.bx-chip small{display:block;font-size:10.5px;color:var(--bxm)}
+.bx-chip[aria-pressed="true"]{background:var(--bxk);border-color:var(--bxk);color:#fff}.bx-chip[aria-pressed="true"] small{color:rgba(255,255,255,.75)}
+.bx-sws{display:flex;flex-wrap:wrap;gap:8px}
+.bx-sw{width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer;position:relative;padding:0}
+.bx-sw[aria-pressed="true"]::after{content:'';position:absolute;inset:-5px;border:2.5px solid var(--bxk);border-radius:50%}
+.bx-cartons{display:flex;flex-direction:column;gap:6px}
+.bx-carton{display:grid;grid-template-columns:44px 1fr;column-gap:10px;align-items:center;border:1.5px solid var(--bxl);background:#fff;border-radius:12px;padding:9px 10px;text-align:left;cursor:pointer;color:var(--bxk);font-family:inherit}
+.bx-carton .bx-thick{grid-row:span 2;width:40px;border-radius:2px;align-self:center}
+.bx-carton b{font-size:13px}.bx-carton small{font-size:11px;color:var(--bxm);line-height:1.3}
+.bx-carton[aria-pressed="true"]{border-color:var(--bxk);box-shadow:inset 0 0 0 1.5px var(--bxk)}
+.bx-field{margin-bottom:12px}
+.bx-field label{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--bxk);margin-bottom:4px}
+.bx-field input[type=number]{width:72px;height:36px;border:1.5px solid var(--bxl);border-radius:10px;text-align:center;font-size:16px;font-family:inherit}
+.bx-field input[type=range]{width:100%;accent-color:var(--bxr)}
+.bx-info{font-size:12.5px;color:var(--bxk);background:#fff;border:1px solid var(--bxl);border-radius:12px;padding:10px 12px;margin-top:10px;line-height:1.5}
+.bx-warn{background:#fff4e0;border-color:#f0d8a8;color:#8a5a12}
+.bx-togs{display:grid;grid-template-columns:1fr;gap:6px}
+.bx-tog{display:flex;align-items:center;gap:10px;border:1.5px solid var(--bxl);background:#fff;border-radius:12px;padding:9px 10px;cursor:pointer;font-size:13px;text-align:left;color:var(--bxk);font-family:inherit;min-height:44px}
+.bx-tog small{display:block;font-size:11px;color:var(--bxm)}
+.bx-ck{width:20px;height:20px;border-radius:6px;border:1.5px solid rgba(61,33,24,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex:none}
+.bx-tog[aria-pressed="true"]{border-color:var(--bxk)}.bx-tog[aria-pressed="true"] .bx-ck{background:var(--bxk);border-color:var(--bxk)}
+.bx-text{width:100%;height:44px;border:1.5px solid var(--bxl);border-radius:12px;padding:0 12px;font-size:16px;font-family:inherit}
+.bx-qty{display:inline-flex;align-items:center;border:1.5px solid var(--bxl);border-radius:50px;background:#fff}
+.bx-qty button{width:44px;height:44px;border:none;background:none;font-size:20px;cursor:pointer;color:var(--bxk)}
+.bx-qty input{width:70px;border:none;text-align:center;font-size:17px;font-family:inherit;background:none}
+.bx-tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:6px;margin-top:10px}
+.bx-tiers button{border:1px solid var(--bxl);background:#fff;border-radius:10px;padding:6px 4px;cursor:pointer;color:var(--bxk);font-family:inherit;display:flex;flex-direction:column;align-items:center}
+.bx-tiers button b{font-size:13px}.bx-tiers button small{font-size:10.5px;color:var(--bxm)}
+.bx-tiers button.on{background:var(--bxk);color:#fff;border-color:var(--bxk)}.bx-tiers button.on small{color:rgba(255,255,255,.75)}
+.bx-spec{font-size:12.5px;color:var(--bxm);margin:12px 0 8px;line-height:1.5}
+.bx-sum{background:#fff;border:1px solid var(--bxl);border-radius:12px;padding:8px 12px;margin-top:8px}
+.bx-sum div{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0;color:var(--bxk)}
+.bx-sum .bx-big{border-top:1px solid var(--bxl);margin-top:4px;padding-top:8px}.bx-sum .bx-big b{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px}
+.bx-owner{margin-top:12px}.bx-owner summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--bxk)}
+.bx-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.bx-row .bx-btn{flex:1}
+.bx-next{display:flex;justify-content:space-between;gap:8px;margin-top:18px}
+.bx-btn{border:none;border-radius:50px;padding:11px 16px;font-size:13.5px;font-weight:500;cursor:pointer;min-height:44px;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.bx-dark{background:var(--bxk);color:#fff}.bx-line{background:transparent;border:1.5px solid rgba(61,33,24,.25);color:var(--bxk)}
+.bx-foot{flex:none;display:flex;align-items:center;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--bxl)}
+.bx-fprice span{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;line-height:1;color:var(--bxk)}.bx-fprice small{font-size:11px;color:var(--bxm)}
+.bx-foot .bx-btn{flex:1}
+.bx-modal{position:fixed;inset:0;z-index:800;background:rgba(30,10,5,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+.bx-modal[hidden]{display:none}
+.bx-modal-box{background:#fff;border-radius:18px;max-width:900px;width:100%;max-height:92vh;overflow:auto;padding:20px;position:relative}
+.bx-modal-box h3{font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;font-weight:400;color:var(--bxk)}
+.bx-note{font-size:12.5px;color:var(--bxm);margin:4px 0 10px}
+.bx-svg{border:1px solid var(--bxl);border-radius:12px;overflow:auto;max-height:65vh}
+.bx-close2{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;border:none;background:var(--bxc);cursor:pointer;font-size:16px}
+@media (max-width:760px){
+  .bx-launch{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;background:linear-gradient(160deg,#4a2c22,#2a1811);color:#fff;border-radius:20px;padding:22px 18px}
+  .bx-launch-art{font-size:38px}.bx-launch h3{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:400}.bx-launch p{font-size:13px;color:rgba(255,255,255,.78);max-width:32ch}
+  .bx-launch .bx-btn{background:#fff;color:var(--bxk);width:100%;margin-top:4px}
+  .bx-app{display:none}
+  .bx.bx-fs .bx-app{display:flex;flex-direction:column;position:fixed;inset:0;z-index:700;height:100vh;height:100dvh;border-radius:0;border:0}
+  .bx.bx-fs .bx-stage{flex:0 0 auto;height:36vh;height:36dvh;min-height:200px}
+  .bx.bx-fs .bx-panel{flex:1 1 auto;border-left:0}
+  .bx.bx-fs .bx-close{display:flex;position:absolute;left:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:3;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.9);color:var(--bxk);align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  .bx.bx-fs .bx-top{left:54px;top:calc(12px + env(safe-area-inset-top,0px))}
+  .bx-title{font-size:18px}.bx-price{font-size:18px}.bx-dims{font-size:11px}
+  .bx-chipbtn{font-size:11px;padding:5px 9px;min-height:30px}
+  .bx-tabs button{font-size:10.5px;min-height:44px}.bx-tabs button b{font-size:14px}
+  .bx-shapes{grid-template-columns:1fr 1fr}.bx-shape{padding:8px;grid-template-columns:32px 1fr}.bx-shape svg{width:30px;height:30px}.bx-shape b{font-size:12.5px}.bx-shape small{font-size:10px}
+  .bx-chip{font-size:12px;padding:7px 9px;min-height:38px}
+  .bx-fprice span{font-size:20px}.bx-foot .bx-btn{font-size:13px}
+  body.bx-open{overflow:hidden}
+}
 </style>
 </head>
 <body>
@@ -480,6 +673,7 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
     </a>
     <nav class="nav" aria-label="Principal">
       <a href="#catalogo">Productos</a>
+      <a href="#cajas">Diseña tu caja</a>
       <a href="#como">Cómo funciona</a>
       <a href="#acceso">Acceso</a>
     </nav>
@@ -517,6 +711,14 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
       <p class="sec-sub" id="scSub">Los precios se muestran cuando ingresas con tu cuenta de distribuidor.</p></div>
     <div class="pills" id="scCats" style="justify-content:center;margin-bottom:16px"></div>
     <div class="ws-grid showcase" id="scGrid"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+  </div>
+</section>
+
+<section class="sec" id="cajas">
+  <div class="wrap">
+    <div class="sec-head"><div class="eyebrow">Hechas a tu medida</div><h2 class="sec-title">Diseña tus <em>cajas</em></h2>
+      <p class="sec-sub">Cuadradas, redondas, corazón, tipo libro, cajón o bolsa. Elige medidas, grosor del cartón, forro y acabados, y mira el precio por cantidad.</p></div>
+    <div class="bx" id="bxRoot"></div>
   </div>
 </section>
 
@@ -610,6 +812,427 @@ footer{background:var(--bark);color:rgba(245,237,232,.7);padding:44px 0 calc(28p
 <script>
 (function(){
 "use strict";
+/* =====================================================================
+   DISEÑADOR DE CAJAS · núcleo (sin 3D): formas, materiales, precios,
+   cálculo de materiales y plano para fabricar. Medidas en centímetros.
+   ===================================================================== */
+const BOX_SHAPES={
+  cuadrada:   {label:'Cuadrada',     desc:'La clásica de florería',               dims:['w','h'],      lids:['media','completa','acrilica','ventana','sin'], poly:'rect', square:true},
+  rectangular:{label:'Rectangular',  desc:'Para ramos alargados y regalos',       dims:['w','d','h'],  lids:['media','completa','acrilica','ventana','sin'], poly:'rect'},
+  redonda:    {label:'Redonda',      desc:'Sombrerera, la más pedida',            dims:['w','h'],      lids:['media','completa','acrilica','ventana','sin'], poly:'circle'},
+  hexagonal:  {label:'Hexagonal',    desc:'Elegante y distinta',                  dims:['w','h'],      lids:['media','completa','acrilica','sin'],           poly:6},
+  octogonal:  {label:'Octogonal',    desc:'Casi redonda, fácil de forrar',        dims:['w','h'],      lids:['media','completa','acrilica','sin'],           poly:8},
+  corazon:    {label:'Corazón',      desc:'Para fechas especiales',               dims:['w','h'],      lids:['media','completa','acrilica','sin'],           poly:'heart'},
+  cajon:      {label:'Cajón',        desc:'Se desliza fuera de una funda',        dims:['w','d','h'],  lids:['funda'],                                       poly:'rect'},
+  libro:      {label:'Tipo libro',   desc:'Tapa con bisagra e imán',              dims:['w','d','h'],  lids:['libro'],                                       poly:'rect'},
+  bolsa:      {label:'Bolsa',        desc:'Con asas, para llevar',                dims:['w','d','h'],  lids:['sin'],                                         poly:'rect'},
+  bandeja:    {label:'Bandeja',      desc:'Abierta, para exhibir',                dims:['w','d','h'],  lids:['sin'],                                         poly:'rect'}
+};
+const BOX_LIDS={media:'Tapa media',completa:'Tapa completa',acrilica:'Tapa acrílica',ventana:'Tapa con ventana',sin:'Sin tapa',funda:'Funda deslizable',libro:'Tapa libro con imán'};
+const BOX_FINISHES={mate:'Mate',brillante:'Brillante',kraft:'Kraft',lino:'Lino texturizado',perlado:'Perlado / metalizado',terciopelo:'Terciopelo',marmol:'Mármol',natural:'Sin forro (cartón visto)'};
+const BOX_EXTRAS={cinta:'Cinta alrededor',lazo:'Lazo',inserto:'Inserto con huecos para flores',impermeable:'Forro impermeable (flor natural)',estampado:'Estampado con tu logo o texto',iman:'Cierre con imán',asas:'Asas de cordón'};
+
+// Reglas de ejemplo: TODO se edita en el sistema → Cajas → Configuración
+const BOX_DEFAULT={
+  v:1, preciosPublicos:false, pliego:{w:70,h:100}, merma:12, minimo:10,
+  formas:Object.fromEntries(Object.keys(BOX_SHAPES).map(k=>[k,{on:true}])),
+  medidas:{min:5,max:60,minH:3,maxH:40},
+  cartones:[
+    {id:'c300',  name:'Cartulina 300 g',        tipo:'cartulina', mm:0.4, g:300,  uso:'Cajas plegables livianas, souvenirs'},
+    {id:'c400',  name:'Cartulina 400 g',        tipo:'cartulina', mm:0.55,g:400,  uso:'Plegables más firmes, bolsas'},
+    {id:'g10',   name:'Cartón gris 1 mm',       tipo:'gris',      mm:1,   g:600,  uso:'Cajas rígidas pequeñas'},
+    {id:'g15',   name:'Cartón gris 1,5 mm',     tipo:'gris',      mm:1.5, g:900,  uso:'Rígidas medianas'},
+    {id:'g20',   name:'Cartón gris 2 mm',       tipo:'gris',      mm:2,   g:1200, uso:'Estándar de florería, resiste peso'},
+    {id:'g25',   name:'Cartón gris 2,5 mm',     tipo:'gris',      mm:2.5, g:1500, uso:'Cajas grandes y de lujo'},
+    {id:'g30',   name:'Cartón gris 3 mm',       tipo:'gris',      mm:3,   g:1800, uso:'Premium, muy rígida'},
+    {id:'ce',    name:'Corrugado microcanal E', tipo:'corrugado', mm:1.5, g:420,  uso:'Envíos y cajas económicas'},
+    {id:'cb',    name:'Corrugado canal B',      tipo:'corrugado', mm:3,   g:550,  uso:'Envíos pesados'}
+  ],
+  forros:Object.fromEntries(Object.keys(BOX_FINISHES).map(k=>[k,{on:true}])),
+  colores:{Blanco:'#f6f4ef',Crema:'#efe3cc',Negro:'#1d1b1c',Rosa:'#eab8c2','Rosa palo':'#e3c3c0',Rojo:'#b3202c',Vino:'#6e1424',Lila:'#c9b3dc',Celeste:'#b9daf0',Azul:'#1f3f6e',Verde:'#3f5a45',Dorado:'#c9a45c',Plateado:'#c8ccd2'},
+  interiores:{ninguno:'Sin forro interior',blanco:'Blanco',negro:'Negro',igual:'Del mismo color',contraste:'Color de contraste'},
+  extras:Object.fromEntries(Object.keys(BOX_EXTRAS).map(k=>[k,{on:true}])),
+  precios:{
+    cartones:{c300:2.2,c400:2.8,g10:3.5,g15:4.5,g20:5.5,g25:6.8,g30:8,ce:2.6,cb:3.4},           // $ por m²
+    forros:{mate:3,brillante:3.4,kraft:2.4,lino:5.5,perlado:6,terciopelo:9,marmol:4.5,natural:0}, // $ por m²
+    interior:2.5,                                                                                // $ por m²
+    formas:{cuadrada:0.6,rectangular:0.6,redonda:0.9,hexagonal:1,octogonal:1,corazon:1.3,cajon:1.2,libro:1.5,bolsa:0.8,bandeja:0.4}, // mano de obra por caja
+    tapas:{media:0,completa:0.2,acrilica:1.2,ventana:0.6,sin:0,funda:0,libro:0.4},
+    extras:{cinta:0.35,lazo:0.5,inserto:0.8,impermeable:0.3,estampado:0.4,iman:0.45,asas:0.4},
+    estampadoSetup:15,                                                                          // cargo único por diseño de estampado
+    descuentos:[{desde:1,pct:0},{desde:50,pct:8},{desde:100,pct:14},{desde:300,pct:20},{desde:1000,pct:26}]
+  },
+  presets:[
+    {name:'1 rosa',            spec:{shape:'cuadrada',w:10,h:10}},
+    {name:'Sombrerera 9 rosas',spec:{shape:'redonda',w:20,h:15}},
+    {name:'Corazón mediano',   spec:{shape:'corazon',w:26,h:11}},
+    {name:'Caja libro',        spec:{shape:'libro',w:22,d:16,h:8}},
+    {name:'Bolsa regalo',      spec:{shape:'bolsa',w:20,d:12,h:26,extras:{asas:true}}}
+  ]
+};
+
+function boxDefaultSpec(){return {shape:'cuadrada',w:20,d:20,h:15,lid:'media',carton:'g20',finish:'mate',color:'Negro',interior:'blanco',interiorColor:'Blanco',ribbon:'Dorado',stampText:'',stampColor:'Dorado',extras:{},qty:50};}
+
+/* ── geometría plana (polígonos en cm, centrados) ── */
+function boxPoly(shape,w,d,seg){
+  const S=BOX_SHAPES[shape]||BOX_SHAPES.cuadrada,P=[];
+  if(S.poly==='rect'){const W=w,D=S.square?w:d,r=Math.min(0.25,W/20,D/20),n=4;
+    [[W/2-r,D/2-r,0],[-W/2+r,D/2-r,Math.PI/2],[-W/2+r,-D/2+r,Math.PI],[W/2-r,-D/2+r,Math.PI*1.5]].forEach(([cx,cy,a0])=>{for(let i=0;i<=n;i++){const a=a0+i/n*Math.PI/2;P.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r]);}});return P;}
+  if(S.poly==='circle'){const n=seg||64;for(let i=0;i<n;i++){const a=i/n*Math.PI*2;P.push([Math.cos(a)*w/2,Math.sin(a)*w/2]);}return P;}
+  if(S.poly==='heart'){const n=seg||96,k=w/2;for(let i=0;i<n;i++){const t=i/n*Math.PI*2;P.push([Math.pow(Math.sin(t),3)*k,((13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))/16+0.12)*k]);}return P;}
+  const N=S.poly,R=w/2;for(let i=0;i<N;i++){const a=Math.PI/2+Math.PI/N+i*2*Math.PI/N;P.push([Math.cos(a)*R,Math.sin(a)*R]);}return P;
+}
+function polyArea(P){let s=0;for(let i=0,j=P.length-1;i<P.length;j=i++)s+=(P[j][0]+P[i][0])*(P[j][1]-P[i][1]);return Math.abs(s/2);}
+function polyPerim(P){let s=0;for(let i=0,j=P.length-1;i<P.length;j=i++)s+=Math.hypot(P[i][0]-P[j][0],P[i][1]-P[j][1]);return s;}
+function polyBox(P){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;P.forEach(([x,y])=>{x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);});return {w:x1-x0,h:y1-y0};}
+
+/* ── validar y completar una especificación según las reglas ── */
+function boxSanitize(spec,cfg){
+  const s=Object.assign(boxDefaultSpec(),spec||{});s.extras=Object.assign({},s.extras||{});
+  const on=k=>!cfg.formas||!cfg.formas[k]||cfg.formas[k].on!==false;
+  if(!BOX_SHAPES[s.shape]||!on(s.shape))s.shape=Object.keys(BOX_SHAPES).find(on)||'cuadrada';
+  const S=BOX_SHAPES[s.shape],m=cfg.medidas||BOX_DEFAULT.medidas,cl=(v,a,b)=>Math.min(b,Math.max(a,Math.round((+v||a)*2)/2));
+  s.w=cl(s.w,m.min,m.max);s.d=S.dims.includes('d')?cl(s.d,m.min,m.max):s.w;s.h=cl(s.h,m.minH,m.maxH);
+  if(!S.lids.includes(s.lid))s.lid=S.lids[0];
+  const cts=cfg.cartones||[];if(!cts.find(c=>c.id===s.carton))s.carton=(cts.find(c=>c.id==='g20')||cts[0]||{}).id;
+  const fOn=k=>!cfg.forros||!cfg.forros[k]||cfg.forros[k].on!==false;if(!BOX_FINISHES[s.finish]||!fOn(s.finish))s.finish=Object.keys(BOX_FINISHES).find(fOn)||'mate';
+  const cols=cfg.colores||{};if(!cols[s.color])s.color=Object.keys(cols)[0];if(!cols[s.interiorColor])s.interiorColor=Object.keys(cols)[0];if(!cols[s.ribbon])s.ribbon=cols.Dorado?'Dorado':Object.keys(cols)[0];if(!cols[s.stampColor])s.stampColor=cols.Dorado?'Dorado':Object.keys(cols)[0];
+  if(!(cfg.interiores||{})[s.interior])s.interior='blanco';
+  Object.keys(s.extras).forEach(k=>{if(!BOX_EXTRAS[k]||(cfg.extras&&cfg.extras[k]&&cfg.extras[k].on===false))delete s.extras[k];});
+  if(s.shape!=='libro')delete s.extras.iman;if(s.shape!=='bolsa')delete s.extras.asas;
+  s.qty=Math.max(1,Math.round(+s.qty||1));s.stampText=String(s.stampText||'').slice(0,30);
+  return s;
+}
+const boxCarton=(s,cfg)=>(cfg.cartones||[]).find(c=>c.id===s.carton)||{mm:2,tipo:'gris',name:'Cartón'};
+const boxLidH=s=>s.lid==='completa'?s.h:s.lid==='sin'||s.lid==='funda'||s.lid==='libro'?0:Math.max(2,Math.round(s.h*0.33*2)/2);
+
+/* ── superficies (cm²) por caja ── */
+function boxAreas(s,cfg){
+  const t=boxCarton(s,cfg).mm/10,P=boxPoly(s.shape,s.w,s.d,96),A=polyArea(P),L=polyPerim(P),H=s.h,wrap=2;
+  let struct=A+L*H,cover=A+L*(H+wrap*2),inner=A+L*H,parts=['Base y paredes'];
+  const lh=boxLidH(s);
+  if(lh){const PL=boxPoly(s.shape,s.w+2*t+0.4,s.d+2*t+0.4,96),AL=polyArea(PL),LL=polyPerim(PL);
+    if(s.lid==='acrilica'){parts.push('Tapa acrílica');}
+    else{struct+=AL+LL*lh;cover+=AL+LL*(lh+wrap*2);inner+=AL;parts.push('Tapa');}}
+  if(s.lid==='funda'){const sl=(2*(s.w+2*t)+2*(H+2*t)+1.5)*s.d;struct+=sl;cover+=sl+2*wrap*(2*(s.w+H));parts.push('Funda');}
+  if(s.lid==='libro'){const b=(s.w+1)*(s.d+1),sp=(H+2*t)*(s.d+1);struct+=2*b+sp;cover+=(2*(s.w+1)+(H+2*t)+2*wrap)*(s.d+1+2*wrap);inner+=b;parts.push('Tapa libro');}
+  if(s.shape==='bolsa'){cover=L*(H+wrap)+A;inner=0;}
+  if(s.extras.inserto)struct+=A*0.9;
+  return {struct,cover,inner:s.interior==='ninguno'?0:inner,base:A,perim:L,parts};
+}
+
+/* ── precio ── */
+function boxTier(qty,cfg){const ds=((cfg.precios||{}).descuentos||[]).slice().sort((a,b)=>a.desde-b.desde);let pct=0;ds.forEach(x=>{if(qty>=x.desde)pct=+x.pct||0;});return pct;}
+function boxPrice(s,cfg){
+  const pr=cfg.precios;if(!pr)return null;
+  const a=boxAreas(s,cfg),m2=v=>v/10000,c=boxCarton(s,cfg);
+  const lines=[];const add=(k,v)=>{if(v>0.0001)lines.push([k,v]);};
+  add('Estructura ('+c.name+')',m2(a.struct)*(+pr.cartones[s.carton]||0));
+  add('Forro exterior ('+BOX_FINISHES[s.finish]+')',m2(a.cover)*(+pr.forros[s.finish]||0)*(1+(+cfg.merma||0)/100));
+  if(a.inner)add('Forro interior',m2(a.inner)*(+pr.interior||0));
+  add('Armado ('+BOX_SHAPES[s.shape].label+')',+pr.formas[s.shape]||0);
+  add(BOX_LIDS[s.lid],+pr.tapas[s.lid]||0);
+  Object.keys(s.extras).filter(k=>s.extras[k]).forEach(k=>add(BOX_EXTRAS[k],+pr.extras[k]||0));
+  const unitBase=lines.reduce((x,l)=>x+l[1],0),pct=boxTier(s.qty,cfg),unit=Math.round(unitBase*(1-pct/100)*100)/100;
+  const setup=s.extras.estampado?(+pr.estampadoSetup||0):0;
+  return {lines,unitBase,pct,unit,setup,total:Math.round((unit*s.qty+setup)*100)/100};
+}
+
+/* ── materiales para producir el pedido ── */
+function boxMaterials(s,cfg){
+  const a=boxAreas(s,cfg),pl=cfg.pliego||{w:70,h:100},sheet=pl.w*pl.h*(1-(+cfg.merma||0)/100),q=s.qty;
+  return {cartonM2:a.struct*q/10000,forroM2:a.cover*q/10000,interiorM2:a.inner*q/10000,
+    pliegosCarton:Math.ceil(a.struct*q/sheet),pliegosForro:Math.ceil(a.cover*q/sheet),pliegosInterior:a.inner?Math.ceil(a.inner*q/sheet):0,
+    porPliego:Math.max(1,Math.floor(sheet/a.struct)),pesoKg:a.struct*q/10000*(boxCarton(s,cfg).g||0)/1000};
+}
+
+/* ── capacidad aproximada para florerías ── */
+function boxFits(s){const A=polyArea(boxPoly(s.shape,s.w,s.d,64)),rose=Math.PI*3.5*3.5;return {rosas:Math.max(0,Math.floor(A*0.95/rose)),girasoles:Math.max(0,Math.floor(A*0.95/(Math.PI*36)))};}
+
+/* ── texto de la especificación (pedido, cotización, WhatsApp) ── */
+function boxSpecText(s,cfg){
+  const S=BOX_SHAPES[s.shape],c=boxCarton(s,cfg),dim=S.dims.includes('d')?`${s.w} × ${s.d} × ${s.h} cm`:(S.poly==='rect'?`${s.w} × ${s.w} × ${s.h} cm`:`Ø ${s.w} × ${s.h} cm`);
+  const ex=Object.keys(s.extras).filter(k=>s.extras[k]).map(k=>k==='estampado'&&s.stampText?`estampado "${s.stampText}" ${s.stampColor.toLowerCase()}`:k==='cinta'?`cinta ${s.ribbon.toLowerCase()}`:BOX_EXTRAS[k].toLowerCase());
+  return [`Caja ${S.label.toLowerCase()} ${dim}`,c.name,BOX_LIDS[s.lid],`forro ${BOX_FINISHES[s.finish].toLowerCase()}${s.finish!=='natural'&&s.finish!=='kraft'&&s.finish!=='marmol'?' '+s.color.toLowerCase():''}`,
+    s.interior!=='ninguno'?`interior ${(cfg.interiores||{})[s.interior]?.toLowerCase()||s.interior}${s.interior==='contraste'?' '+s.interiorColor.toLowerCase():''}`:'sin forro interior'].concat(ex).join(' · ');
+}
+function boxEncode(s){const o={...s};return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function boxDecode(code){try{let b=String(code||'').replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';const o=JSON.parse(decodeURIComponent(escape(atob(b))));return o&&o.shape?o:null;}catch(e){return null;}}
+
+/* ── plano para fabricar (SVG con medidas en cm) ── */
+function boxDieline(s,cfg){
+  const t=boxCarton(s,cfg).mm/10,H=s.h,S=BOX_SHAPES[s.shape],pieces=[];
+  const f1=v=>(Math.round(v*10)/10).toString().replace('.',',');
+  // pieza tipo bandeja con esquinas cortadas (rectangulares)
+  const tray=(W,D,h,name)=>{const ox=h,oy=h,o=[[ox,0],[ox+W,0],[ox+W,oy],[ox+W+h,oy],[ox+W+h,oy+D],[ox+W,oy+D],[ox+W,oy+D+h],[ox,oy+D+h],[ox,oy+D],[0,oy+D],[0,oy],[ox,oy]];
+    return {name,w:W+2*h,h:D+2*h,cut:[o],fold:[[[ox,oy],[ox+W,oy]],[[ox,oy+D],[ox+W,oy+D]],[[ox,oy],[ox,oy+D]],[[ox+W,oy],[ox+W,oy+D]]],dims:[[ox,oy+D+h+1.2,ox+W,`${f1(W)}`],[-1.2,oy,oy+D,`${f1(D)}`,1],[ox+W+h+1.2,oy,oy+h,`${f1(h)}`,1]]};};
+  // pieza base (forma) + tira lateral
+  const shapeBase=(P,name)=>{const b=polyBox(P),mx=Math.min(...P.map(p=>p[0])),my=Math.min(...P.map(p=>p[1]));return {name,w:b.w,h:b.h,cut:[P.map(([x,y])=>[x-mx,y-my])],fold:[],dims:[[0,b.h+1.2,b.w,`${f1(b.w)}`]]};};
+  const strip=(L,h,name,panels)=>{const fold=[];if(panels){for(let i=1;i<panels;i++)fold.push([[i*L/panels,0],[i*L/panels,h]]);}fold.push([[L,0],[L,h]]);
+    return {name,w:L+1.5,h,cut:[[[0,0],[L+1.5,0],[L+1.5,h],[0,h]]],fold,dims:[[0,h+1.2,L,`${f1(L)} + 1,5 pestaña`],[-1.2,0,h,`${f1(h)}`,1]]};};
+  const lh=boxLidH(s),gap=0.2;
+  if(S.poly==='rect'&&s.shape!=='bolsa'){
+    const D=S.square?s.w:s.d;pieces.push(tray(s.w,D,H,'Base'));
+    if(lh)pieces.push(s.lid==='acrilica'?{...tray(s.w+2*t+gap*2,D+2*t+gap*2,lh,'Tapa acrílica (PET)')}:tray(s.w+2*t+gap*2,D+2*t+gap*2,lh,'Tapa'));
+    if(s.lid==='funda'){const L=2*(s.w+2*t)+2*(H+2*t);pieces.push({name:'Funda',w:L+1.5,h:D,cut:[[[0,0],[L+1.5,0],[L+1.5,D],[0,D]]],fold:[s.w+2*t,H+2*t,s.w+2*t,H+2*t].reduce((a,v)=>{const x=(a.x||0)+v;a.l.push([[x,0],[x,D]]);a.x=x;return a;},{l:[],x:0}).l,dims:[[0,D+1.2,L,`${f1(L)} + 1,5`],[-1.2,0,D,`${f1(D)}`,1]]});}
+    if(s.lid==='libro'){const bw=s.w+1,bd=D+1,sp=H+2*t,g=0.6,L=bw*2+sp+g*2;pieces.push({name:'Tapas (cartón)',w:L,h:bd,cut:[[[0,0],[bw,0],[bw,bd],[0,bd]],[[bw+g,0],[bw+g+sp,0],[bw+g+sp,bd],[bw+g,bd]],[[bw+g*2+sp,0],[L,0],[L,bd],[bw+g*2+sp,bd]]],fold:[],dims:[[0,bd+1.2,bw,`${f1(bw)}`],[bw+g,bd+1.2,bw+g+sp,`${f1(sp)}`],[-1.2,0,bd,`${f1(bd)}`,1]]});}
+  }else if(s.shape==='bolsa'){const L=2*s.w+2*s.d,Hb=H+s.d*0.6+3,fold=[];let x=0;[s.w,s.d,s.w,s.d].forEach(v=>{x+=v;fold.push([[x,0],[x,Hb]]);});fold.push([[0,3],[L,3]]);fold.push([[0,H+3],[L,H+3]]);
+    pieces.push({name:'Bolsa',w:L+2,h:Hb,cut:[[[0,0],[L+2,0],[L+2,Hb],[0,Hb]]],fold,dims:[[0,Hb+1.2,L,`${f1(L)} + 2`],[-1.2,0,Hb,`${f1(Hb)}`,1]]});}
+  else{const P=boxPoly(s.shape,s.w,s.d,96),L=polyPerim(P),panels=typeof S.poly==='number'?S.poly:0;
+    pieces.push(shapeBase(P,'Base'));pieces.push(strip(L,H,'Pared lateral',panels));
+    if(lh&&s.lid!=='acrilica'){const PL=boxPoly(s.shape,s.w+2*t+gap*2,s.d,96);pieces.push(shapeBase(PL,'Tapa'));pieces.push(strip(polyPerim(PL),lh,'Pared de la tapa',panels));}}
+  if(s.extras.inserto){const P=boxPoly(s.shape,s.w-2*t-0.2,s.d-2*t-0.2,64);const b=shapeBase(P,'Inserto (espuma o cartón)');pieces.push(b);}
+  // acomodo de piezas y dibujo
+  const gapP=5,maxW=Math.max(64,...pieces.map(p=>p.w+8));let x=4,y=2,rowH=0;pieces.forEach(p=>{if(x+p.w+4>maxW){x=4;y+=rowH+gapP+3;rowH=0;}p.x=x+1.5;p.y=y+1.5;x+=p.w+gapP+4;rowH=Math.max(rowH,p.h+3);});
+  const W=maxW+2,Ht=y+rowH+6,sc=10;
+  const pt=(p,[a,b])=>`${((p.x+a)*sc).toFixed(1)},${((p.y+b)*sc).toFixed(1)}`;
+  let svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W*sc} ${Ht*sc}" width="100%" style="background:#fff;font-family:Jost,Arial,sans-serif" role="img" aria-label="Plano de la caja con medidas en centímetros">`;
+  svg+=`<defs><pattern id="g" width="${sc}" height="${sc}" patternUnits="userSpaceOnUse"><path d="M ${sc} 0 L 0 0 0 ${sc}" fill="none" stroke="#f1e9e4" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#g)"/>`;
+  pieces.forEach(p=>{
+    p.cut.forEach(poly=>{svg+=`<polygon points="${poly.map(q=>pt(p,q)).join(' ')}" fill="#f7efe9" stroke="#3d2118" stroke-width="2"/>`;});
+    p.fold.forEach(([a,b])=>{svg+=`<line x1="${(p.x+a[0])*sc}" y1="${(p.y+a[1])*sc}" x2="${(p.x+b[0])*sc}" y2="${(p.y+b[1])*sc}" stroke="#c47e6e" stroke-width="1.6" stroke-dasharray="7 5"/>`;});
+    (p.dims||[]).forEach(([a,b,c,txt,vert])=>{if(vert){const xx=(p.x+a)*sc;svg+=`<line x1="${xx}" y1="${(p.y+b)*sc}" x2="${xx}" y2="${(p.y+c)*sc}" stroke="#8a7068" stroke-width="1"/><text x="${xx-4}" y="${(p.y+(b+c)/2)*sc}" font-size="13" fill="#7a3f33" text-anchor="end" dominant-baseline="middle">${txt}</text>`;}
+      else{const yy=(p.y+b)*sc;svg+=`<line x1="${(p.x+a)*sc}" y1="${yy}" x2="${(p.x+c)*sc}" y2="${yy}" stroke="#8a7068" stroke-width="1"/><text x="${(p.x+(a+c)/2)*sc}" y="${yy+15}" font-size="13" fill="#7a3f33" text-anchor="middle">${txt} cm</text>`;}});
+    svg+=`<text x="${p.x*sc}" y="${(p.y-0.6)*sc}" font-size="15" font-weight="600" fill="#3d2118">${p.name}</text>`;
+  });
+  svg+=`<g transform="translate(${2*sc},${(Ht-3)*sc})" font-size="12" fill="#5a4038"><line x1="0" y1="-4" x2="30" y2="-4" stroke="#3d2118" stroke-width="2"/><text x="36" y="0">Corte</text><line x1="100" y1="-4" x2="130" y2="-4" stroke="#c47e6e" stroke-width="1.6" stroke-dasharray="7 5"/><text x="136" y="0">Doblez</text><text x="0" y="20">Cartón ${f1(t*10)} mm · el forro lleva 2 cm extra por cada borde · medidas en cm</text></g></svg>`;
+  return {svg,pieces:pieces.map(p=>({name:p.name,w:p.w,h:p.h}))};
+}
+
+/* =====================================================================
+   DISEÑADOR DE CAJAS · 3D + pantalla. Requiere THREE + OrbitControls.
+   BoxDesigner(root,{cfg, owner, onAdd(spec,price,text), canOrder, priceNote})
+   ===================================================================== */
+function BoxDesigner(root,opts){
+  opts=opts||{};let cfg=opts.cfg||BOX_DEFAULT,spec=boxSanitize(opts.spec||{},cfg),step='forma',open=false;
+  const owner=!!opts.owner,isPhone=()=>window.matchMedia('(max-width:760px)').matches,reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money=n=>'$'+Number(n||0).toFixed(2);
+  const say=m=>{if(opts.toast)opts.toast(m);};
+  root.innerHTML=`
+  <div class="bx-launch"><div class="bx-launch-art" aria-hidden="true">📦</div><h3>Diseña tu caja en 3D</h3><p>Forma, medidas, cartón, forro y acabados. Ves el precio por cantidad al instante.</p><button type="button" class="bx-btn bx-dark" data-bx="open">Abrir el diseñador de cajas</button></div>
+  <div class="bx-app">
+    <div class="bx-stage"><div class="bx-view"></div>
+      <button type="button" class="bx-close" data-bx="close" aria-label="Cerrar">✕</button>
+      <div class="bx-top"><div><div class="bx-title"></div><div class="bx-dims"></div></div><div class="bx-price"></div></div>
+      <div class="bx-tools"><button type="button" class="bx-chipbtn" data-bx="lid" aria-pressed="false">📦 Abrir</button><button type="button" class="bx-chipbtn" data-bx="dims" aria-pressed="true">📏 Medidas</button><button type="button" class="bx-chipbtn" data-bx="share">🔗 Compartir</button></div>
+      <div class="bx-msg"><div class="bx-spin"></div>Preparando el diseñador…</div>
+    </div>
+    <div class="bx-panel">
+      <div class="bx-tabs" role="tablist"></div>
+      <div class="bx-scroll"></div>
+      <div class="bx-foot"><div class="bx-fprice"><span></span><small></small></div><button type="button" class="bx-btn bx-dark" data-bx="add"></button></div>
+    </div>
+  </div>
+  <div class="bx-modal" hidden><div class="bx-modal-box"><button type="button" class="bx-close2" data-bx="mclose" aria-label="Cerrar">✕</button><div class="bx-modal-body"></div></div></div>`;
+  const q=s=>root.querySelector(s);
+  const app=q('.bx-app'),view=q('.bx-view');
+
+  /* ── 3D ── */
+  let R=null,scene,camera,controls,boxG=new THREE.Group(),dimsG=null,showDims=true,lidOpen=false,visible=true,tw=null;
+  const C=v=>v/10,V2=(x,y)=>new THREE.Vector2(x,y);
+  function lin(h){return new THREE.Color(h).convertSRGBToLinear();}
+  const M={},T={};const mat=(k,f)=>M[k]||(M[k]=f());
+  function tex(key,draw,rx){if(T[key])return T[key];const c=document.createElement('canvas');c.width=c.height=256;draw(c.getContext('2d'),256);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx||2,rx||2);t.anisotropy=4;return T[key]=t;}
+  const rnd=(s=>()=>(s=s*16807%2147483647)/2147483647)(7);
+  function coverMat(finish,hex){
+    const k='cv'+finish+hex;
+    return mat(k,()=>{const b={color:lin(hex),roughness:0.6,metalness:0,side:THREE.DoubleSide};
+      if(finish==='brillante')return new THREE.MeshPhysicalMaterial(Object.assign(b,{roughness:0.18,clearcoat:0.8,clearcoatRoughness:0.08}));
+      if(finish==='perlado')return new THREE.MeshPhysicalMaterial(Object.assign(b,{roughness:0.3,metalness:0.55,clearcoat:0.4}));
+      if(finish==='terciopelo')return new THREE.MeshStandardMaterial(Object.assign(b,{roughness:1,map:tex('vel',(x,n)=>{x.fillStyle='#fff';x.fillRect(0,0,n,n);for(let i=0;i<5000;i++){x.fillStyle=`rgba(0,0,0,${rnd()*0.08})`;x.fillRect(rnd()*n,rnd()*n,2,2);}},3)}));
+      if(finish==='lino')return new THREE.MeshStandardMaterial(Object.assign(b,{roughness:0.85,map:tex('lino',(x,n)=>{x.fillStyle='#fff';x.fillRect(0,0,n,n);for(let i=0;i<n;i+=3){x.fillStyle=`rgba(0,0,0,${0.05+rnd()*0.05})`;x.fillRect(0,i,n,1);x.fillRect(i,0,1,n);}},4)}));
+      if(finish==='kraft')return new THREE.MeshStandardMaterial({color:0xffffff,side:THREE.DoubleSide,roughness:0.92,map:tex('kraft',(x,n)=>{x.fillStyle='#b89a74';x.fillRect(0,0,n,n);for(let i=0;i<3000;i++){x.fillStyle=rnd()<0.5?'rgba(80,55,30,.09)':'rgba(255,240,220,.09)';x.fillRect(rnd()*n,rnd()*n,1+rnd()*3,1);}})});
+      if(finish==='marmol')return new THREE.MeshStandardMaterial({color:0xffffff,side:THREE.DoubleSide,roughness:0.35,map:tex('marm',(x,n)=>{x.fillStyle='#f6f4f1';x.fillRect(0,0,n,n);for(let i=0;i<14;i++){x.strokeStyle=i%3?'rgba(150,150,150,.3)':'rgba(201,162,78,.85)';x.lineWidth=1+rnd()*2;x.beginPath();let px=rnd()*n,py=0;x.moveTo(px,py);for(let k=0;k<5;k++){const nx=px+(rnd()-0.5)*100,ny=py+n/5;x.quadraticCurveTo(px+(rnd()-0.5)*80,py+n/10,nx,ny);px=nx;py=ny;}x.stroke();}},1)});
+      return new THREE.MeshStandardMaterial(b);});
+  }
+  function cartonMat(tipo){return mat('ct'+tipo,()=>new THREE.MeshStandardMaterial({color:lin(tipo==='gris'?'#8d867c':tipo==='corrugado'?'#b8935f':'#e9e3d6'),roughness:0.95,side:THREE.DoubleSide,
+    map:tex('ctx'+tipo,(x,n)=>{x.fillStyle='#fff';x.fillRect(0,0,n,n);for(let i=0;i<4000;i++){x.fillStyle=`rgba(0,0,0,${rnd()*0.1})`;x.fillRect(rnd()*n,rnd()*n,1+rnd()*2,1);}if(tipo==='corrugado'){for(let i=0;i<n;i+=8){x.fillStyle='rgba(0,0,0,.1)';x.fillRect(0,i,n,2);}}},3)}));}
+  const glassMat=()=>mat('glass',()=>new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:0.16,roughness:0.03,clearcoat:1,depthWrite:false,side:THREE.DoubleSide}));
+  const plainMat=(hex,r,m)=>mat('pl'+hex+r+m,()=>new THREE.MeshStandardMaterial({color:lin(hex),roughness:r==null?0.6:r,metalness:m||0,side:THREE.DoubleSide}));
+  const shapeOf=P=>new THREE.Shape(P.map(p=>V2(C(p[0]),C(p[1]))));
+  function ring(Po,Pi,h,mats){const s=shapeOf(Po);s.holes.push(new THREE.Path(Pi.map(p=>V2(C(p[0]),C(p[1])))));const g=new THREE.ExtrudeGeometry(s,{depth:C(h),bevelEnabled:false,curveSegments:2});g.rotateX(-Math.PI/2);return new THREE.Mesh(g,mats);}
+  function plate(P,t,mats){const g=new THREE.ExtrudeGeometry(shapeOf(P),{depth:C(t),bevelEnabled:false,curveSegments:2});g.rotateX(-Math.PI/2);return new THREE.Mesh(g,mats);}
+  function bow(hex,size){const g=new THREE.Group(),m=plainMat(hex,0.3,0.05),k=C(size)/0.56;const loop=new THREE.TorusGeometry(0.12,0.03,10,28);[-1,1].forEach(sd=>{const l=new THREE.Mesh(loop,m);l.scale.set(1.2,0.6,0.5);l.position.x=sd*0.13;l.rotation.z=sd*0.35;g.add(l);const tl=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.3,0.012),m);tl.position.set(sd*0.06,-0.16,0);tl.rotation.z=sd*0.35;g.add(tl);});
+    const kn=new THREE.Mesh(new THREE.SphereGeometry(0.045,14,10),m);kn.scale.z=0.6;g.add(kn);g.scale.setScalar(k);return g;}
+  function decal(text,hex,w){const c=document.createElement('canvas');c.width=512;c.height=160;const x=c.getContext('2d');x.font='italic 72px Georgia, serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle=hex;x.fillText(text,256,82);
+    const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;const mm=new THREE.MeshStandardMaterial({map:t,transparent:true,alphaTest:0.3,metalness:0.6,roughness:0.3});const p=new THREE.Mesh(new THREE.PlaneGeometry(w,w*160/512),mm);return p;}
+  function build(){
+    const s=spec,c=boxCarton(s,cfg),t=Math.max(0.04,c.mm/10),S=BOX_SHAPES[s.shape],natural=s.finish==='natural';
+    const colors=cfg.colores||{},hex=colors[s.color]||'#1d1b1c',outer=natural?cartonMat(c.tipo):coverMat(s.finish,hex),edge=natural?cartonMat(c.tipo):outer;
+    const innerHex=s.interior==='blanco'?'#f6f4ef':s.interior==='negro'?'#1d1b1c':s.interior==='igual'?hex:s.interior==='contraste'?(colors[s.interiorColor]||'#f6f4ef'):null;
+    const inner=innerHex?plainMat(innerHex,0.75):cartonMat(c.tipo),mats=[edge,outer];
+    const g=new THREE.Group(),D=S.dims.includes('d')?s.d:s.w,H=s.h,gap=0.2;
+    const P=(w,d)=>boxPoly(s.shape,w,d,72);
+    const tray=(w,d,h,yb)=>{const tg=new THREE.Group(),po=P(w,d),pi=P(w-2*t,d-2*t);tg.add(ring(po,pi,h,mats));tg.add(plate(po,t,mats));
+      const li=ring(pi,P(w-2*t-0.08,d-2*t-0.08),h-t-0.02,[inner,inner]);li.position.y=C(t);tg.add(li);const fl=plate(pi,0.02,[inner,inner]);fl.position.y=C(t);tg.add(fl);tg.position.y=C(yb||0);return tg;};
+    let lidG=null,lidH=boxLidH(s);
+    if(s.lid==='funda'){
+      const tr=tray(s.w,s.d,H,t+gap);g.add(tr);const W2=s.w+2*t+2*gap,H2=H+2*t+2*gap,sh=new THREE.Shape([V2(-C(W2)/2,0),V2(C(W2)/2,0),V2(C(W2)/2,C(H2)),V2(-C(W2)/2,C(H2))]);
+      sh.holes.push(new THREE.Path([V2(-C(W2)/2+C(t),C(t)),V2(C(W2)/2-C(t),C(t)),V2(C(W2)/2-C(t),C(H2)-C(t)),V2(-C(W2)/2+C(t),C(H2)-C(t))]));
+      const sg=new THREE.ExtrudeGeometry(sh,{depth:C(s.d),bevelEnabled:false});sg.translate(0,0,-C(s.d)/2);const sl=new THREE.Mesh(sg,mats);g.add(sl);
+      tr.position.z=lidOpen?C(s.d*0.6):0;g.userData.front=C(s.d)/2;g.userData.topY=C(H2);
+      if(s.extras.estampado&&s.stampText){const dc=decal(s.stampText,colors[s.stampColor]||'#c9a45c',C(s.w*0.7));dc.rotation.x=-Math.PI/2;dc.position.y=C(H2)+0.002;g.add(dc);}
+    }else if(s.lid==='libro'){
+      const bw=s.w+1,bd=D+1;g.add(tray(s.w,D,H,t));const base=new THREE.Mesh(new THREE.BoxGeometry(C(bw),C(t),C(bd)),outer);base.position.y=C(t)/2;g.add(base);
+      const sp=new THREE.Mesh(new THREE.BoxGeometry(C(bw),C(H+2*t),C(t)),outer);sp.position.set(0,C(H+2*t)/2,-C(bd)/2);g.add(sp);
+      const piv=new THREE.Group();piv.position.set(0,C(H+2*t),-C(bd)/2);const lidB=new THREE.Mesh(new THREE.BoxGeometry(C(bw),C(t),C(bd)),outer);lidB.position.set(0,C(t)/2,C(bd)/2);piv.add(lidB);
+      const innerTop=new THREE.Mesh(new THREE.PlaneGeometry(C(bw)*0.96,C(bd)*0.96),inner);innerTop.rotation.x=Math.PI/2;innerTop.position.set(0,-0.001,C(bd)/2);piv.add(innerTop);
+      if(s.extras.estampado&&s.stampText){const dc=decal(s.stampText,colors[s.stampColor]||'#c9a45c',C(s.w*0.7));dc.rotation.x=-Math.PI/2;dc.position.set(0,C(t)+0.002,C(bd)/2);piv.add(dc);}
+      if(s.extras.iman){const mg=new THREE.Mesh(new THREE.CylinderGeometry(C(0.8),C(0.8),C(0.1),20),plainMat('#2a2a2a',0.4,0.6));mg.rotation.x=Math.PI/2;mg.position.set(0,C(H*0.7),C(D)/2+0.003);g.add(mg);}
+      piv.rotation.x=lidOpen?-1.95:0;g.add(piv);g.userData.front=C(bd)/2;g.userData.topY=C(H+3*t);
+    }else{
+      g.add(tray(s.w,D,H,0));g.userData.front=C(S.poly==='heart'?s.w*0.47:D/2);g.userData.topY=C(H);
+      if(lidH){const lw=s.w+2*t+2*gap,ld=D+2*t+2*gap,lo=P(lw,ld),li=P(lw-2*t,ld-2*t);lidG=new THREE.Group();
+        const lm=s.lid==='acrilica'?[glassMat(),glassMat()]:mats;lidG.add(ring(lo,li,lidH,lm));
+        let top;if(s.lid==='ventana'){const sh=shapeOf(lo);sh.holes.push(new THREE.Path(P(lw*0.6,ld*0.6).map(p=>V2(C(p[0]),C(p[1])))));const tg=new THREE.ExtrudeGeometry(sh,{depth:C(t),bevelEnabled:false,curveSegments:2});tg.rotateX(-Math.PI/2);top=new THREE.Mesh(tg,mats);
+          const win=plate(P(lw*0.62,ld*0.62),0.05,[glassMat(),glassMat()]);win.position.y=C(lidH-t*0.5);lidG.add(win);}
+        else top=plate(lo,t,lm);top.position.y=C(lidH-t);lidG.add(top);
+        if(s.lid!=='acrilica'){const lin2=plate(li,0.02,[inner,inner]);lin2.position.y=C(lidH-t)-0.003;lidG.add(lin2);}
+        if(s.extras.cinta){const rb=plainMat(colors[s.ribbon]||'#c9a45c',0.35,0.05);const band=ring(P(lw+0.12,ld+0.12),lo,Math.min(1.4,lidH*0.6),[rb,rb]);band.position.y=C(lidH*0.2);lidG.add(band);
+          if(s.extras.lazo){const b=bow(colors[s.ribbon]||'#c9a45c',Math.max(5,s.w*0.4));b.position.set(0,C(lidH*0.5),C(S.poly==='heart'?lw*0.47:ld/2)+0.01);lidG.add(b);}}
+        if(s.extras.estampado&&s.stampText){const dc=decal(s.stampText,colors[s.stampColor]||'#c9a45c',C(Math.min(lw,ld)*0.6));dc.rotation.x=-Math.PI/2;dc.position.y=C(lidH)+0.002;lidG.add(dc);}
+        lidG.position.y=C(H+t-lidH);if(lidOpen){lidG.position.y+=C(H*0.6+lidH);lidG.position.z=-C(D*0.55);lidG.rotation.x=-0.55;}g.add(lidG);g.userData.topY=C(H+t);}
+      else{
+        if(s.extras.cinta){const rb=plainMat(colors[s.ribbon]||'#c9a45c',0.35);const band=ring(P(s.w+0.12,D+0.12),P(s.w,D),1.4,[rb,rb]);band.position.y=C(H*0.45);g.add(band);
+          if(s.extras.lazo){const b=bow(colors[s.ribbon]||'#c9a45c',Math.max(5,s.w*0.35));b.position.set(0,C(H*0.5),C(D/2)+0.01);g.add(b);}}
+        if(s.extras.estampado&&s.stampText){const dc=decal(s.stampText,colors[s.stampColor]||'#c9a45c',C(s.w*0.6));dc.position.set(0,C(H*0.55),C(D/2)+0.004);g.add(dc);}
+      }
+      if(s.shape==='bolsa'&&s.extras.asas){const cm=plainMat(colors[s.ribbon]||'#c9a45c',0.7);[-1,1].forEach(side=>{const z=side*C(D/2+0.05),a=C(s.w*0.22);
+        const cv=new THREE.CatmullRomCurve3([new THREE.Vector3(-a,C(H-2),z),new THREE.Vector3(-a*0.8,C(H+s.h*0.25),z),new THREE.Vector3(a*0.8,C(H+s.h*0.25),z),new THREE.Vector3(a,C(H-2),z)]);
+        g.add(new THREE.Mesh(new THREE.TubeGeometry(cv,24,C(0.25),8,false),cm));});}
+    }
+    if(s.extras.inserto){
+      const pi=P(s.w-2*t-0.1,D-2*t-0.1),sh=shapeOf(pi),bb=polyBox(pi),sp=7,hr=1.1;
+      for(let y=-bb.h/2+sp/2;y<=bb.h/2-sp/2+0.01;y+=sp*0.866){const row=Math.round((y+bb.h)/(sp*0.866));for(let x=-bb.w/2+sp/2+(row%2?sp/2:0);x<=bb.w/2-sp/2+0.01;x+=sp){
+        const ok=pi.length&&(function(px,py){let c=false;for(let i=0,j=pi.length-1;i<pi.length;j=i++){const[xi,yi]=pi[i],[xj,yj]=pi[j];if(((yi>py)!==(yj>py))&&(px<(xj-xi)*(py-yi)/(yj-yi)+xi))c=!c;}return c;})(x,y);
+        if(ok){const hp=new THREE.Path();hp.absarc(C(x),C(y),C(hr),0,Math.PI*2,false);sh.holes.push(hp);}}}
+      const ig=new THREE.ExtrudeGeometry(sh,{depth:C(1.5),bevelEnabled:false,curveSegments:12});ig.rotateX(-Math.PI/2);const ins=new THREE.Mesh(ig,plainMat('#2c3b27',0.95));
+      ins.position.y=C(Math.max(t+0.5,H*0.55));if(s.lid==='libro')ins.position.y+=C(t);
+      const holder=s.lid==='funda'?g.children[0]:g;holder.add(ins);}
+    return g;
+  }
+  function dimsGroup(){
+    const s=spec,g=new THREE.Group(),S=BOX_SHAPES[s.shape],D=S.dims.includes('d')?s.d:s.w,W=C(s.w),Dd=C(D),H=C(s.h),lm=new THREE.LineBasicMaterial({color:0x3d2118,transparent:true,opacity:0.8,depthTest:false});
+    const seg=(a,b)=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),lm);l.renderOrder=999;g.add(l);},V=(x,y,z)=>new THREE.Vector3(x,y,z);
+    const lab=(text,pos,sz)=>{const c=document.createElement('canvas'),x=c.getContext('2d');x.font='600 42px Jost, Arial';const w=Math.ceil(x.measureText(text).width)+36;c.width=w;c.height=64;x.font='600 42px Jost, Arial';
+      x.fillStyle='rgba(61,33,24,.9)';x.beginPath();x.moveTo(32,0);x.lineTo(w-32,0);x.arc(w-32,32,32,-Math.PI/2,Math.PI/2);x.lineTo(32,64);x.arc(32,32,32,Math.PI/2,Math.PI*1.5);x.fill();x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.fillText(text,w/2,34);
+      const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false}));sp.renderOrder=1000;sp.scale.set(sz*w/64,sz,1);sp.position.copy(pos);g.add(sp);};
+    const sz=Math.max(C(1.6),Math.max(W,Dd)*0.07),off=C(2),fz=(boxG.userData.front||Dd/2)+off;
+    seg(V(-W/2,0.002,fz),V(W/2,0.002,fz));lab((S.poly==='circle'?'Ø ':'')+s.w+' cm',V(0,-sz*0.4,fz+sz*0.3),sz);
+    if(S.dims.includes('d')){const x=W/2+off;seg(V(x,0.002,-Dd/2),V(x,0.002,Dd/2));lab(D+' cm',V(x+sz*1.2,0,0),sz);}
+    const xh=-W/2-off;seg(V(xh,0,fz-off),V(xh,H,fz-off));lab(s.h+' cm',V(xh-sz*1.2,H/2,fz-off),sz);
+    return g;
+  }
+  function init3D(){
+    if(R)return;R=new THREE.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(window.devicePixelRatio||1,isPhone()?1.75:2));R.outputEncoding=THREE.sRGBEncoding;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;view.appendChild(R.domElement);
+    scene=new THREE.Scene();try{const pm=new THREE.PMREMGenerator(R),env=new THREE.Scene();env.add(new THREE.Mesh(new THREE.BoxGeometry(10,10,10),new THREE.MeshBasicMaterial({color:0x8a8286,side:THREE.BackSide})));
+      [[0,4.6,0,4,3.2],[4.6,1.5,2.5,2,2.4],[-4.6,2,-1,2,1.6],[0,1.2,4.6,3.5,1.8]].forEach(([x,y,z,w,i])=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,w),new THREE.MeshBasicMaterial({color:new THREE.Color(i,i,i),side:THREE.DoubleSide}));m.position.set(x,y,z);m.lookAt(0,0,0);env.add(m);});scene.environment=pm.fromScene(env,0.03).texture;}catch(e){}
+    scene.add(new THREE.HemisphereLight(0xfffaf5,0x8a7068,0.55));const key=new THREE.DirectionalLight(0xffffff,0.85);key.position.set(3,6,4);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.bias=-0.0005;scene.add(key);
+    const gr=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.ShadowMaterial({opacity:0.22}));gr.rotation.x=-Math.PI/2;gr.receiveShadow=true;scene.add(gr);
+    camera=new THREE.PerspectiveCamera(32,1,0.02,80);controls=new THREE.OrbitControls(camera,R.domElement);controls.enableDamping=true;controls.enablePan=false;controls.maxPolarAngle=1.5;controls.autoRotate=!reduced;controls.autoRotateSpeed=0.8;
+    R.domElement.addEventListener('pointerdown',()=>{controls.autoRotate=false;});scene.add(boxG);
+    if(window.ResizeObserver)new ResizeObserver(resize).observe(view);if('IntersectionObserver' in window)new IntersectionObserver(es=>{visible=es[0].isIntersecting;}).observe(view);
+    (function loop(){requestAnimationFrame(loop);if(!visible)return;if(tw){const k=Math.min(1,(performance.now()-tw.t0)/tw.d),e=1-Math.pow(1-k,3);controls.target.lerpVectors(tw.ft,tw.tt,e);camera.position.lerpVectors(tw.fp,tw.tp,e);if(k>=1)tw=null;}controls.update();R.render(scene,camera);})();
+    q('.bx-msg').hidden=true;resize();
+  }
+  function resize(){if(!R)return;const w=view.clientWidth,h=view.clientHeight;if(!w||!h)return;R.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+  let lastKey='';
+  function frame(force){const b=new THREE.Box3().setFromObject(boxG),c=b.getCenter(new THREE.Vector3()),sz=b.getSize(new THREE.Vector3()),tan=Math.tan(camera.fov*Math.PI/360),wide=Math.max(sz.x,sz.z);
+    const need=(Math.max((sz.y/2)/tan,(wide/2)/tan/camera.aspect)*1.4+wide/2)*(isPhone()?1.2:1.05),key=spec.shape;const same=!force&&key===lastKey;lastKey=key;
+    const dir=same?camera.position.clone().sub(controls.target).normalize():new THREE.Vector3(0.55,0.62,1).normalize(),d=same?Math.max(need,Math.min(camera.position.distanceTo(controls.target),need*2.4)):need;
+    tw={t0:performance.now(),d:reduced?0:420,ft:controls.target.clone(),fp:camera.position.clone(),tt:c.clone(),tp:c.clone().addScaledVector(dir,d)};if(!lastKey||force&&camera.position.lengthSq()===0){tw.d=0;}
+    controls.minDistance=need*0.35;controls.maxDistance=need*3;}
+  function rebuild(force){if(!R)return;scene.remove(boxG);boxG.traverse(o=>{if(o.geometry)o.geometry.dispose();});boxG=build();boxG.traverse(o=>{if(o.isMesh){const tr=o.material&&o.material.transparent;o.castShadow=!tr;o.receiveShadow=true;}});scene.add(boxG);
+    if(dimsG){scene.remove(dimsG);dimsG.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&o.material.map)o.material.map.dispose();});dimsG=null;}if(showDims){dimsG=dimsGroup();scene.add(dimsG);}frame(force);}
+
+  /* ── pantalla ── */
+  const STEPS=[['forma','Forma'],['medidas','Medidas'],['material','Material'],['acabado','Acabado'],['pedido','Pedido']];
+  function chips(items,cur,attr){return `<div class="bx-chips">${items.map(([v,l,sub])=>`<button type="button" class="bx-chip" data-${attr}="${esc(v)}" aria-pressed="${String(cur===v)}">${esc(l)}${sub?`<small>${esc(sub)}</small>`:''}</button>`).join('')}</div>`;}
+  function sws(map,cur,attr){return `<div class="bx-sws">${Object.entries(map).map(([n,h])=>`<button type="button" class="bx-sw" style="background:${h}" title="${esc(n)}" aria-label="${esc(n)}" data-${attr}="${esc(n)}" aria-pressed="${String(cur===n)}"></button>`).join('')}</div>`;}
+  const shapeIcon=k=>{const S=BOX_SHAPES[k],P=boxPoly(k,20,S.poly==='rect'&&!S.square?13:20,40),b=polyBox(P),sc=30/Math.max(b.w,b.h);return `<svg viewBox="-17 -17 34 34" width="38" height="38" aria-hidden="true"><polygon points="${P.map(([x,y])=>`${(x*sc).toFixed(1)},${(-y*sc).toFixed(1)}`).join(' ')}" fill="currentColor" opacity=".18" stroke="currentColor" stroke-width="1.6"/></svg>`;};
+  function panel(){
+    const s=spec,S=BOX_SHAPES[s.shape],m=cfg.medidas||BOX_DEFAULT.medidas,pr=boxPrice(s,cfg),fits=boxFits(s),c=boxCarton(s,cfg);
+    const on=(o,k)=>!o||!o[k]||o[k].on!==false;
+    if(step==='forma')return `<div class="bx-lbl">Elige la forma</div><div class="bx-shapes">${Object.entries(BOX_SHAPES).filter(([k])=>on(cfg.formas,k)).map(([k,x])=>`<button type="button" class="bx-shape" data-shape="${k}" aria-pressed="${String(s.shape===k)}">${shapeIcon(k)}<b>${x.label}</b><small>${x.desc}</small></button>`).join('')}</div>
+      ${(cfg.presets||[]).length?`<div class="bx-lbl">O empieza desde un modelo</div>${chips((cfg.presets||[]).map((p,i)=>[i,p.name]),-1,'preset')}`:''}${next()}`;
+    if(step==='medidas'){const sl=(k,lab,min,max)=>`<div class="bx-field"><label><span>${lab}</span><span><input type="number" inputmode="decimal" min="${min}" max="${max}" step="0.5" value="${s[k]}" data-dim="${k}" aria-label="${lab} en cm"> cm</span></label><input type="range" min="${min}" max="${max}" step="0.5" value="${s[k]}" data-dimr="${k}" aria-label="${lab}"></div>`;
+      return `<div class="bx-lbl">Medidas interiores</div>${sl('w',S.poly==='circle'?'Diámetro':S.poly==='rect'?(S.square?'Lado':'Largo'):'Ancho',m.min,m.max)}${S.dims.includes('d')?sl('d','Fondo',m.min,m.max):''}${sl('h','Alto',m.minH,m.maxH)}
+      <div class="bx-info">Caben aprox. <b>${fits.rosas} rosas</b> de 7 cm o <b>${fits.girasoles} girasoles</b> de 12 cm.</div>${next()}`;}
+    if(step==='material'){const cts=cfg.cartones||[];
+      return `<div class="bx-lbl">Cartón · grosor <small>${esc(c.name)}</small></div><div class="bx-cartons">${cts.map(x=>`<button type="button" class="bx-carton" data-carton="${esc(x.id)}" aria-pressed="${String(s.carton===x.id)}"><span class="bx-thick" style="height:${Math.max(2,x.mm*4)}px;background:${x.tipo==='gris'?'#8d867c':x.tipo==='corrugado'?'#b8935f':'#e2dccf'}"></span><b>${esc(x.name)}</b><small>${x.mm} mm · ${x.g} g/m² · ${esc(x.uso||'')}</small></button>`).join('')}</div>
+      <div class="bx-lbl">Forro exterior <small>${BOX_FINISHES[s.finish]}</small></div>${chips(Object.entries(BOX_FINISHES).filter(([k])=>on(cfg.forros,k)).map(([k,l])=>[k,l]),s.finish,'finish')}
+      ${['natural','kraft','marmol'].includes(s.finish)?'':`<div class="bx-lbl">Color <small>${esc(s.color)}</small></div>${sws(cfg.colores||{},s.color,'color')}`}
+      <div class="bx-lbl">Forro interior</div>${chips(Object.entries(cfg.interiores||{}),s.interior,'interior')}
+      ${s.interior==='contraste'?`<div class="bx-lbl">Color interior <small>${esc(s.interiorColor)}</small></div>${sws(cfg.colores||{},s.interiorColor,'icolor')}`:''}${next()}`;}
+    if(step==='acabado'){const ex=Object.entries(BOX_EXTRAS).filter(([k])=>on(cfg.extras,k)&&(k!=='iman'||s.shape==='libro')&&(k!=='asas'||s.shape==='bolsa')&&(k!=='lazo'||s.extras.cinta||s.lid==='sin'));
+      const ep=k=>cfg.precios&&cfg.precios.extras?' +'+money(cfg.precios.extras[k]||0):'';
+      return `<div class="bx-lbl">Tapa</div>${chips(S.lids.map(k=>[k,BOX_LIDS[k]]),s.lid,'lid')}
+      <div class="bx-lbl">Adicionales</div><div class="bx-togs">${ex.map(([k,l])=>`<button type="button" class="bx-tog" data-extra="${k}" aria-pressed="${String(!!s.extras[k])}"><span class="bx-ck">${s.extras[k]?'✓':''}</span><span>${l}<small>${ep(k)}</small></span></button>`).join('')}</div>
+      ${s.extras.cinta||s.extras.asas?`<div class="bx-lbl">Color de cinta <small>${esc(s.ribbon)}</small></div>${sws(cfg.colores||{},s.ribbon,'ribbon')}`:''}
+      ${s.extras.estampado?`<div class="bx-lbl">Texto o nombre del logo</div><input class="bx-text" maxlength="30" value="${esc(s.stampText)}" data-stamp placeholder="Ej: Flores Ana"><div class="bx-lbl">Color del estampado</div>${sws(Object.fromEntries(['Dorado','Plateado','Blanco','Negro'].filter(k=>(cfg.colores||{})[k]).map(k=>[k,cfg.colores[k]])),s.stampColor,'stampc')}
+        ${cfg.precios&&cfg.precios.estampadoSetup?`<div class="bx-info">El estampado tiene un cargo único de ${money(cfg.precios.estampadoSetup)} por diseño (molde).</div>`:''}`:''}${next()}`;}
+    // pedido
+    const tiers=((cfg.precios||{}).descuentos||[]).slice().sort((a,b)=>a.desde-b.desde);
+    let h=`<div class="bx-lbl">Cantidad</div><div class="bx-qty"><button type="button" data-q="-">−</button><input type="number" inputmode="numeric" min="1" value="${s.qty}" data-qty aria-label="Cantidad"><button type="button" data-q="+">+</button></div>
+      ${tiers.length>1?`<div class="bx-tiers">${tiers.map(t=>`<button type="button" data-tier="${t.desde}" class="${s.qty>=t.desde&&(!tiers.find(x=>x.desde>t.desde&&s.qty>=x.desde))?'on':''}"><b>${t.desde}+</b><small>${t.pct?'-'+t.pct+'%':'precio base'}</small></button>`).join('')}</div>`:''}
+      ${cfg.minimo&&s.qty<cfg.minimo?`<div class="bx-info bx-warn">El pedido mínimo es de ${cfg.minimo} cajas.</div>`:''}
+      <div class="bx-spec">${esc(boxSpecText(s,cfg))}</div>`;
+    if(pr){h+=`<div class="bx-sum"><div><span>Precio por caja</span><b>${money(pr.unit)}</b></div>${pr.pct?`<div><span>Descuento por cantidad</span><span>-${pr.pct}%</span></div>`:''}${pr.setup?`<div><span>Molde de estampado (único)</span><span>${money(pr.setup)}</span></div>`:''}<div class="bx-big"><span>Total ${s.qty} cajas</span><b>${money(pr.total)}</b></div></div>`;}
+    else h+=`<div class="bx-info">${esc(opts.priceNote||'Los precios se muestran a distribuidores registrados.')}</div>`;
+    if(owner&&pr){const mt=boxMaterials(s,cfg),a=boxAreas(s,cfg);h+=`<details class="bx-owner" open><summary>🔧 Modo taller</summary>
+      <div class="bx-sum">${pr.lines.map(([k,v])=>`<div><span>${esc(k)}</span><span>${money(v)}</span></div>`).join('')}<div class="bx-big"><span>Precio por caja sin descuento</span><b>${money(pr.unitBase)}</b></div></div>
+      <div class="bx-sum"><div><span>Cartón por caja</span><span>${(a.struct/10000).toFixed(3)} m²</span></div><div><span>Forro por caja</span><span>${(a.cover/10000).toFixed(3)} m²</span></div>
+      <div><span>Pliegos de cartón (${cfg.pliego.w}×${cfg.pliego.h})</span><b>${mt.pliegosCarton}</b></div><div><span>Pliegos de forro</span><b>${mt.pliegosForro}</b></div>${mt.pliegosInterior?`<div><span>Pliegos de forro interior</span><b>${mt.pliegosInterior}</b></div>`:''}
+      <div><span>Cajas por pliego (aprox.)</span><span>${mt.porPliego}</span></div><div><span>Peso del cartón del pedido</span><span>${mt.pesoKg.toFixed(1)} kg</span></div></div></details>`;}
+    h+=`<div class="bx-row"><button type="button" class="bx-btn bx-line" data-bx="plano">📐 Ver plano con medidas</button>${owner?'<button type="button" class="bx-btn bx-line" data-bx="copy">📋 Copiar cotización</button>':''}</div>`;
+    return h;
+  }
+  function next(){const i=STEPS.findIndex(x=>x[0]===step);return STEPS[i+1]?`<div class="bx-next">${i?'<button type="button" class="bx-btn bx-line" data-go="'+STEPS[i-1][0]+'">Atrás</button>':'<span></span>'}<button type="button" class="bx-btn bx-dark" data-go="${STEPS[i+1][0]}">Siguiente: ${STEPS[i+1][1].toLowerCase()}</button></div>`:'';}
+  function render(rb,force){
+    q('.bx-tabs').innerHTML=STEPS.map(([k,l],i)=>`<button type="button" role="tab" aria-selected="${String(step===k)}" data-go="${k}"><b>${i+1}</b>${l}</button>`).join('');
+    const sc=q('.bx-scroll');sc.innerHTML=panel();
+    const S=BOX_SHAPES[spec.shape],pr=boxPrice(spec,cfg);
+    q('.bx-title').textContent='Caja '+S.label.toLowerCase();
+    q('.bx-dims').textContent=(S.dims.includes('d')?`${spec.w} × ${spec.d} × ${spec.h} cm`:S.poly==='rect'?`${spec.w} × ${spec.w} × ${spec.h} cm`:`Ø ${spec.w} × ${spec.h} cm`)+' · '+boxCarton(spec,cfg).name;
+    q('.bx-price').textContent=pr?money(pr.unit)+' c/u':'';
+    q('.bx-fprice span').textContent=pr?money(pr.total):'';q('.bx-fprice small').textContent=pr?`${spec.qty} cajas · ${money(pr.unit)} c/u`:'Precio para distribuidores';
+    const add=q('[data-bx="add"]');add.textContent=opts.addLabel?opts.addLabel(!!pr):(pr?'Agregar al pedido':'Pedir cotización');
+    q('[data-bx="lid"]').hidden=['sin'].includes(spec.lid);q('[data-bx="lid"]').textContent=lidOpen?'📦 Cerrar':'📦 Abrir';
+    if(rb!==false)rebuild(force);
+  }
+  function set(patch,force){Object.assign(spec,patch);spec=boxSanitize(spec,cfg);render(true,force);}
+  // eventos
+  root.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!root.contains(b))return;const d=b.dataset;
+    if(d.go){step=d.go;render(false);q('.bx-scroll').scrollTop=0;return;}
+    if(d.shape){const S=BOX_SHAPES[d.shape];set({shape:d.shape,d:S.dims.includes('d')?spec.d:spec.w},true);return;}
+    if(d.preset!=null){const p=(cfg.presets||[])[+d.preset];if(p){spec=boxSanitize(Object.assign(boxDefaultSpec(),{qty:spec.qty},p.spec),cfg);render(true,true);}return;}
+    if(d.carton){set({carton:d.carton});return;}if(d.finish){set({finish:d.finish});return;}if(d.color){set({color:d.color});return;}
+    if(d.interior){set({interior:d.interior});return;}if(d.icolor){set({interiorColor:d.icolor});return;}if(d.lid){set({lid:d.lid});return;}
+    if(d.extra){const ex=Object.assign({},spec.extras);ex[d.extra]=!ex[d.extra];if(d.extra==='cinta'&&!ex.cinta)ex.lazo=false;set({extras:ex});return;}
+    if(d.ribbon){set({ribbon:d.ribbon});return;}if(d.stampc){set({stampColor:d.stampc});return;}
+    if(d.q){set({qty:Math.max(1,spec.qty+(d.q==='+'?(spec.qty>=50?10:5):-(spec.qty>50?10:5)))},false);return;}
+    if(d.tier){set({qty:+d.tier});return;}
+    const a=d.bx;if(!a)return;
+    if(a==='open')openFs();else if(a==='close')closeFs();
+    else if(a==='lid'){lidOpen=!lidOpen;render();}
+    else if(a==='dims'){showDims=!showDims;b.setAttribute('aria-pressed',String(showDims));rebuild();}
+    else if(a==='share'){const url=location.origin+location.pathname+'#caja='+boxEncode(spec);if(navigator.share)navigator.share({title:'Mi caja',text:'Mira la caja que diseñé 📦',url}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>say('🔗 Link copiado'));}
+    else if(a==='plano'){const dl=boxDieline(spec,cfg);q('.bx-modal-body').innerHTML=`<h3>Plano para fabricar</h3><p class="bx-note">${esc(boxSpecText(spec,cfg))}</p><div class="bx-svg">${dl.svg}</div><div class="bx-row">${owner?'<button type="button" class="bx-btn bx-dark" data-bx="dl">⬇️ Descargar plano (SVG)</button>':''}<button type="button" class="bx-btn bx-line" data-bx="mclose">Cerrar</button></div>`;q('.bx-modal').hidden=false;}
+    else if(a==='dl'){const dl=boxDieline(spec,cfg),bl=new Blob([dl.svg],{type:'image/svg+xml'}),u=URL.createObjectURL(bl),ln=document.createElement('a');ln.href=u;ln.download=`plano-caja-${spec.shape}-${spec.w}x${spec.d}x${spec.h}.svg`;document.body.appendChild(ln);ln.click();ln.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);}
+    else if(a==='mclose')q('.bx-modal').hidden=true;
+    else if(a==='copy'){const pr=boxPrice(spec,cfg),txt=`📦 Cotización de cajas\n${boxSpecText(spec,cfg)}\nCantidad: ${spec.qty}\nPrecio por caja: ${money(pr.unit)}${pr.pct?` (incluye ${pr.pct}% por cantidad)`:''}${pr.setup?`\nMolde de estampado: ${money(pr.setup)}`:''}\nTotal: ${money(pr.total)}`;if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>say('📋 Cotización copiada'));}
+    else if(a==='add'){if(cfg.minimo&&spec.qty<cfg.minimo){say(`El pedido mínimo es de ${cfg.minimo} cajas`);step='pedido';render(false);return;}const pr=boxPrice(spec,cfg);if(opts.onAdd)opts.onAdd(boxSanitize(spec,cfg),pr,boxSpecText(spec,cfg));}
+  });
+  let it;root.addEventListener('input',e=>{const t=e.target;if(t.dataset.dim||t.dataset.dimr){const k=t.dataset.dim||t.dataset.dimr,v=+t.value;spec[k]=v;const o=root.querySelector(t.dataset.dim?`[data-dimr="${k}"]`:`[data-dim="${k}"]`);if(o)o.value=v;clearTimeout(it);it=setTimeout(()=>{spec=boxSanitize(spec,cfg);render(true);},90);}
+    else if(t.dataset.qty!=null){clearTimeout(it);it=setTimeout(()=>set({qty:+t.value||1}),300);}else if(t.dataset.stamp!=null){spec.stampText=t.value.slice(0,30);clearTimeout(it);it=setTimeout(()=>rebuild(),300);}});
+  function openFs(){open=true;root.classList.add('bx-fs');document.body.classList.add('bx-open');init3D();resize();rebuild(true);if(!(history.state&&history.state.bx))history.pushState({bx:1},'',location.pathname+location.search+'#cajas');}
+  function closeFs(fromPop){if(!open)return;open=false;root.classList.remove('bx-fs');document.body.classList.remove('bx-open');if(!fromPop&&history.state&&history.state.bx)history.back();}
+  window.addEventListener('popstate',()=>{if(open&&!(history.state&&history.state.bx))closeFs(true);});
+  const api={setConfig(c){cfg=c||BOX_DEFAULT;spec=boxSanitize(spec,cfg);render(!!R);},load(s){spec=boxSanitize(Object.assign({},spec,s),cfg);step='pedido';if(isPhone())openFs();else{init3D();}render(true,true);},get spec(){return spec;},open:openFs,close:()=>closeFs(false),start(){if(!isPhone()){init3D();resize();}render(!!R,true);}};
+  return api;
+}
+
 /* =====================================================================
    FLOWERS HANDMADE · SITIO MAYORISTA (web separada de la tienda)
    Misma base de datos y mismo sistema; otro público, otros productos.
@@ -707,11 +1330,13 @@ function setAccount(me){
     W.me={phone,code,name:data.business_name,contact:data.contact_name,discount:+data.discount||0,city:data.city||''};W.cat=data.catalog||{};
     if(!Array.isArray(W.cat.items))W.cat.items=[];W.cat.items=W.cat.items.filter(i=>i&&i.on!==false);
     store(wsKey,{phone,code});W.cart=load('fh_ws_cart',[]);if(!Array.isArray(W.cart))W.cart=[];
-    renderPanel();setAccount(W.me);return true;
+    renderPanel();setAccount(W.me);
+    window.FHWS={me:W.me,addCustom:it=>{W.cart.push(it);saveWs();}};try{window.dispatchEvent(new CustomEvent('fh:ws-login',{detail:data}));}catch(e){}
+    return true;
   }
   q('login').onsubmit=async e=>{e.preventDefault();errMsg('logErr','');const b=q('logBtn');b.disabled=true;b.textContent='Ingresando…';
     const ok=await access(q('lphone').value.trim(),q('lcode').value.trim().toUpperCase());b.disabled=false;b.textContent='Ingresar';if(ok)toast('Bienvenido/a, '+W.me.name);};
-  q('logout').onclick=()=>{store(wsKey,null);W.me=null;W.cart=[];store('fh_ws_cart',[]);q('panel').classList.add('hidden');q('auth').classList.remove('hidden');setAccount(null);};
+  q('logout').onclick=()=>{store(wsKey,null);W.me=null;W.cart=[];store('fh_ws_cart',[]);q('panel').classList.add('hidden');q('auth').classList.remove('hidden');setAccount(null);window.FHWS=null;try{window.dispatchEvent(new CustomEvent('fh:ws-logout'));}catch(e){}};
   W_logged=()=>!!W.me;
 
   /* ── catálogo mayorista ── */
@@ -775,6 +1400,40 @@ function setAccount(me){
   // Sesión recordada en este dispositivo
   const saved=load(wsKey,null);if(saved&&saved.phone&&saved.code)access(saved.phone,saved.code,true);
   if(/ingresar/.test(location.hash))showTab('login');
+})();
+
+
+/* ── Diseñador de cajas en la web mayorista ── */
+(function(){
+  const root=document.getElementById('bxRoot');if(!root)return;
+  let api=null,cfgPublic=null,cfgFull=null,booting=false;
+  const ld=src=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+  const me=()=>window.FHWS&&window.FHWS.me;
+  async function boot(){
+    if(booting)return;booting=true;
+    let cfg=null;
+    try{const libs=window.THREE?Promise.resolve():ld('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js').then(()=>ld('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js'));
+      const r=sb?sb.rpc('get_box_config'):Promise.resolve({});const [,res]=await Promise.all([libs,r]);cfg=res&&res.data&&res.data.formas?res.data:null;}
+    catch(e){console.warn('Diseñador de cajas',e);}
+    cfgPublic=cfg;
+    if(!cfgPublic){root.innerHTML=`<div class="info">El diseñador de cajas estará disponible muy pronto. Mientras tanto, cotiza por WhatsApp.</div><a class="btn btn-wa" style="margin-top:10px" target="_blank" rel="noopener" href="${waLink('Hola Flowers Handmade! 📦 Quiero cotizar cajas a medida.')}">${WAICON} Cotizar cajas</a>`;return;}
+    api=BoxDesigner(root,{cfg:cfgFull||cfgPublic,toast,onAdd,
+      priceNote:'Ingresa como distribuidor para ver precios por cantidad, o pide tu cotización por WhatsApp.',
+      addLabel:()=>me()?'Agregar a mi pedido':'Cotizar por WhatsApp'});
+    api.start();
+    const code=(location.hash.match(/#caja=([A-Za-z0-9_-]+)/)||[])[1];if(code){const s=boxDecode(code);if(s){api.load(s);history.replaceState(null,'',location.pathname+location.search+'#cajas');}}
+  }
+  function onAdd(spec,pr,text){
+    const link=location.origin+location.pathname+'#caja='+boxEncode(spec);
+    if(me()){window.FHWS.addCustom({key:'b'+Date.now(),custom:`Caja: ${text}${pr?` · estimado ${money(pr.unit)} c/u`:''}`.slice(0,370),name:'Caja a medida: '+text,qty:spec.qty,price:0,unit:'unid.'});
+      toast('📦 Caja agregada a tu pedido');if(api)api.close();const a=document.getElementById('acceso');if(a&&a.scrollIntoView)a.scrollIntoView({behavior:'smooth'});}
+    else window.open(waLink(`Hola Flowers Handmade! 📦 Quiero cotizar cajas:\n${text}\nCantidad: ${spec.qty}${pr?`\nPrecio estimado: ${money(pr.unit)} c/u · total ${money(pr.total)}`:''}\nVer diseño: ${link}`),'_blank','noopener');
+  }
+  window.addEventListener('fh:ws-login',e=>{const b=e.detail&&e.detail.boxes;cfgFull=b&&b.formas?b:null;if(api)api.setConfig(cfgFull||cfgPublic);});
+  window.addEventListener('fh:ws-logout',()=>{cfgFull=null;if(api&&cfgPublic)api.setConfig(cfgPublic);});
+  if(/#caja(s|=)/.test(location.hash))boot();
+  else if('IntersectionObserver' in window)new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){o.disconnect();boot();}},{rootMargin:'700px 0px'}).observe(root);
+  else boot();
 })();
 
 })();
