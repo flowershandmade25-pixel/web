@@ -368,6 +368,9 @@ html,body{overflow-x:clip}
 .pm-media button[aria-selected="true"]{background:var(--bark);color:#fff}
 #view.moving canvas{cursor:grab}#view.moving.dragging canvas{cursor:grabbing}
 .st-btn#moveBtn[aria-pressed="true"]{background:var(--rose);color:#fff;border-color:var(--rose)}
+.move-tip{position:absolute;left:50%;top:76px;transform:translateX(-50%);z-index:4;background:rgba(61,33,24,.92);color:#fff;font-size:13px;padding:7px 8px 7px 14px;border-radius:50px;display:flex;align-items:center;gap:10px;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.move-tip button{border:none;background:#fff;color:var(--bark);border-radius:50px;padding:6px 14px;font-size:12.5px;font-weight:600;cursor:pointer;min-height:32px}
+@media (max-width:760px){.move-tip{top:auto;bottom:56px;font-size:12px}}
 /* ═════ tablet ═════ */
 @media (max-width:1080px){
   .nav{display:none}
@@ -647,6 +650,7 @@ html,body{overflow-x:clip}
       <div class="stage" id="stage">
         <div id="view"></div>
         <button type="button" class="st-close" id="bClose" aria-label="Cerrar el diseñador">✕</button>
+        <div class="move-tip hidden" id="moveTip">✋ Arrastra una flor para ubicarla <button type="button" id="moveDone">Listo</button></div>
         <div class="st-top">
           <div><div class="st-title" id="stTitle">Diseñador 3D</div><div class="st-dims" id="stDims"></div></div>
           <div class="st-price" id="stPrice"></div>
@@ -1201,7 +1205,7 @@ function applyConfig(c){
 const containerOn=c=>Object.values(CONTAINERS[c].variants).some(v=>v.on);
 // Ajusta cualquier diseño (propio, sugerido o compartido) a las reglas vigentes
 function sanitize(cfg){
-  if(cfg.base!=='abierta')cfg.base='cerrada';if(cfg.container!=='ramo'||['cono','vestido'].includes(cfg.variant))cfg.base='cerrada';
+  cfg.base='cerrada'; // la base abierta se retiró: siempre papel hasta abajo
   if(!['auto','filas','anillos'].includes(cfg.layout))cfg.layout='auto';
   if(cfg.pos&&typeof cfg.pos==='object'){const ids=new Set(cfg.flowers.map(f=>String(f.id)));Object.keys(cfg.pos).forEach(k=>{if(!ids.has(k))delete cfg.pos[k];});}else cfg.pos={};
   if(!CONTAINERS[cfg.container]||!containerOn(cfg.container))cfg.container=Object.keys(CONTAINERS).find(containerOn)||'ramo';
@@ -2179,7 +2183,7 @@ window.initBuilder=function(){
     chips($('contChips'),Object.entries(CONTAINERS).filter(([k])=>containerOn(k)).map(([k,x])=>[k,x.label]),c,k=>{state.container=k;state.variant=Object.keys(CONTAINERS[k].variants).find(v=>CONTAINERS[k].variants[v].on);sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');});
     const vars=Object.entries(CONTAINERS[c].variants).filter(([,x])=>x.on);chips($('varChips'),vars.map(([k,x])=>[k,x.label]),v,k=>{state.variant=k;sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');});hide('varChips',vars.length<2);
     const sz=sizeOf(state);hide('sizeWrap',!vd.sizes);
-    const bOk=c==='ramo'&&!['cono','vestido'].includes(state.variant);hide('baseWrap',!bOk);
+    const bOk=false;hide('baseWrap',true);
     if(bOk)chips($('baseChips'),[['cerrada','Cerrada','Papel hasta abajo'],['abierta','Abierta','Tallos a la vista']],state.base||'cerrada',k=>{state.base=k;renderEnvase();updateInfo();rebuild(true);});
     hide('formaWrap',c!=='ramo'||state.variant==='vestido'||B.formasOn.filter(Boolean).length<2);if(c==='ramo')chips($('formaChips'),FORMAS.map((f,i)=>[i,f[0],f[1]]).filter(x=>B.formasOn[x[0]]),state.forma??1,i=>{state.forma=i;renderEnvase();updateInfo();rebuild(true);});
     if(vd.sizes){chips($('sizeChips'),vd.sizes.map(s=>{const nm=sizeName(s),dm=s.dp?`${s.d}×${s.dp} cm`:`${s.d} cm`;return [s.id,nm,(/cm/.test(nm)?'':dm+' · ')+fmt(s.p)];}),sz.id,id=>{state.sizes[c+'.'+v]=id;state.userSizes=state.userSizes||{};state.userSizes[c+'.'+v]=id;changed(true);});}
@@ -2231,19 +2235,22 @@ window.initBuilder=function(){
   function renderLayout(){
     const ok=canMove();hide('layoutWrap',!ok);$('moveBtn').classList.toggle('hidden',!ok);if(!ok){if(moving)setMove(false,true);return;}
     const manual=Object.keys(state.pos||{}).length;
-    chips($('layoutChips'),[['auto','Automático','Natural'],['filas','En filas','Ordenado'],['anillos','En anillos','Simétrico']],state.layout||'auto',k=>{state.layout=k;state.pos={};renderLayout();rebuild(false);});
+    chips($('layoutChips'),[['auto','Automático','Natural'],['filas','En filas','Ordenado'],['anillos','En anillos','Simétrico'],['mano','✋ A mano','Arrástralas']],moving?'mano':(state.layout||'auto'),k=>{if(k==='mano'){setMove(!moving);if(moving)toast('Arrastra una flor en el 3D para moverla');return;}if(moving)setMove(false,true);state.layout=k;state.pos={};renderLayout();rebuild(false);});
     $('layoutHint').innerHTML=moving?'✋ Arrastra cada flor en el 3D para ubicarla. Toca <b>Listo</b> al terminar.':
       (manual?`Moviste ${manual} flor${manual>1?'es':''} a mano. <button type="button" class="link" id="resetPos">Volver al acomodo</button>`:'Si quieres, toca <b>✋ Mover flores</b> y ubícalas a tu gusto.');
     const rp=$('resetPos');if(rp)rp.onclick=()=>{state.pos={};renderLayout();rebuild(false);toast('Acomodo restablecido');};
   }
   var moving=false,drag=null;const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hitP=new THREE.Vector3();
-  function setMove(on,quiet){moving=!!on;$('moveBtn').setAttribute('aria-pressed',String(moving));$('moveBtn').textContent=moving?'✓ Listo':'✋ Mover flores';view.classList.toggle('moving',moving);controls.autoRotate=false;if(!moving)drag=null;if(!quiet)renderLayout();}
+  function setMove(on,quiet){moving=!!on;const tip=$('moveTip');if(tip)tip.classList.toggle('hidden',!moving);if(moving&&window.FHDesigner&&window.FHDesigner.isOpen){}$('moveBtn').setAttribute('aria-pressed',String(moving));$('moveBtn').textContent=moving?'✓ Listo':'✋ Mover flores';view.classList.toggle('moving',moving);controls.autoRotate=false;if(!moving)drag=null;if(!quiet)renderLayout();}
   $('moveBtn').onclick=()=>{setMove(!moving);if(moving)toast('Arrastra una flor para moverla');};
+  $('moveDone').onclick=()=>setMove(false);
   const toNdc=e=>{const r=renderer.domElement.getBoundingClientRect();ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);};
   renderer.domElement.addEventListener('pointerdown',e=>{if(!moving)return;toNdc(e);const hits=ray.intersectObject(product,true);
     for(const h of hits){let o=h.object;while(o&&!o.userData.pick)o=o.parent;if(o){const cl=o.parent;drag={o,cl,id:o.userData.fid,y:new THREE.Vector3().setFromMatrixPosition(o.matrixWorld).y};controls.enabled=false;view.classList.add('dragging');try{renderer.domElement.setPointerCapture(e.pointerId);}catch(_){}e.preventDefault();return;}}});
   renderer.domElement.addEventListener('pointermove',e=>{if(!drag)return;toNdc(e);plane.constant=-drag.y;if(!ray.ray.intersectPlane(plane,hitP))return;
-    const loc=drag.cl.worldToLocal(hitP.clone()),ins=drag.cl.userData.inside;if(ins&&!ins(loc.x,loc.z))return;
+    const loc=drag.cl.worldToLocal(hitP.clone()),ins=drag.cl.userData.inside;
+    // si se sale del envase, la flor se queda en el borde (no se traba)
+    if(ins&&!ins(loc.x,loc.z)){const sx=drag.o.position.x,sz=drag.o.position.z;let lo=0,hi=1;for(let k=0;k<14;k++){const m=(lo+hi)/2;if(ins(sx+(loc.x-sx)*m,sz+(loc.z-sz)*m))lo=m;else hi=m;}loc.x=sx+(loc.x-sx)*lo;loc.z=sz+(loc.z-sz)*lo;}
     const d=drag.cl.userData.dome||0,rr=Math.hypot(loc.x,loc.z);drag.o.position.set(loc.x,-d*rr*rr,loc.z);drag.moved=[loc.x,loc.z];});
   const endDrag=()=>{if(!drag)return;controls.enabled=true;view.classList.remove('dragging');if(drag.moved){state.pos=state.pos||{};state.pos[drag.id]=drag.moved;drag=null;renderLayout();rebuild(false);}else drag=null;};
   renderer.domElement.addEventListener('pointerup',endDrag);renderer.domElement.addEventListener('pointercancel',endDrag);
@@ -2354,6 +2361,7 @@ window.initBuilder=function(){
     if(editingId){window.FHCart.replace(editingId,item);editingId=null;toast('Cambios guardados');}else{window.FHCart.add(item);toast('Diseño agregado al carrito 🌸');}
     updateInfo();if(window.FHDesigner&&window.FHDesigner.isOpen)window.FHDesigner.close();window.FHCart.open();
   };
+  window.__fhDbg={camera,controls,getProduct:()=>product,canvas:renderer.domElement};
   window.FHBuilder={load(cfg,editId){state=sanitize(clone(cfg));state.flowers.forEach(f=>{if(!f.id)f.id=uid();});editingId=editId||null;step='flores';changed('force');controls.autoRotate=!reduced;
       if(!(window.FHDesigner&&window.FHDesigner.isOpen)){const s=$('personaliza');if(s.scrollIntoView)s.scrollIntoView({behavior:reduced?'auto':'smooth'});}},
     edit(it){if(window.FHDesigner&&window.FHDesigner.phone()){window.FHDesigner.open(it.cfg,it.id);return;}this.load(it.cfg,it.id);},photo,
