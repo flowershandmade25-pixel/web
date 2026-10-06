@@ -1189,7 +1189,7 @@ function applyConfig(c){
   Object.keys(TYPES).forEach(t=>{const f=c.flores[t]||{};B.flores[t]={};['S','M','L'].forEach(k=>{if(f[k]&&+f[k].cm>0)B.flores[t][k]={cm:+f[k].cm,p:+f[k].p||0};});B.on['f.'+t]=f.on!==false&&Object.keys(B.flores[t]).length>0;});
   setMap(FLOWER_COLORS,c.coloresFlor);
   Object.entries(CONTAINERS).forEach(([ck,C])=>Object.entries(C.variants).forEach(([vk,V])=>{
-    const e=(c.envases||{})[ck+'.'+vk]||{};V.on=e.on!==false;V.foto=typeof e.foto==='string'?e.foto:'';
+    let e=(c.envases||{})[ck+'.'+vk];if(!e&&ck==='ramo'&&c.envases&&c.envases['ramo.redondo'])e=Object.assign({},c.envases['ramo.redondo'],{foto:''});e=e||{};V.on=e.on!==false;V.foto=typeof e.foto==='string'?e.foto:'';
     if(Array.isArray(V.sizes)){V.sizes=(e.sizes||[]).filter(z=>z&&+z.d>0).map(z=>({id:String(z.id||'M'),label:z.label||'',d:+z.d,h:+z.h||0,dp:+z.dp||0,back:+z.back||0,p:+z.p||0,max:+z.max||0}));if(!V.sizes.length)V.on=false;}
     else{V.price=+e.p||0;V.max=+e.max||0;if(!V.max)V.on=false;}
   }));
@@ -1423,10 +1423,11 @@ function buildCluster(cfg,o){
   // posiciones movidas a mano por el cliente (se respetan mientras sigan dentro del envase)
   if(cfg.pos){pts=pts.map((p,i)=>{const q=cfg.pos[fl[i].id];return q&&(!inside||inside(q[0],q[1]))?[q[0],q[1]]:p;});}
   let maxR=0,ring=0,drop=0;const heads=[];
-  pts.forEach(([x,z],i)=>{const f=fl[i],rr=Math.hypot(x,z),y=-o.dome*rr*rr+(o.yfn?o.yfn(x,z,i):0),obj=makeFlower(f);obj.position.set(x,y,z);obj.userData.fid=f.id;obj.userData.pick=true;const tl=Math.min(0.6,rr*0.9)*(o.tiltK==null?1:o.tiltK);orient(obj,x,z,tl,r()*6.28);g.add(obj);heads.push({p:new THREE.Vector3(x,y,z),r:rads[i]});maxR=Math.max(maxR,rr+rads[i]);ring=Math.max(ring,rr);});
+  const Rmax=Math.max(cm(6),...pts.map(([x,z],i)=>Math.hypot(x,z)+rads[i]*0.5)),domeY=rr=>-o.dome*0.32*rr*rr/Rmax;
+  pts.forEach(([x,z],i)=>{const f=fl[i],rr=Math.hypot(x,z),y=domeY(rr)+(o.yfn?o.yfn(x,z,i):0),obj=makeFlower(f);obj.position.set(x,y,z);obj.userData.fid=f.id;obj.userData.pick=true;const tl=Math.min(0.6,rr*0.9)*(o.tiltK==null?1:o.tiltK);orient(obj,x,z,tl,r()*6.28);g.add(obj);heads.push({p:new THREE.Vector3(x,y,z),r:rads[i]});maxR=Math.max(maxR,rr+rads[i]);ring=Math.max(ring,rr);});
   let top=null;if(o.msg){const m=makeMsgDisc(cfg.texto);m.position.set(0,cm(3.5),cm(0.4));g.add(m);top=[0,cm(8),-cm(0.6)];}
   else if(heads.length){let c=heads[0];heads.forEach(h=>{if(h.p.lengthSq()<c.p.lengthSq())c=h;});top=[c.p.x,c.p.y+c.r*0.45+0.02,c.p.z];}
-  g.userData.cluster=true;g.userData.inside=inside;g.userData.dome=o.dome;
+  g.userData.cluster=true;g.userData.inside=inside;g.userData.dome=o.dome;g.userData.domeY=domeY;
   addExtras(g,heads,top,cfg,29);return {group:g,radius:Math.max(maxR,o.msg?cm(5):0,cm(4)),avg,ring,heads,low:Math.min(0,...heads.map((h,i)=>h.p.y-h.r*Math.sin(Math.min(0.6,Math.hypot(h.p.x,h.p.z)*0.9)*(o.tiltK==null?1:o.tiltK))*0.85))};}
 function stemBetween(a,b,rad){const d=new THREE.Vector3().subVectors(b,a),L=d.length(),m=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad*1.15,L,8),plain(STEM,0.6));m.position.copy(a).addScaledVector(d,0.5);m.quaternion.setFromUnitVectors(Yax,d.normalize());return m;}
 function buildStemmed(cfg,mouthY,lift,fromY,maxR){
@@ -1495,11 +1496,11 @@ function buildRamo(cfg){
   if(v==='corazon'){const K=Math.sqrt(Math.max(1,n)*Math.PI*avgR*avgR/(HEART_AREA*0.62))+avgR*0.3,Kin=K*0.9;
     Object.assign(P,{dome:0.08,tiltK:0.35,inside:(x,z)=>inPoly(x/Kin,-z/Kin,HEART)});Object.assign(W,{flareK:0.8});}
   if(v==='cascada'){const Rx=Math.sqrt(Math.max(1,n)*Math.PI*avgR*avgR/(Math.PI*1.7*0.72))+avgR*0.4;
-    Object.assign(P,{dome:dome*0.8,tiltK:tilt*1.2,inside:(x,z)=>{const zz=(z-Rx*0.35)/(z>Rx*0.35?Rx*1.35:Rx);return (x/Rx)**2+zz*zz<=1;},yfn:(x,z)=>-Math.max(0,z-Rx*0.15)*0.55});Object.assign(W,{backK:0.75});}
+    Object.assign(P,{dome:dome*0.8,tiltK:tilt*1.2,inside:(x,z)=>{const zz=(z-Rx*0.35)/(z>Rx*0.35?Rx*1.35:Rx);return (x/Rx)**2+zz*zz<=1;},yfn:(x,z)=>-Math.min(cm(7),Math.max(0,z-Rx*0.25)*0.4)});Object.assign(W,{backK:0.75});}
   if(v==='alargado'){Object.assign(P,{dome:dome*1.8+0.5,tiltK:tilt*0.7,spacing:spacing*0.9,yfn:(x,z,i)=>((i*37)%11)/11*cm(4)});Object.assign(W,{lipK:1.8,backK:0.7,sheets:6});}
   const cl=buildCluster(cfg,P),Rc=cl.radius+cm(0.4),neckY=cm(11),neckR=cm(2.6);
   const Yf=neckY+Math.max(cm(7),(Rc-neckR)*0.9),L=lip*W.lipK,F=flare*W.flareK;
-  const prof={Yf,r:y=>y<=neckY?neckR*(0.8+0.2*y/neckY):y<=Yf?neckR+(Rc-neckR)*Math.pow(Math.sin((y-neckY)/(Yf-neckY)*Math.PI/2),1.15):Rc+F*Math.pow((y-Yf)/L,1.5)};
+  const prof={Yf,r:y=>y<=neckY?neckR*(0.45+0.55*Math.pow(y/neckY,0.8)):y<=Yf?neckR+(Rc-neckR)*Math.pow(Math.sin((y-neckY)/(Yf-neckY)*Math.PI/2),1.15):Rc+F*Math.pow((y-Yf)/L,1.5)};
   // base abierta: el papel empieza más arriba y se ven los tallos amarrados
   const open=cfg.base==='abierta',y0=open?neckY+(Yf-neckY)*0.42:0;if(open)prof.y0=y0;
   for(let layer=0;layer<W.layers;layer++)for(let k=0;k<W.sheets;k++){const a0=k*Math.PI*2/W.sheets-0.72+(r()-0.5)*0.15+layer*0.35,span=Math.PI*2/W.sheets*1.75,front=Math.max(0,Math.sin(a0+span/2)),
@@ -1517,7 +1518,7 @@ function buildRamo(cfg){
       mid=new THREE.Vector3(Math.cos(a)*neckR*0.45*q,tieY,Math.sin(a)*neckR*0.45*q),low=new THREE.Vector3(Math.cos(a)*neckR*1.1*q,bot,Math.sin(a)*neckR*1.1*q);
       stems.add(stemBetween(top,mid,cm(0.28)));stems.add(stemBetween(mid,low,cm(0.28)));}
     const tie=new THREE.Mesh(new THREE.TorusGeometry(neckR*0.55,cm(0.5),8,40),ribbonMat(cfg.cinta||cfg.lazo.color||'Dorado'));tie.rotation.x=Math.PI/2;tie.position.y=tieY;stems.add(tie);}
-  else for(let k=0;k<Math.min(9,3+n);k++){const a=k*2.4,rr=neckR*0.55*Math.sqrt((k+0.5)/9);const st=new THREE.Mesh(new THREE.CylinderGeometry(cm(0.28),cm(0.3),cm(4.5),8),sm);st.position.set(Math.cos(a)*rr,-cm(1.6),Math.sin(a)*rr);stems.add(st);}
+  else{lowest=0;const bc=new THREE.Mesh(new THREE.CircleGeometry(neckR*0.47,32),paperMat(cfg.paper));bc.rotation.x=Math.PI/2;bc.position.y=cm(0.05);stems.add(bc);}
   g.add(stems);
   if(v==='terno')addSuit(g,prof,neckY,Yf,cfg,open?y0:neckY);
   const ny=open?y0-cm(2):neckY*0.92,rn=(open?neckR*0.55:prof.r(ny))+cm(0.35);if(cfg.cinta){const t=new THREE.Mesh(new THREE.TorusGeometry(rn,cm(0.45),8,56),ribbonMat(cfg.cinta));t.rotation.x=Math.PI/2;t.scale.set(1,1,1.6);t.position.y=ny;g.add(t);}
@@ -2251,7 +2252,7 @@ window.initBuilder=function(){
     const loc=drag.cl.worldToLocal(hitP.clone()),ins=drag.cl.userData.inside;
     // si se sale del envase, la flor se queda en el borde (no se traba)
     if(ins&&!ins(loc.x,loc.z)){const sx=drag.o.position.x,sz=drag.o.position.z;let lo=0,hi=1;for(let k=0;k<14;k++){const m=(lo+hi)/2;if(ins(sx+(loc.x-sx)*m,sz+(loc.z-sz)*m))lo=m;else hi=m;}loc.x=sx+(loc.x-sx)*lo;loc.z=sz+(loc.z-sz)*lo;}
-    const d=drag.cl.userData.dome||0,rr=Math.hypot(loc.x,loc.z);drag.o.position.set(loc.x,-d*rr*rr,loc.z);drag.moved=[loc.x,loc.z];});
+    const dy=drag.cl.userData.domeY,rr=Math.hypot(loc.x,loc.z);drag.o.position.set(loc.x,dy?dy(rr):0,loc.z);drag.moved=[loc.x,loc.z];});
   const endDrag=()=>{if(!drag)return;controls.enabled=true;view.classList.remove('dragging');if(drag.moved){state.pos=state.pos||{};state.pos[drag.id]=drag.moved;drag=null;renderLayout();rebuild(false);}else drag=null;};
   renderer.domElement.addEventListener('pointerup',endDrag);renderer.domElement.addEventListener('pointercancel',endDrag);
   $('clearBtn').onclick=()=>{state.flowers=[];flowersChanged(true);};
