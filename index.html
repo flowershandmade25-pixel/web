@@ -366,6 +366,8 @@ html,body{overflow-x:clip}
 .pm-media{position:absolute;left:12px;top:12px;z-index:3;display:flex;gap:4px;background:rgba(255,255,255,.92);border-radius:50px;padding:4px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
 .pm-media button{border:none;background:none;border-radius:50px;padding:8px 14px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;min-height:36px}
 .pm-media button[aria-selected="true"]{background:var(--bark);color:#fff}
+#view.moving canvas{cursor:grab}#view.moving.dragging canvas{cursor:grabbing}
+.st-btn#moveBtn[aria-pressed="true"]{background:var(--rose);color:#fff;border-color:var(--rose)}
 /* ═════ tablet ═════ */
 @media (max-width:1080px){
   .nav{display:none}
@@ -652,6 +654,7 @@ html,body{overflow-x:clip}
         <div class="st-warn hidden" id="stWarn"></div>
         <div class="st-msg" id="stMsg"><div class="spinner"></div><div>Preparando el diseñador…</div></div>
         <div class="st-tools">
+          <button class="st-btn hidden" id="moveBtn" aria-pressed="false">✋ Mover flores</button>
           <button class="st-btn" id="dimsBtn" aria-pressed="true">📏 Medidas</button>
           <button class="st-btn" id="bgBtn" aria-pressed="false">◐ Fondo claro</button>
           <button class="st-btn hidden" id="realBtn">📷 Foto real</button>
@@ -669,6 +672,7 @@ html,body{overflow-x:clip}
             <div class="chips" id="varChips" style="margin-top:8px"></div>
             <div id="sizeWrap"><div class="lbl">Tamaño</div><div class="chips" id="sizeChips"></div></div>
             <div id="formaWrap"><div class="lbl">Forma del ramo</div><div class="seg" id="formaChips"></div></div>
+            <div id="baseWrap"><div class="lbl">Base del ramo</div><div class="seg" id="baseChips"></div></div>
             <div class="info" id="sizeInfo"></div>
             <div id="ccolorWrap"><div class="lbl"><span id="ccolorTitle">Color</span><small id="ccolorName"></small></div><div class="sws" id="ccolorSw"></div></div>
             <div class="nextrow"><span></span><button class="btn btn-dark" data-next>Siguiente: flores</button></div>
@@ -691,6 +695,8 @@ html,body{overflow-x:clip}
             <div class="lbl">Tu selección <small id="selCount"></small></div>
             <ul class="groups" id="groups"></ul>
             <div class="tools"><button type="button" class="link" id="mixBtn">Mezclar colores</button><button type="button" class="link" id="clearBtn">Quitar todas</button></div>
+            <div id="layoutWrap"><div class="lbl">Acomodo de las flores</div><div class="seg" id="layoutChips"></div>
+              <div class="hintline" id="layoutHint"></div></div>
             <div class="nextrow"><button class="btn btn-line" data-prev>Atrás</button><button class="btn btn-dark" data-next>Siguiente</button></div>
           </div>
           <div class="step" data-step="papel">
@@ -903,6 +909,8 @@ const CONTAINERS={
     cascada:{label:'Cascada',title:'Ramo cascada',price:0,max:0},
     corazon:{label:'Corazón',title:'Ramo corazón',price:0,max:0},
     alargado:{label:'Alargado',title:'Ramo alargado',price:0,max:0},
+    vestido:{label:'Vestido',title:'Ramo vestido',price:0,max:0},
+    terno:{label:'Terno',title:'Ramo terno',price:0,max:0},
     cono:{label:'En cono',title:'Ramo en cono',price:0,max:0}}},
   caja:{label:'Caja',variants:{
     redonda:{label:'Redonda',title:'Caja redonda',colorLabel:'Color de la caja',sizes:[]},
@@ -1015,12 +1023,41 @@ function mouth(cfg){ // área útil (cm²) y medida mínima de la boca
   if(c==='cuadro')return {area:(s.d*0.86)**2,min:s.d*0.8};
   return null;
 }
+const inPolyT=(px,py,poly)=>{let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const[xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>py)!==(yj>py))&&(px<(xj-xi)*(py-yi)/(yj-yi)+xi))c=!c;}return c;};
+function boxInside(cfg,r){
+  const c=cfg.container,v=cfg.variant,s=sizeOf(cfg),U=x=>x/20;if(!s)return null;
+  if(c==='caja'){
+    if(v==='redonda'){const R=U(s.d)/2;return (x,z)=>Math.hypot(x,z)<=Math.max(R*0.35,R-r*0.88);}
+    if(v==='corazon'){const K=U(s.d)/2,Kin=Math.max(K*0.45,K*0.97-r*0.95);return (x,z)=>inPolyT(x/Kin,-z/Kin,HEART);}
+    if(v==='hexagonal'){const R=U(s.d)/2,Ri=Math.max(R*0.4,R*0.866-r*0.85);return (x,z)=>{const q=Math.abs(z),w=Math.abs(x);return q<=Ri&&(0.5*q+0.866*w)<=Ri;};}
+    if(v==='acrilica'){const W=U(s.d),m=Math.max(W/2*0.35,W/2-U(0.4)-r*0.9);return (x,z)=>Math.abs(x)<=m&&Math.abs(z)<=m;}
+    if(v==='cuadrada'||v==='cartera'||v==='rectangular'){const W=U(s.d),D=U(v==='cuadrada'?s.d:s.dp),mx=Math.max(W/2*0.35,W/2-r*0.85),mz=Math.max(D/2*0.35,D/2-r*0.85);return (x,z)=>Math.abs(x)<=mx&&Math.abs(z)<=mz;}
+  }
+  if(c==='cuadro'){const S=U(s.d),h=Math.max(S/2*0.35,S/2*0.86-r*0.85);return (x,z)=>Math.abs(x)<=h&&Math.abs(z)<=h;}
+  return null;
+}
+// ¿Cuántas flores de este tamaño caben de verdad sin encimarse? (se calcula acomodándolas y se recuerda)
+const FIT_MEMO=new Map();
+function fitCount(cfg,r,hole){
+  const s=sizeOf(cfg),key=[cfg.container,cfg.variant,s&&s.id,r.toFixed(4),hole?1:0].join('|');if(FIT_MEMO.has(key))return FIT_MEMO.get(key);
+  const inside=boxInside(cfg,r);if(!inside)return null;
+  const o={inside,hole:hole?4.2/20:0,tight:true,stopBelow:0.84,extent:Math.max(s.d,s.dp||0)/20*0.75+r};
+  // se prueba llenando desde el centro y desde las paredes; vale el que más flores acomoda
+  const N=Math.max(packPositions(Array(160).fill(r),o).length,packPositions(Array(160).fill(r),Object.assign({},o,{edge:true})).length);
+  FIT_MEMO.set(key,N);return N;
+}
 function capacity(cfg){
   const n=cfg.flowers.length,m=mouth(cfg),s=sizeOf(cfg);
-  if(m){const cap=m.area*B.empaque,used=cfg.flowers.reduce((a,f)=>a+Math.PI*(fcm(f)/2)**2,0);
-    const big=cfg.flowers.find(f=>fcm(f)>m.min);const overCount=m.max&&n>m.max;
-    return {mode:'area',cap,used,pct:used/cap,ok:used<=cap*1.001&&!big&&!overCount,big,maxN:m.max||null,
-      fits:f=>{if(fcm(f)>m.min)return 0;const room=Math.floor((cap-used)/(Math.PI*(fcm(f)/2)**2)+1e-6);return Math.max(0,m.max?Math.min(room,m.max-n):room);}};}
+  if(m){const big=cfg.flowers.find(f=>fcm(f)>m.min);const overCount=m.max&&n>m.max;
+    // capacidad real: cuántas flores caben acomodadas dentro de las paredes (con la más grande como referencia)
+    const rOf=f=>fcm(f)/40,hole=!!cfg.mensaje&&cfg.container!=='cuadro'?1:0,rRef=n?Math.max(...cfg.flowers.map(rOf)):rOf({type:'rosa',tier:'M'});
+    const real=boxInside(cfg,rRef)?fitCount(cfg,rRef,hole):null;
+    const cap=real!=null?real*Math.PI*rRef*rRef*400:m.area*B.empaque,used=cfg.flowers.reduce((a,f)=>a+Math.PI*(fcm(f)/2)**2,0);
+    return {mode:'area',cap,used,pct:cap?used/cap:1,ok:used<=cap*1.001&&!big&&!overCount,big,maxN:m.max||null,
+      fits:f=>{if(fcm(f)>m.min)return 0;let room;
+        if(real!=null){const rr=Math.max(rRef,rOf(f)),N=fitCount(cfg,rr,hole),eq=cfg.flowers.reduce((a,x)=>a+(rOf(x)/rr)**2,0);room=Math.floor(N-eq+1e-6);}
+        else room=Math.floor((cap-used)/(Math.PI*(fcm(f)/2)**2)+1e-6);
+        return Math.max(0,m.max?Math.min(room,m.max-n):room);}};}
   const max=(s&&s.max)||vdef(cfg).max;
   return {mode:'count',max,pct:n/max,ok:n<=max,fits:()=>Math.max(0,max-n)};
 }
@@ -1081,26 +1118,43 @@ const PRESETS=[
 /* Empaquetado de flores de distintos tamaños (sin THREE, se puede probar aparte).
    rads: radios en orden de colocación · opts.inside(x,z): límite del envase · opts.hole: radio libre al centro */
 function packPositions(rads,opts){
-  opts=opts||{};const n=rads.length;if(!n)return [];
+  opts=opts||{};const tight=!!opts.tight;const n=rads.length;if(!n)return [];
   const rmin=Math.min(...rads),rmax=Math.max(...rads),area=rads.reduce((a,r)=>a+r*r,0),hole=opts.hole||0;
-  const L=Math.sqrt(area)*1.75+rmax*2+hole*2,step=Math.max(rmin*0.34,L/46),N=Math.ceil(L/step);
+  const L=opts.extent||(Math.sqrt(area)*1.75+rmax*2+hole*2),step=Math.max(rmin*0.34,L/46),N=Math.ceil(L/step);
   const cand=[];for(let j=-N;j<=N;j++){const z=j*step*0.866;for(let i=-N;i<=N;i++){const x=(i+(j&1?0.5:0))*step,d=Math.hypot(x,z);
     if(d>L)continue;if(opts.inside&&!opts.inside(x,z))continue;cand.push([x,z,d+Math.atan2(z,x)*1e-6]);}}
-  cand.sort((a,b)=>a[2]-b[2]);
+  cand.sort((a,b)=>opts.edge?b[2]-a[2]:a[2]-b[2]);
   if(!cand.length)return rads.map(()=>[0,0]);
   // rejilla para revisar solo las flores vecinas (mucho más rápido en celulares)
   const cs=rmax*2,grid=new Map(),P=[],key=(x,z)=>Math.floor(x/cs)+','+Math.floor(z/cs);
   const score=(x,z,r)=>{let m=hole?Math.hypot(x,z)/(r*0.6+hole):Infinity;const gx=Math.floor(x/cs),gz=Math.floor(z/cs);
     for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const l=grid.get((gx+a)+','+(gz+b));if(!l)continue;for(const k of l){const q=P[k],v=Math.hypot(x-q[0],z-q[1])/(r+q[2]);if(v<m)m=v;}}return m;};
-  const TH=[0.92,0.84,0.76,0.68];
+  const TH=tight?[0.97,0.91,0.85,0.78]:[0.92,0.84,0.76,0.68];
   for(let i=0;i<n;i++){const r=rads[i],first=[null,null,null,null];let best=null,bv=-1,pick=null;
     for(const c of cand){const v=score(c[0],c[1],r);if(v>=TH[0]){pick=c;break;}
       for(let t=1;t<TH.length;t++)if(!first[t]&&v>=TH[t])first[t]=c;if(v>bv){bv=v;best=c;}}
+    if(opts.stopBelow&&!pick&&bv<opts.stopBelow)break;
     if(!pick)pick=first[1]||first[2]||first[3]||best;
     const idx=P.length;P.push([pick[0],pick[1],r]);const k=key(pick[0],pick[1]);if(!grid.has(k))grid.set(k,[]);grid.get(k).push(idx);}
   // ramos: se centra el conjunto (el ajuste es mínimo al agregar una flor)
   if(!opts.inside&&!hole&&n>1){const cx=P.reduce((a,p)=>a+p[0],0)/n,cz=P.reduce((a,p)=>a+p[1],0)/n;P.forEach(p=>{p[0]-=cx;p[1]-=cz;});}
   return P.map(p=>[p[0],p[1]]);
+}
+
+/* Acomodos ordenados (más fáciles de repetir en el taller) */
+function rowPositions(rads,inside,hole){
+  const n=rads.length;if(!n)return [];const d=Math.max(...rads)*2*0.98,P=[],N=Math.ceil(Math.sqrt(n))+4;
+  for(let j=-N;j<=N;j++)for(let i=-N;i<=N;i++){const x=i*d,z=j*d;if(hole&&Math.hypot(x,z)<hole+d*0.4)continue;if(inside&&!inside(x,z))continue;P.push([x,z,Math.hypot(x,z*1.001)]);}
+  P.sort((a,b)=>a[2]-b[2]);if(P.length<n)return null;const pick=P.slice(0,n);
+  if(!inside){const cx=pick.reduce((a,p)=>a+p[0],0)/n,cz=pick.reduce((a,p)=>a+p[1],0)/n;return pick.map(p=>[p[0]-cx,p[1]-cz]);}
+  return pick.map(p=>[p[0],p[1]]);
+}
+function ringPositions(rads,inside,hole){
+  const n=rads.length;if(!n)return [];const d=Math.max(...rads)*2*0.96,P=[];let left=n,ringI=0;
+  if(!hole){P.push([0,0]);left--;}
+  while(left>0&&ringI<30){ringI++;const R=hole?hole+d*(ringI-0.5):d*ringI,cap=Math.max(1,Math.floor(2*Math.PI*R/d)),k=Math.min(cap,left),off=ringI*0.37;
+    for(let i=0;i<k;i++){const a=off+i*2*Math.PI/k,x=Math.cos(a)*R,z=Math.sin(a)*R;if(inside&&!inside(x,z))return null;P.push([x,z]);}left-=k;}
+  return left>0?null:P;
 }
 
 /* ── Tamaño automático del envase según las flores ── */
@@ -1147,6 +1201,9 @@ function applyConfig(c){
 const containerOn=c=>Object.values(CONTAINERS[c].variants).some(v=>v.on);
 // Ajusta cualquier diseño (propio, sugerido o compartido) a las reglas vigentes
 function sanitize(cfg){
+  if(cfg.base!=='abierta')cfg.base='cerrada';if(cfg.container!=='ramo'||['cono','vestido'].includes(cfg.variant))cfg.base='cerrada';
+  if(!['auto','filas','anillos'].includes(cfg.layout))cfg.layout='auto';
+  if(cfg.pos&&typeof cfg.pos==='object'){const ids=new Set(cfg.flowers.map(f=>String(f.id)));Object.keys(cfg.pos).forEach(k=>{if(!ids.has(k))delete cfg.pos[k];});}else cfg.pos={};
   if(!CONTAINERS[cfg.container]||!containerOn(cfg.container))cfg.container=Object.keys(CONTAINERS).find(containerOn)||'ramo';
   const vs=CONTAINERS[cfg.container].variants;if(!vs[cfg.variant]||!vs[cfg.variant].on)cfg.variant=Object.keys(vs).find(k=>vs[k].on)||Object.keys(vs)[0];
   const V=vs[cfg.variant],key=cfg.container+'.'+cfg.variant;cfg.sizes=cfg.sizes||{};cfg.ccolor=cfg.ccolor||{};
@@ -1167,7 +1224,7 @@ function sanitize(cfg){
 }
 function encodeDesign(cfg){
   const k=cfg.container+'.'+cfg.variant;
-  const o={c:cfg.container,v:cfg.variant,s:(cfg.sizes||{})[k]||'',k:(cfg.ccolor||{})[k]||'',pt:cfg.paper.type,pc:cfg.paper.color,pi:cfg.paper.inner||'',fe:cfg.fieltro||'',m:cfg.malla?1:0,fo:cfg.forma??1,x:cfg.mix||0,
+  const o={c:cfg.container,v:cfg.variant,s:(cfg.sizes||{})[k]||'',k:(cfg.ccolor||{})[k]||'',pt:cfg.paper.type,pc:cfg.paper.color,pi:cfg.paper.inner||'',fe:cfg.fieltro||'',m:cfg.malla?1:0,fo:cfg.forma??1,x:cfg.mix||0,b:cfg.base==='abierta'?1:0,la:cfg.layout&&cfg.layout!=='auto'?cfg.layout:'',po:(()=>{const ids=groupsOf(cfg).flatMap(x=>x.ids||[]),P=cfg.pos||{};return ids.some(id=>P[id])?ids.map(id=>P[id]?[+P[id][0].toFixed(3),+P[id][1].toFixed(3)]:0):undefined;})(),
     ls:cfg.lazo.style,lc:cfg.lazo.color,ci:cfg.cinta||'',g:cfg.gyps?1:0,co:cfg.corona||'',ma:cfg.mariposas?1:0,lu:cfg.luces?1:0,me:cfg.mensaje?1:0,t:cfg.mensaje?cfg.texto:'',
     fl:groupsOf(cfg).map(x=>[x.f.type,x.f.type==='girasol'?'':x.f.color,x.f.tier,Math.round((x.f.open||0)*100),x.n])};
   return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -1176,9 +1233,10 @@ function decodeDesign(code){
   try{let b=String(code||'').trim().replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';const o=JSON.parse(decodeURIComponent(escape(atob(b))));
     if(!o||!CONTAINERS[o.c]||!CONTAINERS[o.c].variants[o.v])return null;
     const c=defaultCfg(),k=o.c+'.'+o.v;c.container=o.c;c.variant=o.v;if(o.s)c.sizes[k]=String(o.s);if(o.k)c.ccolor[k]=String(o.k);
-    c.paper={type:String(o.pt||'liso'),color:String(o.pc||'Blanco'),inner:o.pi?String(o.pi):'Blanco'};c.fieltro=o.fe?String(o.fe):null;c.malla=!!o.m;c.forma=+o.fo||0;c.mix=+o.x||0;
+    c.paper={type:String(o.pt||'liso'),color:String(o.pc||'Blanco'),inner:o.pi?String(o.pi):'Blanco'};c.fieltro=o.fe?String(o.fe):null;c.malla=!!o.m;c.forma=+o.fo||0;c.mix=+o.x||0;c.base=o.b?'abierta':'cerrada';c.layout=String(o.la||'auto');
     c.lazo={style:LAZOS[o.ls]?o.ls:'simple',color:RIBBON[o.lc]?o.lc:'Dorado'};c.cinta=RIBBON[o.ci]?o.ci:null;c.gyps=!!o.g;c.corona=CROWN[o.co]?o.co:null;c.mariposas=!!o.ma;c.luces=!!o.lu;c.mensaje=!!o.me;if(o.t)c.texto=String(o.t).slice(0,40);
     c.flowers=[];let total=0;(Array.isArray(o.fl)?o.fl:[]).forEach(r=>{if(!Array.isArray(r))return;const[t,col,tier,op,n]=r;if(!TYPES[t])return;for(let i=0;i<Math.min(40,n|0)&&total<40;i++,total++)c.flowers.push(newFlower(t,String(col||'Amarillo'),{tier:String(tier||'M'),open:t==='girasol'?0:(+op||0)/100}));});
+    if(Array.isArray(o.po)){c.pos={};o.po.forEach((p,k)=>{if(Array.isArray(p)&&c.flowers[k])c.pos[c.flowers[k].id]=[+p[0]||0,+p[1]||0];});}
     return c;}catch(e){return null;}
 }
 function designFromLink(s){const m=/[#&?]d=([A-Za-z0-9_-]+)/.exec(String(s||''));return m?m[1]:(/^[A-Za-z0-9_-]{20,}$/.test(String(s||'').trim())?String(s).trim():null);}
@@ -1255,15 +1313,28 @@ function sheetGeo(a0,span,r0,r1,h,peak,wave,pw){const g=new THREE.PlaneGeometry(
   for(let i=0;i<p.count;i++){const u=p.getX(i)+0.5,v=p.getY(i)+0.5,a=a0+u*span,vv=v*(1-(peak||0)*Math.pow(2*u-1,2));const r=r0+(r1-r0)*Math.pow(vv,pw||2.2)+(wave||0)*Math.sin(u*Math.PI*4)*vv*vv;p.setXYZ(i,Math.cos(a)*r,vv*h,Math.sin(a)*r);}
   g.computeVertexNormals();const q=g.attributes.position;const c=new Float32Array(q.count*3);for(let i=0;i<q.count;i++){const v=(q.getY(i)/h),k=0.55+0.45*Math.min(1,Math.max(0,v));c[i*3]=c[i*3+1]=c[i*3+2]=k;}g.setAttribute('color',new THREE.BufferAttribute(c,3));return g;}
 // hoja de papel que sigue el perfil real del ramo: prof.r(y) da el radio a cada altura
-function wrapGeo(a0,span,prof,hTop,peak,seed){const g=new THREE.PlaneGeometry(1,1,28,34),p=g.attributes.position,r=rng(seed),ph=r()*6,amp=0.5+r()*0.5;
-  for(let i=0;i<p.count;i++){const u=p.getX(i)+0.5,v=p.getY(i)+0.5,a=a0+u*span,top=hTop*(1-peak*Math.pow(2*u-1,2)),y=v*top;
+function wrapGeo(a0,span,prof,hTop,peak,seed){const g=new THREE.PlaneGeometry(1,1,28,34),p=g.attributes.position,r=rng(seed),ph=r()*6,amp=0.5+r()*0.5,y0=prof.y0||0;
+  for(let i=0;i<p.count;i++){const u=p.getX(i)+0.5,v=p.getY(i)+0.5,a=a0+u*span,top=hTop*(1-peak*Math.pow(2*u-1,2)),y=y0+v*Math.max(0.01,top-y0);
     const lipT=Math.max(0,(y-prof.Yf)/Math.max(0.01,hTop-prof.Yf));
     let rr=prof.r(y)+cm(0.5)*amp*Math.sin(u*Math.PI*3+ph)*lipT*lipT+cm(0.15)*Math.sin(u*40+y*30)*lipT;
     p.setXYZ(i,Math.cos(a)*rr,y,Math.sin(a)*rr);}
   g.computeVertexNormals();aoColors(g,hTop);return g;}
 const rgb=h=>{const c=lin(h);return [c.r,c.g,c.b];};
 const q4=v=>Math.round(Math.max(0,Math.min(1,v))*4)/4;
-function roseGeos(o){const k='rose'+o;if(G[k])return G[k];const a=[];for(let i=0;i<16;i++){const f=i/15;a.push(petalGeo({w:0.085+0.15*f,h:0.075+0.085*f,cup:1.15-0.5*f,curl:(0.03+0.3*f)*(0.4+o)}));}return G[k]=a;}
+/* Rosa de cinta: centro de cinta enrollada en espiral + 3 capas de pétalos doblados */
+function roseGeos(o){const k='rose3'+o;if(G[k])return G[k];
+  const L=[{n:5,w:0.11,h:0.085,cup:1.3,curl:0.02+0.06*o,z:0.018,tilt:0.1+0.25*o,y:-0.004},
+           {n:7,w:0.15,h:0.105,cup:1.05,curl:0.05+0.2*o,z:0.03,tilt:0.32+0.55*o,y:-0.014},
+           {n:8,w:0.19,h:0.12,cup:0.75,curl:0.16+0.34*o,z:0.042,tilt:0.62+0.8*o,y:-0.026}];
+  L.forEach(l=>{l.geo=petalGeo({w:l.w,h:l.h,cup:l.cup,curl:l.curl,base:[0.5,0.5,0.5],tip:[1,1,1]});});
+  return G[k]={layers:L,spiral:roseSpiral(o)};}
+function roseSpiral(o){
+  // cinta enrollada: el corazón típico de la rosa de cinta (más apretada si está cerrada)
+  const turns=2.4-0.5*o,segs=110,rows=7,r0=0.004,r1=0.038+0.014*o,hTop=0.072,hBot=-0.012,pos=[],col=[],idx=[];
+  for(let i=0;i<=segs;i++){const t=i/segs,a=t*turns*Math.PI*2,r=r0+(r1-r0)*Math.pow(t,0.9),top=hTop*(1-0.22*t)+0.004*Math.sin(t*26);
+    for(let j=0;j<=rows;j++){const v=j/rows,y=hBot+(top-hBot)*v,fl=1+(0.18+0.25*o)*v*v*t,rr=r*fl;pos.push(Math.cos(a)*rr,y,Math.sin(a)*rr);const c=0.5+0.5*Math.pow(v,0.75)*(0.8+0.2*t);col.push(c,c,c);}}
+  for(let i=0;i<segs;i++)for(let j=0;j<rows;j++){const a=i*(rows+1)+j,b=a+rows+1;idx.push(a,b,a+1,b,b+1,a+1);}
+  const g=new THREE.BufferGeometry();g.setIndex(idx);g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();return keep(g);}
 const leafGeo=()=>G.leaf||(G.leaf=petalGeo({shape:'point',w:0.11,h:0.17,cup:0.35,curl:0.18,base:[0.55,0.55,0.55]}));
 function sunGeos(){if(G.sun)return G.sun;return G.sun={petal:petalGeo({shape:'point',w:0.12,h:0.2,cup:-0.6,puff:-0.35,base:rgb('#e07f08'),tip:rgb('#ffd12a')}),leaf:petalGeo({shape:'point',w:0.14,h:0.2,cup:0.3,curl:0.15,base:[0.55,0.55,0.55]}),
   strand:keep(new THREE.CylinderGeometry(0.0045,0.0055,0.04,4).translate(0,0.02,0)),disc:keep(new THREE.SphereGeometry(0.12,24,8,0,Math.PI*2,0,Math.PI/2))};}
@@ -1272,10 +1343,12 @@ function inPoly(px,py,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.lengt
 const heartShape=K=>new THREE.Shape(HEART.map(([x,y])=>new THREE.Vector2(x*K,y*K)));
 
 /* flores: el tamaño viene en cm reales */
-const natural=f=>f.type==='girasol'?0.3:f.type==='tulipan'?0.12*(0.95+0.9*q4(f.open)):0.21*(0.8+0.35*q4(f.open));
+const natural=f=>f.type==='girasol'?0.3:f.type==='tulipan'?0.12*(0.95+0.9*q4(f.open)):0.21*(0.8+0.35*q4(f.open))*(0.95-0.17*q4(f.open)); // rosa de cinta (3 capas + centro en espiral)
 const fRad=f=>cm(fcm(f))/2;
 function makeRose(hex,open,seed){const o=q4(open),g=new THREE.Group(),geos=roseGeos(o),m=satin(hex),r=rng(seed),lm=satin(LEAF);
-  for(let i=0;i<16;i++){const f=i/15,piv=new THREE.Group();piv.rotation.y=i*2.39996+r()*0.3;const me=new THREE.Mesh(geos[i],m);me.position.set(0,-0.03*f,0.004+0.045*f);me.rotation.x=-0.25*(1-f)+0.15+(0.3+0.9*o)*Math.pow(f,1.3)+r()*0.08;piv.add(me);g.add(piv);}
+  const sp=new THREE.Mesh(geos.spiral,m);sp.rotation.y=r()*6.28;g.add(sp);
+  geos.layers.forEach((l,li)=>{const off=li*0.45+r()*0.3;for(let i=0;i<l.n;i++){const piv=new THREE.Group();piv.rotation.y=off+i*Math.PI*2/l.n+(r()-0.5)*0.18;
+    const me=new THREE.Mesh(l.geo,m);me.position.set(0,l.y,l.z);me.rotation.x=l.tilt+(r()-0.5)*0.1;me.rotation.z=(r()-0.5)*0.12;piv.add(me);g.add(piv);}});
   for(let k=0;k<5;k++){const piv=new THREE.Group();piv.rotation.y=k*1.2566+r()*0.4;const l=new THREE.Mesh(leafGeo(),lm);l.position.set(0,-0.05,0.07);l.rotation.x=1.3+r()*0.2;piv.add(l);g.add(piv);}return g;}
 function makeSun(seed){const g=new THREE.Group(),s=sunGeos(),r=rng(seed),pm=satin('#ffffff'),lm=satin(LEAF);
   for(let k=0;k<6;k++){const piv=new THREE.Group();piv.rotation.y=k*1.047+0.3;const l=new THREE.Mesh(s.leaf,lm);l.position.set(0,-0.035,0.12);l.rotation.x=1.5;piv.add(l);g.add(piv);}
@@ -1331,17 +1404,25 @@ function gridIn(n,s,inside){for(let f=1;f>=0.62;f-=0.04){const sp=s*f,pts=[];for
 const Yax=new THREE.Vector3(0,1,0);
 function orient(o,x,z,tilt,spin){const a=Math.atan2(z,x),qt=new THREE.Quaternion(),qs=new THREE.Quaternion();if(x===0&&z===0)qt.setFromAxisAngle(new THREE.Vector3(1,0,0),tilt);else qt.setFromAxisAngle(new THREE.Vector3(-Math.sin(a),0,Math.cos(a)),-tilt);qs.setFromAxisAngle(Yax,spin);o.quaternion.copy(qt).multiply(qs);}
 const PACK_MEMO=new Map();
+const fmax=cfg=>cfg.flowers.length?Math.max(...cfg.flowers.map(fRad)):cm(3);
 function buildCluster(cfg,o){
   const fl=orderFlowers(cfg),g=new THREE.Group(),n=fl.length,rads=fl.map(fRad),avg=n?rads.reduce((a,b)=>a+b,0)/n:0.15,s=avg*(o.spacing||1.9),r=rng(17);let pts;
   // cada flor ocupa su lugar según su tamaño real; los pétalos pueden rozarse un poco, como en un arreglo real
-  const sp=(o.spacing||1.9)/1.9,rmx=n?Math.max(...rads):0,inside=o.inside||(o.fitR?((x,z)=>Math.hypot(x,z)<=Math.max(o.fitR*0.35,o.fitR-rmx*0.45)):null);
+  const sp=(o.spacing||1.9)/1.9,rmx=n?Math.max(...rads):0,inside=o.inside||(o.fitR?((x,z)=>Math.hypot(x,z)<=Math.max(o.fitR*0.35,o.fitR-rmx*(o.box?0.88:0.45))):null);
   // se recuerda el acomodo: cambiar colores o adornos no vuelve a calcularlo
   const mkey=[rads.map(x=>x.toFixed(4)).join(','),cfg.container,cfg.variant,(sizeOf(cfg)||{}).id||'',o.msg?1:0,sp,cfg.forma??1].join('|');
-  pts=PACK_MEMO.get(mkey);if(!pts){pts=packPositions(rads.map(r=>r*sp),{inside,hole:o.msg?cm(4.2):0});PACK_MEMO.set(mkey,pts);if(PACK_MEMO.size>40)PACK_MEMO.delete(PACK_MEMO.keys().next().value);}
+  const lay=cfg.layout||'auto',mk2=mkey+'|'+lay;
+  pts=PACK_MEMO.get(mk2);if(!pts){pts=lay==='filas'?rowPositions(rads.map(r=>r*sp),inside,o.msg?cm(4.2):0):lay==='anillos'?ringPositions(rads.map(r=>r*sp),inside,o.msg?cm(4.2):0):null;
+    if(!pts){const R2=rads.map(r=>r*sp),po={inside,hole:o.msg?cm(4.2):0,tight:!!o.box};pts=packPositions(R2,po);
+      if(o.box&&inside&&n>1){const sepOf=P=>{let m=9;for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++)m=Math.min(m,Math.hypot(P[i][0]-P[j][0],P[i][1]-P[j][1])/(R2[i]+R2[j]));return m;};
+        if(sepOf(pts)<0.9){const alt=packPositions(R2,Object.assign({},po,{edge:true}));if(sepOf(alt)>sepOf(pts))pts=alt;}}}PACK_MEMO.set(mk2,pts);if(PACK_MEMO.size>40)PACK_MEMO.delete(PACK_MEMO.keys().next().value);}
+  // posiciones movidas a mano por el cliente (se respetan mientras sigan dentro del envase)
+  if(cfg.pos){pts=pts.map((p,i)=>{const q=cfg.pos[fl[i].id];return q&&(!inside||inside(q[0],q[1]))?[q[0],q[1]]:p;});}
   let maxR=0,ring=0,drop=0;const heads=[];
-  pts.forEach(([x,z],i)=>{const f=fl[i],rr=Math.hypot(x,z),y=-o.dome*rr*rr+(o.yfn?o.yfn(x,z,i):0),obj=makeFlower(f);obj.position.set(x,y,z);const tl=Math.min(0.6,rr*0.9)*(o.tiltK==null?1:o.tiltK);orient(obj,x,z,tl,r()*6.28);g.add(obj);heads.push({p:new THREE.Vector3(x,y,z),r:rads[i]});maxR=Math.max(maxR,rr+rads[i]);ring=Math.max(ring,rr);});
+  pts.forEach(([x,z],i)=>{const f=fl[i],rr=Math.hypot(x,z),y=-o.dome*rr*rr+(o.yfn?o.yfn(x,z,i):0),obj=makeFlower(f);obj.position.set(x,y,z);obj.userData.fid=f.id;obj.userData.pick=true;const tl=Math.min(0.6,rr*0.9)*(o.tiltK==null?1:o.tiltK);orient(obj,x,z,tl,r()*6.28);g.add(obj);heads.push({p:new THREE.Vector3(x,y,z),r:rads[i]});maxR=Math.max(maxR,rr+rads[i]);ring=Math.max(ring,rr);});
   let top=null;if(o.msg){const m=makeMsgDisc(cfg.texto);m.position.set(0,cm(3.5),cm(0.4));g.add(m);top=[0,cm(8),-cm(0.6)];}
   else if(heads.length){let c=heads[0];heads.forEach(h=>{if(h.p.lengthSq()<c.p.lengthSq())c=h;});top=[c.p.x,c.p.y+c.r*0.45+0.02,c.p.z];}
+  g.userData.cluster=true;g.userData.inside=inside;g.userData.dome=o.dome;
   addExtras(g,heads,top,cfg,29);return {group:g,radius:Math.max(maxR,o.msg?cm(5):0,cm(4)),avg,ring,heads,low:Math.min(0,...heads.map((h,i)=>h.p.y-h.r*Math.sin(Math.min(0.6,Math.hypot(h.p.x,h.p.z)*0.9)*(o.tiltK==null?1:o.tiltK))*0.85))};}
 function stemBetween(a,b,rad){const d=new THREE.Vector3().subVectors(b,a),L=d.length(),m=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad*1.15,L,8),plain(STEM,0.6));m.position.copy(a).addScaledVector(d,0.5);m.quaternion.setFromUnitVectors(Yax,d.normalize());return m;}
 function buildStemmed(cfg,mouthY,lift,fromY,maxR){
@@ -1354,9 +1435,44 @@ function buildStemmed(cfg,mouthY,lift,fromY,maxR){
 
 /* envases con medidas reales */
 function bowAt(g,cfg,x,y,z,w,rot){const b=makeBow(cfg.lazo.style,cfg.lazo.color,w);if(b){b.position.set(x,y,z);if(rot)b.rotation.set(rot[0],rot[1],rot[2]);g.add(b);}}
+
+/* Ramo vestido: las flores forman el corpiño y el papel una falda con pliegues, con cinturón y lazo */
+function buildDress(cfg,P){
+  const g=new THREE.Group(),r=rng(31),n=cfg.flowers.length;
+  const cl=buildCluster(cfg,{dome:P.dome*1.2+0.3,tiltK:P.tilt*0.9,spacing:P.spacing*0.95,msg:false}),Rc=Math.max(cm(5),cl.radius),waist=Rc*0.72;
+  const Hs=Math.max(cm(22),Rc*2.4),hem=Rc*1.9+cm(4),pl=12;
+  const skirt=(scale,hh,col,seed,tulle)=>{const geo=new THREE.CylinderGeometry(1,1,1,96,24,true),p=geo.attributes.position;
+    for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i)+0.5,z=p.getZ(i),a=Math.atan2(z,x),t=1-y,rr=(waist+(hem*scale-waist)*Math.pow(t,1.25))*(1+0.06*t*Math.sin(a*pl+seed));p.setXYZ(i,Math.cos(a)*rr,y*hh,Math.sin(a)*rr);}
+    geo.computeVertexNormals();aoColors(geo,hh);return new THREE.Mesh(geo,tulle?meshMat():col);};
+  const outer=cfg.paper.type==='doblecara'?paperMat(cfg.paper,THREE.BackSide):paperMat(cfg.paper);
+  g.add(skirt(1,Hs,outer,0));if(cfg.paper.type==='doblecara')g.add(skirt(1,Hs,paperMat({type:'liso',color:cfg.paper.inner||'Blanco'},THREE.FrontSide),0));
+  if(cfg.malla)g.add(skirt(1.08,Hs*0.92,null,1.3,true));
+  const under=skirt(0.92,Hs*0.97,paperMat({type:'liso',color:cfg.paper.inner||'Blanco'}),2.1);under.scale.set(1,1,1);g.add(under);
+  const cap=new THREE.Mesh(new THREE.CircleGeometry(waist,40),outer);cap.rotation.x=-Math.PI/2;cap.position.y=Hs-cm(0.3);g.add(cap);
+  cl.group.position.y=Hs-cl.low*0.6+cm(0.5);g.add(cl.group);
+  const belt=new THREE.Mesh(new THREE.TorusGeometry(waist+cm(0.2),cm(0.7),8,64),ribbonMat(cfg.cinta||cfg.lazo.color||'Dorado'));belt.rotation.x=Math.PI/2;belt.scale.set(1,1,0.6);belt.position.y=Hs-cm(0.8);g.add(belt);
+  bowAt(g,cfg,0,Hs-cm(0.8),waist+cm(0.8),11);
+  return {group:g,dims:null};
+}
+/* Ramo terno: el papel se viste de saco con solapas, camisa blanca y corbata */
+function addSuit(g,prof,neckY,Yf,cfg,yb){
+  const y1=Yf-cm(0.5),y0=Math.max(yb,neckY)+cm(0.5),r1=prof.r(y1),r0=prof.r(y0),slope=Math.atan2(r1-r0,y1-y0),hgt=Math.hypot(y1-y0,r1-r0);
+  const front=new THREE.Group();front.position.set(0,y0,r0+cm(0.35));front.rotation.x=-slope;
+  const mk=(pts,mat,z)=>{const sh=new THREE.Shape(pts.map(([x,y])=>new THREE.Vector2(x,y)));const m=new THREE.Mesh(new THREE.ShapeGeometry(sh),mat);m.position.z=z;return m;};
+  const W=Math.min(r1*1.3,cm(9)),white=board('#fbfaf7',0.6),tieM=ribbonMat(cfg.cinta||'Rojo'),lap=paperMat(cfg.paper);
+  front.add(mk([[-W*0.42,hgt],[W*0.42,hgt],[0,hgt*0.18]],white,0));                         // camisa
+  front.add(mk([[-W*0.5,hgt],[-W*0.3,hgt],[-W*0.02,hgt*0.12],[-W*0.16,hgt*0.12]],lap,cm(0.08)));  // solapa izquierda
+  front.add(mk([[W*0.5,hgt],[W*0.3,hgt],[W*0.02,hgt*0.12],[W*0.16,hgt*0.12]],lap,cm(0.08)));      // solapa derecha
+  front.add(mk([[-W*0.07,hgt*0.96],[W*0.07,hgt*0.96],[W*0.05,hgt*0.86],[-W*0.05,hgt*0.86]],tieM,cm(0.16)));          // nudo
+  front.add(mk([[-W*0.05,hgt*0.86],[W*0.05,hgt*0.86],[W*0.09,hgt*0.36],[0,hgt*0.26],[-W*0.09,hgt*0.36]],tieM,cm(0.14))); // corbata
+  [0.62,0.46].forEach(t=>{const b=new THREE.Mesh(new THREE.CircleGeometry(cm(0.35),14),board('#1d1b1c',0.4));b.position.set(W*0.12,hgt*t,cm(0.2));front.add(b);});
+  g.add(front);
+}
+
 function buildRamo(cfg){
   const g=new THREE.Group(),pm=paperMat(cfg.paper),o=Math.max(0,Math.min(2,cfg.forma??1)),r=rng(11),v=cfg.variant;
   const dome=[0.9,0.6,0.35][o],tilt=[0.75,1,1.35][o],flare=[cm(0.6),cm(3.2),cm(7)][o],lip=[cm(4.5),cm(6),cm(7)][o],spacing=[1.72,1.82,1.95][o];
+  if(v==='vestido')return buildDress(cfg,{dome,tilt,spacing});
   if(cfg.variant==='cono'){
     const cl=buildCluster(cfg,{dome:dome*0.8,tiltK:tilt*0.8,msg:cfg.mensaje,spacing}),Rc=cl.radius,Yf=Math.max(cm(18),Rc*2.1);
     const prof={Yf,r:y=>y<=Yf?cm(0.7)+(Rc+cm(0.6)-cm(0.7))*Math.pow(y/Yf,0.92):Rc+cm(0.6)+flare*1.2*Math.pow((y-Yf)/lip,1.4)};
@@ -1380,32 +1496,41 @@ function buildRamo(cfg){
   const cl=buildCluster(cfg,P),Rc=cl.radius+cm(0.4),neckY=cm(11),neckR=cm(2.6);
   const Yf=neckY+Math.max(cm(7),(Rc-neckR)*0.9),L=lip*W.lipK,F=flare*W.flareK;
   const prof={Yf,r:y=>y<=neckY?neckR*(0.8+0.2*y/neckY):y<=Yf?neckR+(Rc-neckR)*Math.pow(Math.sin((y-neckY)/(Yf-neckY)*Math.PI/2),1.15):Rc+F*Math.pow((y-Yf)/L,1.5)};
+  // base abierta: el papel empieza más arriba y se ven los tallos amarrados
+  const open=cfg.base==='abierta',y0=open?neckY+(Yf-neckY)*0.42:0;if(open)prof.y0=y0;
   for(let layer=0;layer<W.layers;layer++)for(let k=0;k<W.sheets;k++){const a0=k*Math.PI*2/W.sheets-0.72+(r()-0.5)*0.15+layer*0.35,span=Math.PI*2/W.sheets*1.75,front=Math.max(0,Math.sin(a0+span/2)),
-    pk={Yf,r:y=>prof.r(y)*(1+0.012*k+0.03*layer)+cm(0.15)*k},hh=Yf+L*(1-W.backK*front)*(0.9+r()*0.2)*(layer?0.85:1);
+    pk={Yf,y0,r:y=>prof.r(y)*(1+0.012*k+0.03*layer)+cm(0.15)*k},hh=Yf+L*(1-W.backK*front)*(0.9+r()*0.2)*(layer?0.85:1);
     paperSheet(g,wrapGeo(a0,span,pk,hh,0.32,60+k+layer*20),cfg.paper);}
-  if(cfg.malla)for(let k=0;k<4;k++){const pk={Yf,r:y=>prof.r(y)*0.99};g.add(new THREE.Mesh(wrapGeo(k*Math.PI/2+0.35,1.9,pk,Yf+L*0.85,0.28,80+k),meshMat()));}
-  if(cfg.fieltro)for(let k=0;k<6;k++){const pk={Yf,r:y=>prof.r(y)*0.955};g.add(new THREE.Mesh(wrapGeo(k*1.047+0.4,1.4,pk,Yf+cm(2.4)+L*0.15,0.42,90+k),fieltroMat(cfg.fieltro)));}
+  if(cfg.malla)for(let k=0;k<4;k++){const pk={Yf,y0,r:y=>prof.r(y)*0.99};g.add(new THREE.Mesh(wrapGeo(k*Math.PI/2+0.35,1.9,pk,Yf+L*0.85,0.28,80+k),meshMat()));}
+  if(cfg.fieltro)for(let k=0;k<6;k++){const pk={Yf,y0,r:y=>prof.r(y)*0.955};g.add(new THREE.Mesh(wrapGeo(k*1.047+0.4,1.4,pk,Yf+cm(2.4)+L*0.15,0.42,90+k),fieltroMat(cfg.fieltro)));}
   const fillM=cfg.fieltro?fieltroMat(cfg.fieltro):pm,cap=new THREE.Mesh(new THREE.CircleGeometry(prof.r(Yf-cm(1.2))*0.97,48),fillM);aoColors(cap.geometry,1);cap.rotation.x=-Math.PI/2;cap.position.y=Yf-cm(1.2);g.add(cap);
   // en cascada, las flores de adelante cuelgan por fuera del papel
   const lowB=v==='cascada'?Math.min(0,...cl.heads.filter(h=>h.p.z<=0).map(h=>h.p.y-h.r*0.5)):cl.low;
   cl.group.position.y=Yf-lowB+cm(0.6);g.add(cl.group);
-  const stems=new THREE.Group(),sm=plain(STEM,0.55);for(let k=0;k<Math.min(9,3+n);k++){const a=k*2.4,rr=neckR*0.55*Math.sqrt((k+0.5)/9);const st=new THREE.Mesh(new THREE.CylinderGeometry(cm(0.28),cm(0.3),cm(4.5),8),sm);st.position.set(Math.cos(a)*rr,-cm(1.6),Math.sin(a)*rr);stems.add(st);}
+  const stems=new THREE.Group(),sm=plain(STEM,0.55);let lowest=-cm(3.85);
+  if(open){const ns=Math.min(15,4+n),tieY=y0-cm(2),bot=-cm(12);lowest=bot;
+    for(let k=0;k<ns;k++){const a=k*2.39996,q=Math.sqrt((k+0.5)/ns),top=new THREE.Vector3(Math.cos(a)*prof.r(y0)*0.75*q,y0+cm(1),Math.sin(a)*prof.r(y0)*0.75*q),
+      mid=new THREE.Vector3(Math.cos(a)*neckR*0.45*q,tieY,Math.sin(a)*neckR*0.45*q),low=new THREE.Vector3(Math.cos(a)*neckR*1.1*q,bot,Math.sin(a)*neckR*1.1*q);
+      stems.add(stemBetween(top,mid,cm(0.28)));stems.add(stemBetween(mid,low,cm(0.28)));}
+    const tie=new THREE.Mesh(new THREE.TorusGeometry(neckR*0.55,cm(0.5),8,40),ribbonMat(cfg.cinta||cfg.lazo.color||'Dorado'));tie.rotation.x=Math.PI/2;tie.position.y=tieY;stems.add(tie);}
+  else for(let k=0;k<Math.min(9,3+n);k++){const a=k*2.4,rr=neckR*0.55*Math.sqrt((k+0.5)/9);const st=new THREE.Mesh(new THREE.CylinderGeometry(cm(0.28),cm(0.3),cm(4.5),8),sm);st.position.set(Math.cos(a)*rr,-cm(1.6),Math.sin(a)*rr);stems.add(st);}
   g.add(stems);
-  const ny=neckY*0.92,rn=prof.r(ny)+cm(0.35);if(cfg.cinta){const t=new THREE.Mesh(new THREE.TorusGeometry(rn,cm(0.45),8,56),ribbonMat(cfg.cinta));t.rotation.x=Math.PI/2;t.scale.set(1,1,1.6);t.position.y=ny;g.add(t);}
+  if(v==='terno')addSuit(g,prof,neckY,Yf,cfg,open?y0:neckY);
+  const ny=open?y0-cm(2):neckY*0.92,rn=(open?neckR*0.55:prof.r(ny))+cm(0.35);if(cfg.cinta){const t=new THREE.Mesh(new THREE.TorusGeometry(rn,cm(0.45),8,56),ribbonMat(cfg.cinta));t.rotation.x=Math.PI/2;t.scale.set(1,1,1.6);t.position.y=ny;g.add(t);}
   bowAt(g,cfg,0,ny,rn+cm(0.6),11);
-  const wrap=new THREE.Group();g.position.y=cm(3.85);wrap.add(g);return {group:wrap,dims:null};}
+  const wrap=new THREE.Group();g.position.y=-lowest;wrap.add(g);return {group:wrap,dims:null};}
 function buildCaja(cfg){
   const g=new THREE.Group(),v=cfg.variant,s=sizeOf(cfg),cc=ccolorOf(cfg),gold=cc.name==='Dorado',bm=board(cc.hex,gold?0.3:0.5,gold?0.55:0);
-  if(v==='corazon'){const K=cm(s.d)/2,H=cm(s.h),Kin=K*0.84;
-    const cl=buildCluster(cfg,{dome:0.12,tiltK:0.4,msg:cfg.mensaje,inside:(x,z)=>inPoly(x/Kin,-z/Kin,HEART)});
+  if(v==='corazon'){const K=cm(s.d)/2,H=cm(s.h),Kin=Math.max(K*0.45,K*0.97-fmax(cfg)*0.95);
+    const cl=buildCluster(cfg,{box:true,dome:0.06,tiltK:0.14,msg:cfg.mensaje,inside:boxInside(cfg,fmax(cfg))});
     const body=new THREE.Mesh(new THREE.ExtrudeGeometry(heartShape(K),{depth:H,bevelEnabled:true,bevelThickness:cm(0.2),bevelSize:cm(0.2),bevelSegments:2,curveSegments:4}),bm);body.rotation.x=-Math.PI/2;g.add(body);
     const lid=new THREE.Mesh(new THREE.ExtrudeGeometry(heartShape(K+cm(0.6)),{depth:Math.min(cm(3),H*0.35),bevelEnabled:false,curveSegments:4}),bm);lid.rotation.x=-Math.PI/2;g.add(lid);
     const mo=new THREE.Mesh(new THREE.ShapeGeometry(heartShape(K*0.98)),mossMat());mo.rotation.x=-Math.PI/2;mo.position.y=H+cm(0.25);g.add(mo);
     cl.group.position.y=H+cm(1.6);g.add(cl.group);bowAt(g,cfg,0,H*0.55,0.94*K+cm(0.8),s.d*0.4);
     return {group:g,dims:{w:s.d,h:s.h,frontZ:0.94*K,round:false}};}
   if(v==='hexagonal'){const R=cm(s.d)/2,H=cm(s.h),a6=Math.PI/6;
-    const hexIn=(x,z)=>{const q=Math.abs(x),w=Math.abs(z);return q<=R*0.84*0.866&&(0.5*q+0.866*w)<=R*0.84*0.866;};
-    const cl=buildCluster(cfg,{dome:0.2,tiltK:0.5,msg:cfg.mensaje,inside:(x,z)=>hexIn(z,x)});
+    const Ri=Math.max(R*0.4,R*0.866-fmax(cfg)*0.85),hexIn=(x,z)=>{const q=Math.abs(x),w=Math.abs(z);return q<=Ri&&(0.5*q+0.866*w)<=Ri;};
+    const cl=buildCluster(cfg,{box:true,dome:0.08,tiltK:0.14,msg:cfg.mensaje,inside:boxInside(cfg,fmax(cfg))});
     const body=new THREE.Mesh(new THREE.CylinderGeometry(R,R,H,6),bm);body.rotation.y=a6;body.position.y=H/2;g.add(body);
     const lidH=Math.min(cm(3),H*0.28),lid=new THREE.Mesh(new THREE.CylinderGeometry(R+cm(0.5),R+cm(0.5),lidH,6),bm);lid.rotation.y=a6;lid.position.y=lidH/2;g.add(lid);
     if(cfg.cinta){const b=new THREE.Mesh(new THREE.CylinderGeometry(R+cm(0.15),R+cm(0.15),cm(1.2),6,1,true),ribbonMat(cfg.cinta));b.rotation.y=a6;b.position.y=H*0.5;g.add(b);}
@@ -1413,7 +1538,7 @@ function buildCaja(cfg){
     const mo=new THREE.Mesh(new THREE.CircleGeometry(R-cm(0.2),6),mossMat());mo.rotation.x=-Math.PI/2;mo.position.y=H+cm(0.1);g.add(mo);
     cl.group.position.y=H+cm(1.6);g.add(cl.group);return {group:g,dims:{w:s.d,h:s.h,frontZ:R*0.866,round:true}};}
   if(v==='acrilica'){const W=cm(s.d),H=cm(s.h),bh=Math.min(cm(3),H*0.25);
-    const cl=buildCluster(Object.assign({},cfg,{mensaje:false}),{dome:0.05,tiltK:0.25,inside:(x,z)=>Math.abs(x)<=W/2*0.78&&Math.abs(z)<=W/2*0.78});
+    const cl=buildCluster(Object.assign({},cfg,{mensaje:false}),{box:true,dome:0.03,tiltK:0.1,inside:boxInside(cfg,fmax(cfg))});
     const base=new THREE.Mesh(new THREE.BoxGeometry(W+cm(0.6),bh,W+cm(0.6)),bm);base.position.y=bh/2;g.add(base);
     const mo=new THREE.Mesh(new THREE.PlaneGeometry(W-cm(0.3),W-cm(0.3)),mossMat());mo.rotation.x=-Math.PI/2;mo.position.y=bh+cm(0.05);g.add(mo);
     const gm=glassMat('#ffffff'),walls=new THREE.Mesh(new THREE.BoxGeometry(W,H-bh,W),gm);walls.position.y=bh+(H-bh)/2;g.add(walls);
@@ -1424,7 +1549,7 @@ function buildCaja(cfg){
     if(cfg.lazo.style!=='ninguno'){const rb=ribbonMat(cfg.lazo.color);[0,Math.PI/2].forEach(a=>{const t=new THREE.Mesh(new THREE.BoxGeometry(W+cm(0.2),cm(0.15),cm(1.4)),rb);t.rotation.y=a;t.position.y=H+cm(0.08);g.add(t);});bowAt(g,cfg,0,H+cm(1.6),0,s.d*0.5,[-1.1,0,0]);}
     return {group:g,dims:{w:s.d,h:s.h,frontZ:W/2,round:false}};}
   if(v==='cuadrada'||v==='cartera'||v==='rectangular'){const W=cm(s.d),D=cm(v==='cuadrada'?s.d:s.dp),H=cm(s.h);
-    const cl=buildCluster(Object.assign({},cfg,{mensaje:v==='cartera'?false:cfg.mensaje}),{dome:0.1,tiltK:0.35,msg:v!=='cartera'&&cfg.mensaje,inside:(x,z)=>Math.abs(x)<=W/2*0.8&&Math.abs(z)<=D/2*0.8});
+    const cl=buildCluster(Object.assign({},cfg,{mensaje:v==='cartera'?false:cfg.mensaje}),{box:true,dome:0.05,tiltK:0.14,msg:v!=='cartera'&&cfg.mensaje,inside:boxInside(cfg,fmax(cfg))});
     const body=new THREE.Mesh(new THREE.BoxGeometry(W,H,D),bm);body.position.y=H/2;g.add(body);
     if(v!=='cartera'){const lid=new THREE.Mesh(new THREE.BoxGeometry(W+cm(1),Math.min(cm(3.4),H*0.3),D+cm(1)),bm);lid.position.y=Math.min(cm(3.4),H*0.3)/2;g.add(lid);
       if(cfg.cinta){const b=new THREE.Mesh(new THREE.BoxGeometry(W+cm(0.25),cm(1.4),D+cm(0.25)),ribbonMat(cfg.cinta));b.position.y=H*0.5;g.add(b);}bowAt(g,cfg,0,H*0.5,D/2+cm(0.8),s.d*0.45);}
@@ -1434,7 +1559,7 @@ function buildCaja(cfg){
       bowAt(g,cfg,0,BH-cm(8),-D/2+cm(0.6),s.d*0.4);}
     const mo=new THREE.Mesh(new THREE.PlaneGeometry(W-cm(0.3),D-cm(0.3)),mossMat());mo.rotation.x=-Math.PI/2;mo.position.y=H+cm(0.1);g.add(mo);
     cl.group.position.y=H+cm(1.4);g.add(cl.group);return {group:g,dims:{w:s.d,h:v==='cartera'?s.back:s.h,frontZ:D/2,round:false}};}
-  const R=cm(s.d)/2,H=cm(s.h);const cl=buildCluster(cfg,{dome:0.35,msg:cfg.mensaje,fitR:R});
+  const R=cm(s.d)/2,H=cm(s.h);const cl=buildCluster(cfg,{box:true,dome:0.08,tiltK:0.16,msg:cfg.mensaje,inside:boxInside(cfg,fmax(cfg))});
   const body=new THREE.Mesh(new THREE.CylinderGeometry(R,R,H,72),bm);body.position.y=H/2;g.add(body);
   const lidH=Math.min(cm(3.5),H*0.28),lid=new THREE.Mesh(new THREE.CylinderGeometry(R+cm(0.5),R+cm(0.5),lidH,72),bm);lid.position.y=lidH/2;g.add(lid);
   const lace=new THREE.Mesh(new THREE.CylinderGeometry(R+cm(0.1),R+cm(0.1),cm(2.4),72,1,true),laceMat());lace.position.y=H-cm(2);g.add(lace);
@@ -1483,8 +1608,8 @@ function buildVaso(cfg){
   if(cfg.malla)for(let k=0;k<2;k++){const sh=new THREE.Mesh(sheetGeo(-Math.PI/2-1.1+k*0.9,1.3,R*0.72,R*1.3,cm(16),0.25,cm(0.4),1.4),meshMat());sh.position.y=H-cm(4);g.add(sh);}
   g.add(buildStemmed(cfg,H,cm(6.8),H*0.5,null).group);return {group:g,dims:{w:s.d,h:s.h,frontZ:R,round:true}};}
 function buildCuadro(cfg){
-  const wrap=new THREE.Group(),g=new THREE.Group(),s=sizeOf(cfg),cc=ccolorOf(cfg),fm=board(cc.hex,0.5),S=cm(s.d),half=S/2*0.8;
-  const cl=buildCluster(cfg,{dome:0.08,tiltK:0.3,msg:cfg.mensaje,inside:(x,z)=>Math.abs(x)<=half&&Math.abs(z)<=half});
+  const wrap=new THREE.Group(),g=new THREE.Group(),s=sizeOf(cfg),cc=ccolorOf(cfg),fm=board(cc.hex,0.5),S=cm(s.d),half=Math.max(S/2*0.35,S/2*0.86-fmax(cfg)*0.85);
+  const cl=buildCluster(cfg,{box:true,dome:0.03,tiltK:0.1,msg:cfg.mensaje,inside:boxInside(cfg,fmax(cfg))});
   const back=new THREE.Mesh(new THREE.PlaneGeometry(S,S),mat('dotsM',()=>new THREE.MeshStandardMaterial({roughness:0.9,map:tex('dots',512,512,(x,w,h)=>{x.fillStyle='#efe7dc';x.fillRect(0,0,w,h);const r=rng(4);x.fillStyle='#c9a24e';for(let i=0;i<140;i++){x.beginPath();x.arc(r()*w,r()*h,1.5+r()*4.5,0,Math.PI*2);x.fill();}})})));g.add(back);
   const fw=cm(2),dep=cm(5);[[0,S/2+fw/2,S+2*fw,fw],[0,-S/2-fw/2,S+2*fw,fw],[S/2+fw/2,0,fw,S],[-S/2-fw/2,0,fw,S]].forEach(([x,y,w,h])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,dep),fm);b.position.set(x,y,dep/2);g.add(b);});
   const dl=satin('#23332a'),lg=G.flat||(G.flat=petalGeo({shape:'point',w:0.13,h:0.44,cup:0.1,base:[0.7,0.7,0.7]}));
@@ -2000,7 +2125,7 @@ window.initBuilder=function(){
     ground.material.opacity=dark?0.55:0.28;pool.visible=dark;rim.intensity=dark?0.9:0.45;hemi.intensity=dark?0.45:0.6;refreshDims();}
   function refreshDims(){if(dims){scene.remove(dims);dims.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&o.material.map)o.material.map.dispose();});dims=null;}
     if(showDims&&lastRes&&state.flowers.length+1){dims=E.dimsGroup(lastRes,product,dark);scene.add(dims);}}
-  function rebuild(resetCam){
+  function rebuild(resetCam){if(typeof renderLayout==='function'&&$('layoutChips'))renderLayout();
     scene.remove(product);E.disposeObj(product);lastRes=E.build(state);product=lastRes.group;
     product.traverse(o=>{if(o.isMesh){const tr=o.material&&o.material.transparent&&!o.material.alphaTest;o.castShadow=!tr&&!o.userData.noShadow;o.receiveShadow=!tr;}});scene.add(product);
     const b=new THREE.Box3().setFromObject(product),sz=b.getSize(new THREE.Vector3()),r=Math.max(sz.x,sz.y,sz.z)*0.9+0.2;
@@ -2054,7 +2179,9 @@ window.initBuilder=function(){
     chips($('contChips'),Object.entries(CONTAINERS).filter(([k])=>containerOn(k)).map(([k,x])=>[k,x.label]),c,k=>{state.container=k;state.variant=Object.keys(CONTAINERS[k].variants).find(v=>CONTAINERS[k].variants[v].on);sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');});
     const vars=Object.entries(CONTAINERS[c].variants).filter(([,x])=>x.on);chips($('varChips'),vars.map(([k,x])=>[k,x.label]),v,k=>{state.variant=k;sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');});hide('varChips',vars.length<2);
     const sz=sizeOf(state);hide('sizeWrap',!vd.sizes);
-    hide('formaWrap',c!=='ramo'||B.formasOn.filter(Boolean).length<2);if(c==='ramo')chips($('formaChips'),FORMAS.map((f,i)=>[i,f[0],f[1]]).filter(x=>B.formasOn[x[0]]),state.forma??1,i=>{state.forma=i;renderEnvase();updateInfo();rebuild(true);});
+    const bOk=c==='ramo'&&!['cono','vestido'].includes(state.variant);hide('baseWrap',!bOk);
+    if(bOk)chips($('baseChips'),[['cerrada','Cerrada','Papel hasta abajo'],['abierta','Abierta','Tallos a la vista']],state.base||'cerrada',k=>{state.base=k;renderEnvase();updateInfo();rebuild(true);});
+    hide('formaWrap',c!=='ramo'||state.variant==='vestido'||B.formasOn.filter(Boolean).length<2);if(c==='ramo')chips($('formaChips'),FORMAS.map((f,i)=>[i,f[0],f[1]]).filter(x=>B.formasOn[x[0]]),state.forma??1,i=>{state.forma=i;renderEnvase();updateInfo();rebuild(true);});
     if(vd.sizes){chips($('sizeChips'),vd.sizes.map(s=>{const nm=sizeName(s),dm=s.dp?`${s.d}×${s.dp} cm`:`${s.d} cm`;return [s.id,nm,(/cm/.test(nm)?'':dm+' · ')+fmt(s.p)];}),sz.id,id=>{state.sizes[c+'.'+v]=id;state.userSizes=state.userSizes||{};state.userSizes[c+'.'+v]=id;changed(true);});}
     const cap=capacity(state),m=sz&&mouth(state),ex=state.flowers[0]||{type:'rosa',tier:'M'};
     if(vd.sizes&&AUTO_SIZE(state))$('sizeChips').insertAdjacentHTML('beforeend','<div class="hintline" style="width:100%">✨ Se ajusta solo a la cantidad de flores que elijas.</div>');
@@ -2099,6 +2226,27 @@ window.initBuilder=function(){
   $('aPlus').onclick=()=>{addForm.qty++;renderFlores();};
   $('aAdd').onclick=()=>{const f=addForm;for(let i=0;i<f.qty;i++)state.flowers.push(newFlower(f.type,f.color,{tier:f.tier,open:f.type==='girasol'?0:f.open}));f.qty=1;flowersChanged();};
   $('mixBtn').onclick=()=>{state.mix=(state.mix||0)+1;soon();};
+  /* Acomodo: automático, en filas, en anillos o a mano (arrastrando cada flor en el 3D) */
+  const canMove=()=>state.container!=='vaso'&&!(state.container==='cupula'&&state.variant==='campana')&&state.flowers.length>0;
+  function renderLayout(){
+    const ok=canMove();hide('layoutWrap',!ok);$('moveBtn').classList.toggle('hidden',!ok);if(!ok){if(moving)setMove(false,true);return;}
+    const manual=Object.keys(state.pos||{}).length;
+    chips($('layoutChips'),[['auto','Automático','Natural'],['filas','En filas','Ordenado'],['anillos','En anillos','Simétrico']],state.layout||'auto',k=>{state.layout=k;state.pos={};renderLayout();rebuild(false);});
+    $('layoutHint').innerHTML=moving?'✋ Arrastra cada flor en el 3D para ubicarla. Toca <b>Listo</b> al terminar.':
+      (manual?`Moviste ${manual} flor${manual>1?'es':''} a mano. <button type="button" class="link" id="resetPos">Volver al acomodo</button>`:'Si quieres, toca <b>✋ Mover flores</b> y ubícalas a tu gusto.');
+    const rp=$('resetPos');if(rp)rp.onclick=()=>{state.pos={};renderLayout();rebuild(false);toast('Acomodo restablecido');};
+  }
+  var moving=false,drag=null;const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hitP=new THREE.Vector3();
+  function setMove(on,quiet){moving=!!on;$('moveBtn').setAttribute('aria-pressed',String(moving));$('moveBtn').textContent=moving?'✓ Listo':'✋ Mover flores';view.classList.toggle('moving',moving);controls.autoRotate=false;if(!moving)drag=null;if(!quiet)renderLayout();}
+  $('moveBtn').onclick=()=>{setMove(!moving);if(moving)toast('Arrastra una flor para moverla');};
+  const toNdc=e=>{const r=renderer.domElement.getBoundingClientRect();ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);};
+  renderer.domElement.addEventListener('pointerdown',e=>{if(!moving)return;toNdc(e);const hits=ray.intersectObject(product,true);
+    for(const h of hits){let o=h.object;while(o&&!o.userData.pick)o=o.parent;if(o){const cl=o.parent;drag={o,cl,id:o.userData.fid,y:new THREE.Vector3().setFromMatrixPosition(o.matrixWorld).y};controls.enabled=false;view.classList.add('dragging');try{renderer.domElement.setPointerCapture(e.pointerId);}catch(_){}e.preventDefault();return;}}});
+  renderer.domElement.addEventListener('pointermove',e=>{if(!drag)return;toNdc(e);plane.constant=-drag.y;if(!ray.ray.intersectPlane(plane,hitP))return;
+    const loc=drag.cl.worldToLocal(hitP.clone()),ins=drag.cl.userData.inside;if(ins&&!ins(loc.x,loc.z))return;
+    const d=drag.cl.userData.dome||0,rr=Math.hypot(loc.x,loc.z);drag.o.position.set(loc.x,-d*rr*rr,loc.z);drag.moved=[loc.x,loc.z];});
+  const endDrag=()=>{if(!drag)return;controls.enabled=true;view.classList.remove('dragging');if(drag.moved){state.pos=state.pos||{};state.pos[drag.id]=drag.moved;drag=null;renderLayout();rebuild(false);}else drag=null;};
+  renderer.domElement.addEventListener('pointerup',endDrag);renderer.domElement.addEventListener('pointercancel',endDrag);
   $('clearBtn').onclick=()=>{state.flowers=[];flowersChanged(true);};
   function renderPapel(){
     const ft=feats(state.container,state.variant);hide('paperChips',!ft.paper);hide('paperColorWrap',!ft.paper);document.querySelector('[data-step="papel"] .lbl').classList.toggle('hidden',!ft.paper);
