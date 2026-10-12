@@ -217,7 +217,7 @@ details.howto{margin:12px 0}details.howto summary{cursor:pointer;font-weight:600
       <div class="brand">Flowers Handmade</div>
       <h1 id="hello">Plan digital</h1>
       <p class="muted" id="when"></p>
-      <a href="sistema.html" class="del" style="display:inline-block;margin-right:12px">← Volver al sistema</a><button id="sync" class="del" style="text-decoration:none;text-align:left" onclick="if(sb&&!online)openLogin()"></button>
+      <a href="./#inicio" class="del" style="display:inline-block;margin-right:12px">← Volver al sistema</a><button id="sync" class="del" style="text-decoration:none;text-align:left" onclick="if(sb&&!online)openLogin()"></button>
     </div>
     <button class="iconbtn" aria-label="Ajustes" onclick="openSettings()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
@@ -1787,7 +1787,7 @@ function saveFreeLog(){
 }
 
 function openSale(){
-  if(hasReal()){ openSheet(`${closeBtn}<h2>Las ventas se registran en tu sistema</h2><p style="margin-top:8px">Registra la venta en el sistema (sección Ventas, o pasando el pedido a venta). Aparece aquí sola, con su utilidad, y en Números le asignas de qué canal vino.</p><a class="btn rose" style="display:block;text-align:center;text-decoration:none" href="sistema.html#ventas">Abrir Ventas en el sistema</a>`); return; }
+  if(hasReal()){ openSheet(`${closeBtn}<h2>Las ventas se registran en tu sistema</h2><p style="margin-top:8px">Registra la venta en el sistema (sección Ventas, o pasando el pedido a venta). Aparece aquí sola, con su utilidad, y en Números le asignas de qué canal vino.</p><a class="btn rose" style="display:block;text-align:center;text-decoration:none" href="./#ventas">Abrir Ventas en el sistema</a>`); return; }
   openSheet(`${closeBtn}<h2>Registrar una venta</h2>
     <div class="row"><div><label for="sAmt">Monto ($)</label><input id="sAmt" type="number" min="0" step="0.01" inputmode="decimal" value="${S.price}"></div>
     <div><label for="sDate">Fecha</label><input id="sDate" type="date" value="${todayISO()}"></div></div>
