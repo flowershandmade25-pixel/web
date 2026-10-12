@@ -378,6 +378,29 @@ html,body{overflow-x:clip}
 .pnav .btn{flex:1;min-height:40px;padding:9px 12px;font-size:13px}
 .pnav .btn.hidden{display:none}
 .pnav #navPrev{flex:0 0 auto}
+/* ───── diseñador más simple: jerarquía clara ───── */
+.lvl{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px 12px 14px;margin-bottom:10px}
+.lvl-h{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--bark);font-size:14px}
+.lvl-n{width:22px;height:22px;border-radius:50%;background:var(--bark);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.lvl-last .lbl:first-child{margin-top:0}
+.lvl-sum{width:100%;display:flex;align-items:center;gap:12px;border:1.5px solid var(--bark);background:var(--cream);border-radius:14px;padding:10px 12px;cursor:pointer;text-align:left;font-family:inherit;color:var(--bark);min-height:56px}
+.lvl-sum .ic{font-size:28px;line-height:1}
+.lvl-sum b{font-size:15px;display:block}.lvl-sum small{font-size:12px;color:var(--muted)}
+.lvl-sum .chg{margin-left:auto;font-size:13px;color:var(--rose);font-weight:500;white-space:nowrap}
+.ccards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:8px}
+.vcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.ccard,.vcard{border:1.5px solid rgba(196,126,110,.22);background:#fff;border-radius:14px;padding:10px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-family:inherit;color:var(--text);min-height:44px}
+.ccard .ic,.vcard .ic{font-size:26px;line-height:1.1}
+.ccard b,.vcard b{font-size:13.5px;font-weight:500;color:var(--bark)}
+.ccard small,.vcard small{font-size:11px;color:var(--muted);line-height:1.25}
+.ccard[aria-pressed="true"],.vcard[aria-pressed="true"]{border-color:var(--bark);box-shadow:inset 0 0 0 1.5px var(--bark);background:var(--cream)}
+details.more{margin-top:14px;border-top:1px dashed var(--line);padding-top:10px}
+details.more>summary{cursor:pointer;font-size:13.5px;color:var(--bark);font-weight:500;list-style:none;display:flex;align-items:center;gap:6px;min-height:40px}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:'＋';width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+details.more[open]>summary::before{content:'−'}
+details.more>summary small{color:var(--muted);font-weight:400;font-size:12px}
+@media (max-width:760px){.vcards{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.ccards{grid-template-columns:repeat(2,minmax(0,1fr))}.vcard{padding:8px 4px}.vcard .ic{font-size:22px}.vcard b{font-size:12px}.vcard small{display:none}.lvl{padding:10px}}
 /* ═════ tablet ═════ */
 @media (max-width:1080px){
   .nav{display:none}
@@ -678,14 +701,23 @@ html,body{overflow-x:clip}
         <div class="tabs" role="tablist" id="tabs"></div>
         <div class="pscroll" id="pscroll">
           <div class="step" data-step="envase">
-            <div class="lbl">Tipo de envase</div>
-            <div class="chips" id="contChips"></div>
-            <div class="chips" id="varChips" style="margin-top:8px"></div>
+            <div class="lvl">
+              <div class="lvl-h"><span class="lvl-n">1</span><b>¿Qué quieres armar?</b></div>
+              <button type="button" class="lvl-sum" id="contSum" aria-expanded="false"></button>
+              <div class="ccards hidden" id="contChips"></div>
+            </div>
+            <div class="lvl">
+              <div class="lvl-h"><span class="lvl-n">2</span><b id="varTitle">Elige el estilo</b></div>
+              <div class="vcards" id="varChips"></div>
+            </div>
+            <div class="lvl lvl-last">
+              <div class="lvl-h"><span class="lvl-n">3</span><b>Tamaño y color</b></div>
             <div id="sizeWrap"><div class="lbl">Tamaño</div><div class="chips" id="sizeChips"></div></div>
             <div id="formaWrap"><div class="lbl">Forma del ramo</div><div class="seg" id="formaChips"></div></div>
             <div id="baseWrap"><div class="lbl">Base del ramo</div><div class="seg" id="baseChips"></div></div>
             <div class="info" id="sizeInfo"></div>
             <div id="ccolorWrap"><div class="lbl"><span id="ccolorTitle">Color</span><small id="ccolorName"></small></div><div class="sws" id="ccolorSw"></div></div>
+            </div>
             <div class="nextrow"><span></span><button class="btn btn-dark" data-next>Siguiente: flores</button></div>
           </div>
           <div class="step" data-step="flores">
@@ -696,7 +728,7 @@ html,body{overflow-x:clip}
               <div id="aColorWrap"><div class="lbl">Color <small id="aColorName"></small></div><div class="sws" id="aColor"></div></div>
               <div class="lbl">Tamaño</div>
               <div class="seg" id="aSize"></div>
-              <div id="aOpenWrap"><div class="lbl">Apertura</div><div class="seg" id="aOpen"></div></div>
+
               <div class="addrow">
                 <div class="stepper"><button type="button" id="aMinus" aria-label="Menos">−</button><span id="aQty">1</span><button type="button" id="aPlus" aria-label="Más">+</button></div>
                 <button type="button" class="btn btn-dark" id="aAdd">Agregar</button>
@@ -705,9 +737,13 @@ html,body{overflow-x:clip}
             </div>
             <div class="lbl">Tu selección <small id="selCount"></small></div>
             <ul class="groups" id="groups"></ul>
-            <div class="tools"><button type="button" class="link" id="mixBtn">Mezclar colores</button><button type="button" class="link" id="clearBtn">Quitar todas</button></div>
-            <div id="layoutWrap"><div class="lbl">Acomodo de las flores</div><div class="seg" id="layoutChips"></div>
-              <div class="hintline" id="layoutHint"></div></div>
+            <div class="tools"><button type="button" class="link" id="clearBtn">Quitar todas</button></div>
+            <details class="more" id="flMore"><summary>Más opciones <small>apertura, acomodo y colores</small></summary>
+              <div id="aOpenWrap"><div class="lbl">Apertura de las próximas flores</div><div class="seg" id="aOpen"></div></div>
+              <div id="layoutWrap"><div class="lbl">Acomodo de las flores</div><div class="seg" id="layoutChips"></div>
+                <div class="hintline" id="layoutHint"></div></div>
+              <div class="tools"><button type="button" class="link" id="mixBtn">🔀 Mezclar colores</button></div>
+            </details>
             <div class="nextrow"><button class="btn btn-line" data-prev>Atrás</button><button class="btn btn-dark" data-next>Siguiente</button></div>
           </div>
           <div class="step" data-step="papel">
@@ -715,8 +751,10 @@ html,body{overflow-x:clip}
             <div class="chips" id="paperChips"></div>
             <div id="paperColorWrap"><div class="lbl"><span id="paperColorTitle">Color</span><small id="paperColorName"></small></div><div class="sws" id="paperSw"></div></div>
             <div id="paperInnerWrap" class="hidden"><div class="lbl">Color interior <small id="paperInnerName"></small></div><div class="sws" id="paperInnerSw"></div></div>
-            <div id="fieltroWrap"><div class="lbl">Fieltro interior <small id="fieltroName"></small></div><div class="sws" id="fieltroSw"></div></div>
-            <div id="mallaWrap" style="margin-top:14px"><div class="togs" id="mallaTog"></div></div>
+            <details class="more" id="ppMore"><summary>Más opciones <small>fieltro y malla</small></summary>
+              <div id="fieltroWrap"><div class="lbl">Fieltro interior <small id="fieltroName"></small></div><div class="sws" id="fieltroSw"></div></div>
+              <div id="mallaWrap" style="margin-top:14px"><div class="togs" id="mallaTog"></div></div>
+            </details>
             <div class="nextrow"><button class="btn btn-line" data-prev>Atrás</button><button class="btn btn-dark" data-next>Siguiente: detalles</button></div>
           </div>
           <div class="step" data-step="detalles">
@@ -747,8 +785,21 @@ html,body{overflow-x:clip}
     <ol class="steps">
       <li><h3>Elige o arma</h3><p>Agrega piezas de la colección o diseña tu ramo en 3D con el tamaño real de la caja o el vaso.</p></li>
       <li><h3>Completa tus datos</h3><p>Quién recibe, dirección, fecha y mensaje de la tarjeta. Todo en un solo formulario.</p></li>
-      <li><h3>Envía y paga</h3><p>Tu pedido llega a nuestro WhatsApp listo para despachar. Te confirmamos y coordinamos el pago.</p></li>
+      <li><h3>Envía y paga</h3><p>Tu pedido llega a nuestro WhatsApp. Te confirmamos disponibilidad y fecha, pagas el 50% para separarlo y el saldo al recibirlo.</p></li>
     </ol>
+  </div>
+</section>
+
+<section class="sec" id="como-trabajamos">
+  <div class="wrap">
+    <div class="sec-head"><div class="eyebrow">Compra con tranquilidad</div><h2 class="sec-title">Cómo <em>trabajamos</em></h2>
+      <p class="sec-sub">Reglas claras para que tu detalle llegue perfecto y a tiempo.</p></div>
+    <div class="feats">
+      <div class="feat"><h3>Pedidos y anticipo</h3><p>Separamos tu pedido con el 50% de anticipo y pagas el saldo al recibirlo. Los diseños personalizados se piden con al menos 2 días de anticipación; en fechas especiales, con una semana.</p></div>
+      <div class="feat"><h3>Entregas y envíos</h3><p>Entregamos a domicilio en Loja en la fecha y horario que elijas; el costo depende del sector y te lo confirmamos por WhatsApp. Enviamos a todo Ecuador por courier.</p></div>
+      <div class="feat"><h3>Pagos y garantía</h3><p>Aceptamos transferencia y efectivo contra entrega. Antes de salir te enviamos una foto de tu pedido. Si llega con algún daño, avísanos con una foto dentro de las 24 horas y lo reparamos o cambiamos.</p></div>
+    </div>
+    <p class="sec-sub" style="text-align:center;margin-top:18px">Mira entregas reales en nuestro Instagram: <a href="https://www.instagram.com/flowershandmade25/" target="_blank" rel="noopener">@flowershandmade25</a></p>
   </div>
 </section>
 
@@ -1046,6 +1097,8 @@ function boxInside(cfg,r){
     if(v==='cuadrada'||v==='cartera'||v==='rectangular'){const W=U(s.d),D=U(v==='cuadrada'?s.d:s.dp),mx=Math.max(W/2*0.35,W/2-r*0.85),mz=Math.max(D/2*0.35,D/2-r*0.85);return (x,z)=>Math.abs(x)<=mx&&Math.abs(z)<=mz;}
   }
   if(c==='cuadro'){const S=U(s.d),h=Math.max(S/2*0.35,S/2*0.86-r*0.85);return (x,z)=>Math.abs(x)<=h&&Math.abs(z)<=h;}
+  if(c==='cupula'&&v==='esfera'){const R=U(s.d)/2,top=U(1.5)+r*1.7,lim=Math.max(R*0.2,Math.sqrt(Math.max(0,R*R-top*top))-r*0.9);return (x,z)=>Math.hypot(x,z)<=lim;}
+  if(c==='cupula'&&v==='campana'){const R=U(s.d)/2,lim=Math.max(R*0.25,R*0.95-r*0.9);return (x,z)=>Math.hypot(x,z)<=lim;}
   return null;
 }
 // ¿Cuántas flores de este tamaño caben de verdad sin encimarse? (se calcula acomodándolas y se recuerda)
@@ -1350,7 +1403,7 @@ function roseSpiral(o){
 const leafGeo=()=>G.leaf||(G.leaf=petalGeo({shape:'point',w:0.11,h:0.17,cup:0.35,curl:0.18,base:[0.55,0.55,0.55]}));
 function sunGeos(){if(G.sun)return G.sun;return G.sun={petal:petalGeo({shape:'point',w:0.12,h:0.2,cup:-0.6,puff:-0.35,base:rgb('#e07f08'),tip:rgb('#ffd12a')}),leaf:petalGeo({shape:'point',w:0.14,h:0.2,cup:0.3,curl:0.15,base:[0.55,0.55,0.55]}),
   strand:keep(new THREE.CylinderGeometry(0.0045,0.0055,0.04,4).translate(0,0.02,0)),disc:keep(new THREE.SphereGeometry(0.12,24,8,0,Math.PI*2,0,Math.PI/2))};}
-const tulipGeo=o=>G['tul'+o]||(G['tul'+o]=petalGeo({shape:'egg',w:0.17,h:0.24,cup:1.0-0.3*o,curl:-0.04+0.25*o,base:[0.62,0.62,0.62]}));
+const tulipGeo=o=>G['tul2'+o]||(G['tul2'+o]=petalGeo({shape:'egg',w:0.17,h:0.24,cup:1.25-0.25*o,curl:-0.06+0.12*o,base:[0.62,0.62,0.62]}));
 function inPoly(px,py,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const[xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>py)!==(yj>py))&&(px<(xj-xi)*(py-yi)/(yj-yi)+xi))c=!c;}return c;}
 const heartShape=K=>new THREE.Shape(HEART.map(([x,y])=>new THREE.Vector2(x*K,y*K)));
 
@@ -1370,7 +1423,7 @@ function makeSun(seed){const g=new THREE.Group(),s=sunGeos(),r=rng(seed),pm=sati
   for(let i=0;i<n;i++){const rr=0.118*Math.sqrt((i+0.5)/n),a=i*2.39996,q=rr/0.118;d.position.set(Math.cos(a)*rr,0.036*(1-q*q),Math.sin(a)*rr);ax.set(-Math.sin(a),0,Math.cos(a));d.quaternion.setFromAxisAngle(ax,-q*0.9);d.scale.set(1,0.8+r()*0.5,1);d.updateMatrix();im.setMatrixAt(i,d.matrix);c.copy(C1).lerp(C2,Math.min(1,r()*0.8+q*0.2)).convertSRGBToLinear();im.setColorAt(i,c);}
   g.add(im);return g;}
 function makeTulip(hex,open,seed){const o=q4(open),g=new THREE.Group(),m=satin(hex),r=rng(seed);
-  for(let k=0;k<6;k++){const inner=k>=3,piv=new THREE.Group();piv.rotation.y=k*2.094+(inner?1.047:0)+r()*0.1;const me=new THREE.Mesh(tulipGeo(o),m);me.position.set(0,0,inner?0.055:0.065);me.rotation.x=inner?-0.2+0.55*o:-0.12+0.8*o;if(inner)me.scale.setScalar(0.95);piv.add(me);g.add(piv);}return g;}
+  for(let k=0;k<6;k++){const inner=k>=3,piv=new THREE.Group();piv.rotation.y=k*2.094+(inner?1.047:0)+r()*0.1;const me=new THREE.Mesh(tulipGeo(o),m);me.position.set(0,0,inner?0.055:0.065);me.rotation.x=inner?-0.18+0.28*o:-0.1+0.42*o;if(inner)me.scale.setScalar(0.95);piv.add(me);g.add(piv);}return g;}
 function makeFlower(f){const seed=(f.id||1)*97+13,hex=FLOWER_COLORS[f.color]||'#f4c20d';const h=f.type==='girasol'?makeSun(seed):f.type==='tulipan'?makeTulip(hex,f.open,seed):makeRose(hex,f.open,seed);
   h.scale.setScalar(fRad(f)/natural(f));const g=new THREE.Group();g.add(h);return g;}
 
@@ -1432,15 +1485,18 @@ function buildCluster(cfg,o){
   if(cfg.pos){pts=pts.map((p,i)=>{const q=cfg.pos[fl[i].id];return q&&(!inside||inside(q[0],q[1]))?[q[0],q[1]]:p;});}
   let maxR=0,ring=0,drop=0;const heads=[];
   const Rmax=Math.max(cm(6),...pts.map(([x,z],i)=>Math.hypot(x,z)+rads[i]*0.5)),domeY=rr=>-o.dome*0.32*rr*rr/Rmax;
-  pts.forEach(([x,z],i)=>{const f=fl[i],rr=Math.hypot(x,z),y=domeY(rr)+(o.yfn?o.yfn(x,z,i):0),obj=makeFlower(f);obj.position.set(x,y,z);obj.userData.fid=f.id;obj.userData.pick=true;const tl=Math.min(0.6,rr*0.9)*(o.tiltK==null?1:o.tiltK);orient(obj,x,z,tl,r()*6.28);g.add(obj);heads.push({p:new THREE.Vector3(x,y,z),r:rads[i]});maxR=Math.max(maxR,rr+rads[i]);ring=Math.max(ring,rr);});
+  const lm=o.foliage?satin(LEAF):null;
+  pts.forEach(([x,z],i)=>{const f=fl[i],rr=Math.hypot(x,z),y=domeY(rr)+(o.yfn?o.yfn(x,z,i):0),obj=makeFlower(f);obj.position.set(x,y,z);obj.userData.fid=f.id;obj.userData.pick=true;
+    if(o.stems){const top=new THREE.Vector3(x,y-rads[i]*(f.type==='tulipan'?0.15:0.3),z),bot=new THREE.Vector3(x*0.18,y-o.stems-rr*0.4,z*0.18);g.add(stemBetween(top,bot,cm(f.type==='girasol'?0.4:0.3)));}
+    if(o.foliage&&rr>Rmax*0.45){const piv=new THREE.Group(),l=new THREE.Mesh(leafGeo(),lm),a=Math.atan2(z,x);piv.position.set(x*1.02,y-rads[i]*0.75,z*1.02);piv.rotation.y=-a+Math.PI/2;l.rotation.x=1.15+((i*37)%7)/30;l.scale.setScalar(1.15);piv.add(l);g.add(piv);}const tl=Math.min(0.6,rr*0.9)*(o.tiltK==null?1:o.tiltK);orient(obj,x,z,tl,r()*6.28);g.add(obj);heads.push({p:new THREE.Vector3(x,y,z),r:rads[i]});maxR=Math.max(maxR,rr+rads[i]);ring=Math.max(ring,rr);});
   let top=null;if(o.msg){const m=makeMsgDisc(cfg.texto);m.position.set(0,cm(3.5),cm(0.4));g.add(m);top=[0,cm(8),-cm(0.6)];}
   else if(heads.length){let c=heads[0];heads.forEach(h=>{if(h.p.lengthSq()<c.p.lengthSq())c=h;});top=[c.p.x,c.p.y+c.r*0.45+0.02,c.p.z];}
-  g.userData.cluster=true;g.userData.inside=inside;g.userData.dome=o.dome;g.userData.domeY=domeY;
+  const rmx2=n?Math.max(...rads):0;g.userData.cluster=true;g.userData.inside=inside||((x,z)=>Math.hypot(x,z)<=Math.max(cm(1),Rmax-rmx2*0.5));g.userData.dome=o.dome;g.userData.domeY=domeY;
   addExtras(g,heads,top,cfg,29);return {group:g,radius:Math.max(maxR,o.msg?cm(5):0,cm(4)),avg,ring,heads,low:Math.min(0,...heads.map((h,i)=>h.p.y-h.r*Math.sin(Math.min(0.6,Math.hypot(h.p.x,h.p.z)*0.9)*(o.tiltK==null?1:o.tiltK))*0.85))};}
 function stemBetween(a,b,rad){const d=new THREE.Vector3().subVectors(b,a),L=d.length(),m=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad*1.15,L,8),plain(STEM,0.6));m.position.copy(a).addScaledVector(d,0.5);m.quaternion.setFromUnitVectors(Yax,d.normalize());return m;}
-function buildStemmed(cfg,mouthY,lift,fromY,maxR){
-  const fl=orderFlowers(cfg),g=new THREE.Group(),n=fl.length,rads=fl.map(fRad),avg=n?rads.reduce((a,b)=>a+b,0)/n:0.15,s=avg*1.9;let pts=packPositions(rads.map(x=>x*0.95),{}),r=rng(23),heads=[];
-  if(maxR&&n){const e=Math.max(...pts.map((p,i)=>Math.hypot(p[0],p[1])+rads[i]));if(e>maxR){const k=Math.max(0.55,maxR/e);pts=pts.map(p=>[p[0]*k,p[1]*k]);}}
+function buildStemmed(cfg,mouthY,lift,fromY,maxR,lim){
+  const fl=orderFlowers(cfg),g=new THREE.Group(),n=fl.length,rads=fl.map(fRad),avg=n?rads.reduce((a,b)=>a+b,0)/n:0.15,s=avg*1.9;let pts=lim?packPositions(rads,{inside:lim,tight:true}):packPositions(rads.map(x=>x*0.95),{}),r=rng(23),heads=[];
+  if(maxR&&n&&!lim){const e=Math.max(...pts.map((p,i)=>Math.hypot(p[0],p[1])+rads[i]));if(e>maxR){const k=Math.max(0.55,maxR/e);pts=pts.map(p=>[p[0]*k,p[1]*k]);}}
   let topY=mouthY;
   pts.forEach(([x,z],i)=>{const rr=Math.hypot(x,z),hy=mouthY+lift-0.45*rr*rr+(n>3&&i===0?cm(1):0)+(r()-0.5)*cm(1);const head=new THREE.Vector3(x,hy,z);g.add(stemBetween(new THREE.Vector3(x*0.15,fromY,z*0.15),head,cm(0.25)));
     const obj=makeFlower(fl[i]);obj.position.copy(head);orient(obj,x,z,n===1?0.25:Math.min(0.75,rr*1.1+0.1),r()*6.28);g.add(obj);heads.push({p:head,r:rads[i]});topY=Math.max(topY,hy+rads[i]*0.45);});
@@ -1449,6 +1505,7 @@ function buildStemmed(cfg,mouthY,lift,fromY,maxR){
 /* envases con medidas reales */
 function bowAt(g,cfg,x,y,z,w,rot){const b=makeBow(cfg.lazo.style,cfg.lazo.color,w);if(b){b.position.set(x,y,z);if(rot)b.rotation.set(rot[0],rot[1],rot[2]);g.add(b);}}
 
+function compactLimit(cfg,sp){const fl=cfg.flowers;if(!fl.length)return null;const A=fl.reduce((a,f)=>a+Math.PI*Math.pow(fRad(f)*sp,2),0),R=Math.sqrt(A/(Math.PI*0.78))+Math.max(...fl.map(f=>fRad(f)))*0.15;return (x,z)=>Math.hypot(x,z)<=Math.max(R-Math.max(...fl.map(f=>fRad(f)))*0.6,cm(1));}
 /* Superficie que sigue un perfil de revolución entre dos ángulos (para camisa, solapas y corbata sobre el cono) */
 function revPatch(profR,y0,y1,aFn,off,mat,segU,segV){
   const nu=segU||16,nv=segV||14,pos=[],idx=[];
@@ -1466,7 +1523,7 @@ const FRONT=Math.PI/2; // el frente del arreglo mira hacia +z
 /* Ramo terno: cono delgado vestido de saco, con camisa blanca en V, corbata, solapas, tubo para tomarlo, lazo y etiqueta */
 function buildSuit(cfg,P){
   const g=new THREE.Group(),n=cfg.flowers.length;
-  const cl=buildCluster(cfg,{dome:0.35,tiltK:0.55,spacing:P.spacing*0.92,msg:false}),Rf=Math.max(cm(4.5),cl.radius);
+  const cl=buildCluster(cfg,{dome:0.4,tiltK:0.4,spacing:P.spacing*0.84,msg:false,stems:cm(7),foliage:true,inside:compactLimit(cfg,0.84)}),Rf=Math.max(cm(4.5),cl.radius);
   const Rt=Math.max(cm(6),Rf*0.92),yW=cm(13),rW=cm(2.4),yT=yW+Math.max(cm(19),Rt*2.4),rB=cm(2.7);
   const prof=y=>y<=yW?rB+(rW-rB)*(y/yW):rW+(Rt-rW)*Math.pow((y-yW)/(yT-yW),1.25);
   const pm=paperMat(cfg.paper),pts=[];for(let k=0;k<=24;k++){const y=yT*k/24;pts.push([prof(y),y]);}
@@ -1484,7 +1541,7 @@ function buildSuit(cfg,P){
   // cuello blanco que asoma a los lados de la camisa
   [-1,1].forEach(sd=>g.add(revPatch(prof,yT-cm(1.8),yT+cm(0.2),()=>sd>0?[FRONT+0.62,FRONT+0.95]:[FRONT-0.95,FRONT-0.62],cm(0.2),white,6,3)));
   // flores arriba
-  cl.group.position.y=yT-cl.low*0.8-cm(1);g.add(cl.group);
+  cl.group.position.y=yT+cm(1)-cl.low;g.add(cl.group);
   // lazo en la cintura y etiqueta de madera
   const rb=ribbonMat(cfg.lazo.color||'Negro'),band=new THREE.Mesh(new THREE.TorusGeometry(rW+cm(0.2),cm(0.45),8,48),rb);band.rotation.x=Math.PI/2;band.scale.set(1,1,1.4);band.position.y=yW;g.add(band);
   bowAt(g,cfg,0,yW,rW+cm(0.7),11);woodTag(g,0,yW-cm(4.2),rW+cm(1.1),cm(2.2));
@@ -1494,8 +1551,8 @@ function buildSuit(cfg,P){
 /* Ramo vestido: corpiño con escote corazón, flores que salen arriba como un bouquet, falda amplia con pliegues hasta el piso, cinturón con lazo y etiqueta */
 function buildDress(cfg,P){
   const g=new THREE.Group(),n=cfg.flowers.length;
-  const cl=buildCluster(cfg,{dome:P.dome*0.9+0.3,tiltK:P.tilt*0.9,spacing:P.spacing*0.95,msg:false}),Rf=Math.max(cm(5),cl.radius);
-  const rWaist=Math.max(cm(3.4),Rf*0.36),rBust=rWaist*1.38,Hs=Math.max(cm(24),Rf*2.2),yBust=Hs+Math.max(cm(10),rBust*1.7),hem=Math.max(cm(10),Rf*1.0);
+  const cl=buildCluster(cfg,{dome:0.45,tiltK:0.38,spacing:P.spacing*0.84,msg:false,stems:cm(7),foliage:true,inside:compactLimit(cfg,0.84)}),Rf=Math.max(cm(5),cl.radius);
+  const rBust=Math.max(cm(4.6),Rf*0.74),rWaist=rBust/1.38,Hs=Math.max(cm(24),Rf*2.0),yBust=Hs+Math.max(cm(10),rBust*1.5),hem=Math.max(cm(10),Rf*1.25);
   const pm=cfg.paper.type==='doblecara'?paperMat(cfg.paper,THREE.BackSide):paperMat(cfg.paper),under=paperMat({type:'liso',color:cfg.paper.inner||'Blanco'});
   // falda con pliegues (y una segunda capa de tul si eligió malla)
   const skirt=(scale,h,y0,mat,ph,amp)=>{const geo=new THREE.CylinderGeometry(1,1,1,120,26,true),p=geo.attributes.position;
@@ -1511,9 +1568,9 @@ function buildDress(cfg,P){
     const r=rWaist+(rBust-rWaist)*Math.pow(yy,0.8),neck=cm(1.1)*Math.cos(2*da)-cm(1.6)*Math.exp(-Math.pow(da/0.16,2))*(Math.abs(da)<1.2?1:0);
     const top=yBust+(Math.abs(da)<1.4?neck:-cm(1.2));bp.setXYZ(i,Math.cos(a)*r,Hs+(top-Hs)*yy,Math.sin(a)*r);}
   bod.computeVertexNormals();aoColors(bod,yBust-Hs);g.add(new THREE.Mesh(bod,pm));
-  const inner=new THREE.Mesh(new THREE.CircleGeometry(rBust*0.96,40),board('#3d4a35',0.95));inner.rotation.x=-Math.PI/2;inner.position.y=yBust-cm(2);g.add(inner);
-  // flores saliendo arriba como un ramo
-  cl.group.position.y=yBust-cl.low*0.7-cm(0.5);g.add(cl.group);
+  const inner=new THREE.Mesh(new THREE.CircleGeometry(rBust*0.96,40),board('#2f3a2a',0.95));inner.rotation.x=-Math.PI/2;inner.position.y=yBust-cm(2.5);g.add(inner);
+  // flores saliendo arriba como un ramo: las más bajas apenas sobre el escote, con sus tallos entrando al corpiño
+  cl.group.position.y=yBust+cm(1.2)-cl.low;g.add(cl.group);
   // cinturón, lazo y etiqueta
   const rb=ribbonMat(cfg.cinta||cfg.lazo.color||'Dorado'),belt=new THREE.Mesh(new THREE.CylinderGeometry(rWaist+cm(0.15),rWaist+cm(0.2),cm(1.4),48,1,true),rb);belt.position.y=Hs+cm(0.4);g.add(belt);
   bowAt(g,cfg,0,Hs+cm(0.4),rWaist+cm(0.6),11);woodTag(g,rWaist*0.5,Hs-cm(4.5),rWaist+(hem-rWaist)*0.2+cm(1.2),cm(2));
@@ -1623,12 +1680,12 @@ function buildCupula(cfg){
   const g=new THREE.Group(),s=sizeOf(cfg),cc=ccolorOf(cfg),bm=board(cc.hex,0.45),band=cfg.cinta?ribbonMat(cfg.cinta):null,gm=glassMat('#ffffff');
   if(cfg.variant==='campana'){const R=cm(s.d)/2,H=cm(s.h),bh=cm(2.6);const base=new THREE.Mesh(new THREE.CylinderGeometry(R+cm(1.6),R+cm(2.2),bh,64),bm);base.position.y=bh/2;g.add(base);
     if(band){const b=new THREE.Mesh(new THREE.CylinderGeometry(R+cm(1.95),R+cm(1.95),cm(1),64,1,true),band);b.position.y=bh/2;g.add(b);}
-    const st=buildStemmed(cfg,bh+cm(2),H*0.42,bh,R*0.92);g.add(st.group);
+    const st=buildStemmed(cfg,bh+cm(2),H*0.42,bh,R*0.92,boxInside(cfg,fmax(cfg)));g.add(st.group);
     const cyl=new THREE.Mesh(new THREE.CylinderGeometry(R,R,H-R,64,1,true),gm);cyl.position.y=bh+(H-R)/2;g.add(cyl);
     const dome=new THREE.Mesh(new THREE.SphereGeometry(R,48,24,0,Math.PI*2,0,Math.PI/2),gm);dome.position.y=bh+H-R;g.add(dome);
     const knob=new THREE.Mesh(new THREE.SphereGeometry(cm(1),16,12),bm);knob.position.y=bh+H+cm(0.8);g.add(knob);
     bowAt(g,cfg,0,bh/2,R+cm(2.3),s.d*0.45);return {group:g,dims:{w:s.d,h:s.h,frontZ:R+cm(2),round:true}};}
-  const Rd=cm(s.d)/2,bh=cm(5);const cl=buildCluster(cfg,{dome:0.3,fitR:Rd*0.8});
+  const Rd=cm(s.d)/2,bh=cm(5);const cl=buildCluster(cfg,{box:true,dome:0.12,tiltK:0.25,inside:boxInside(cfg,fmax(cfg))});
   const base=new THREE.Mesh(new THREE.CylinderGeometry(Rd,Rd+cm(0.4),bh,64),bm);base.position.y=bh/2;g.add(base);
   if(band){const b=new THREE.Mesh(new THREE.CylinderGeometry(Rd+cm(0.5),Rd+cm(0.5),cm(1.4),64,1,true),band);b.position.y=bh/2;g.add(b);}
   const lm=satin(LEAF);for(let k=0;k<7;k++){const piv=new THREE.Group();piv.rotation.y=k*0.9;piv.position.y=bh+cm(0.2);const l=new THREE.Mesh(sunGeos().leaf,lm);l.position.z=cm(1);l.rotation.x=1.45;l.scale.setScalar(Rd/0.5*1.05);piv.add(l);g.add(piv);}
@@ -2216,7 +2273,8 @@ window.initBuilder=function(){
   const hide=(id,h)=>$(id).classList.toggle('hidden',!!h);
 
   /* ── pasos ── */
-  function steps(){const ft=feats(state.container,state.variant);return [['envase','Envase'],['flores','Flores']].concat(ft.paper||ft.fieltro||ft.malla?[['papel','Papel']]:[]).concat([['detalles','Detalles']]);}
+  let contOpen=false;
+  function steps(){const ft=feats(state.container,state.variant);return [['envase','Tipo'],['flores','Flores']].concat(ft.paper||ft.fieltro||ft.malla?[['papel','Papel']]:[]).concat([['detalles','Detalles']]);}
   function renderTabs(){const st=steps();if(!st.find(s=>s[0]===step))step='flores';const el=$('tabs');el.innerHTML='';
     st.forEach(([k,l],i)=>{const b=document.createElement('button');b.type='button';b.className='tab';b.setAttribute('role','tab');b.setAttribute('aria-selected',String(step===k));b.innerHTML=`<b>${i+1}</b>${l}`;b.onclick=()=>go(k);el.appendChild(b);});
     document.querySelectorAll('.step').forEach(s=>s.classList.toggle('hidden',s.dataset.step!==step));
@@ -2228,8 +2286,22 @@ window.initBuilder=function(){
 
   function renderEnvase(){
     const c=state.container,v=state.variant,vd=vdef(state),ft=feats(c,v);
-    chips($('contChips'),Object.entries(CONTAINERS).filter(([k])=>containerOn(k)).map(([k,x])=>[k,x.label]),c,k=>{state.container=k;state.variant=Object.keys(CONTAINERS[k].variants).find(v=>CONTAINERS[k].variants[v].on);sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');});
-    const vars=Object.entries(CONTAINERS[c].variants).filter(([,x])=>x.on);chips($('varChips'),vars.map(([k,x])=>[k,x.label]),v,k=>{state.variant=k;if(k==='terno'&&state.paper.type==='liso'&&state.paper.color==='Blanco'&&PAPER_COLORS.Negro){state.paper.color='Negro';toast('Para el terno te sugerimos papel negro; puedes cambiarlo en Papel');}sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');});hide('varChips',vars.length<2);
+    // 1 · ¿Qué quieres armar? (se muestra lo elegido; la lista completa solo al tocar "Cambiar")
+    const CI={ramo:['💐','Envuelto en papel'],caja:['🎁','Flores dentro de una caja'],cupula:['🔮','Bajo cristal o acrílico'],vaso:['🏺','En florero'],cuadro:['🖼️','Para colgar o regalar']};
+    const cs=$('contSum'),cc=$('contChips'),conts=Object.entries(CONTAINERS).filter(([k])=>containerOn(k));
+    cs.innerHTML=`<span class="ic">${(CI[c]||['🌸'])[0]}</span><span><b>${esc(CONTAINERS[c].label)}</b><small>${esc((CI[c]||['',''])[1])}</small></span>${conts.length>1?`<span class="chg">${contOpen?'Cerrar':'Cambiar'}</span>`:''}`;
+    cs.setAttribute('aria-expanded',String(contOpen));cs.onclick=()=>{if(conts.length<2)return;contOpen=!contOpen;renderEnvase();};cc.classList.toggle('hidden',!contOpen);
+    cc.innerHTML='';conts.forEach(([k,x])=>{const b2=document.createElement('button');b2.type='button';b2.className='ccard';b2.setAttribute('aria-pressed',String(k===c));
+      b2.innerHTML=`<span class="ic">${(CI[k]||['🌸'])[0]}</span><b>${esc(x.label)}</b><small>${esc((CI[k]||['',''])[1])}</small>`;
+      b2.onclick=()=>{contOpen=false;if(k===c){renderEnvase();return;}state.container=k;state.variant=Object.keys(CONTAINERS[k].variants).find(v=>CONTAINERS[k].variants[v].on);sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');};cc.appendChild(b2);});
+    // 2 · Estilo (tarjetas con ícono)
+    const VI={ramo:{redondo:'💐',buchon:'🌸',cascada:'🌿',corazon:'❤️',alargado:'🌾',vestido:'👗',terno:'🤵',cono:'🍦'},caja:{redonda:'⭕',cuadrada:'⬛',rectangular:'▬',hexagonal:'⬢',corazon:'❤️',acrilica:'💎',cartera:'👜'},cupula:{esfera:'🔮',campana:'🔔'},vaso:{cono:'🍦',vidrio:'🥛',ceramica:'🏺'},cuadro:{marco:'🖼️'}};
+    $('varTitle').textContent=c==='ramo'?'Estilo de ramo':c==='caja'?'Forma de la caja':'Elige el estilo';
+    const vars=Object.entries(CONTAINERS[c].variants).filter(([,x])=>x.on);
+    const pickVar=k=>{state.variant=k;if(k==='terno'&&state.paper.type==='liso'&&state.paper.color==='Blanco'&&PAPER_COLORS.Negro){state.paper.color='Negro';toast('Para el terno te sugerimos papel negro; puedes cambiarlo en Papel');}sanitize(state);autoSize(state,AUTO_SIZE(state)?'fit':null);changed('force');};
+    const vc=$('varChips');vc.innerHTML='';vars.forEach(([k,x])=>{const b2=document.createElement('button');b2.type='button';b2.className='vcard';b2.setAttribute('aria-pressed',String(k===v));
+      b2.innerHTML=`<span class="ic">${(VI[c]||{})[k]||'🌸'}</span><b>${esc(x.label)}</b>`;b2.onclick=()=>pickVar(k);vc.appendChild(b2);});
+    vc.closest('.lvl').classList.toggle('hidden',vars.length<2);
     const sz=sizeOf(state);hide('sizeWrap',!vd.sizes);
     const bOk=false;hide('baseWrap',true);
     if(bOk)chips($('baseChips'),[['cerrada','Cerrada','Papel hasta abajo'],['abierta','Abierta','Tallos a la vista']],state.base||'cerrada',k=>{state.base=k;renderEnvase();updateInfo();rebuild(true);});
@@ -2409,7 +2481,7 @@ window.initBuilder=function(){
     if(editingId){window.FHCart.replace(editingId,item);editingId=null;toast('Cambios guardados');}else{window.FHCart.add(item);toast('Diseño agregado al carrito 🌸');}
     updateInfo();if(window.FHDesigner&&window.FHDesigner.isOpen)window.FHDesigner.close();window.FHCart.open();
   };
-  window.__fhDbg={camera,controls,getProduct:()=>product,canvas:renderer.domElement};
+  window.__fhDbg={camera,controls,getProduct:()=>product,canvas:renderer.domElement,CONTAINERS,fcm,boxInside};
   window.FHBuilder={load(cfg,editId){state=sanitize(clone(cfg));state.flowers.forEach(f=>{if(!f.id)f.id=uid();});editingId=editId||null;step='flores';changed('force');controls.autoRotate=!reduced;
       if(!(window.FHDesigner&&window.FHDesigner.isOpen)){const s=$('personaliza');if(s.scrollIntoView)s.scrollIntoView({behavior:reduced?'auto':'smooth'});}},
     edit(it){if(window.FHDesigner&&window.FHDesigner.phone()){window.FHDesigner.open(it.cfg,it.id);return;}this.load(it.cfg,it.id);},photo,
