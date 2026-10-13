@@ -242,8 +242,10 @@ details.howto{margin:12px 0}details.howto summary{cursor:pointer;font-weight:600
   <section class="view" id="v-plan">
     <div id="progress"></div>
     <h2>Tu plan de 12 semanas</h2>
-    <p class="muted" style="margin-bottom:18px">Mientras ordenas el negocio sigues vendiendo con una rutina mínima. Las tareas marcadas como opcionales solo se hacen si sobra tiempo. Cada tarea dice quién la hace: Dueño, Producción, Ventas o todos juntos. Haz las tareas en orden: cada una prepara la siguiente. Toca una tarea para ver el paso a paso.</p>
+    <p class="muted" style="margin-bottom:18px">Cada rol avanza a la vez desde la semana 1: no hay que esperar para poner al día tus canales ni para el primer anuncio. Las tareas marcadas como opcionales solo se hacen si sobra tiempo. Cada tarea dice quién la hace: Dueño, Producción, Ventas o todos juntos. Haz las tareas en orden: cada una prepara la siguiente. Toca una tarea para ver el paso a paso.</p>
+    <button class="btn ghost" style="margin:0 0 14px" onclick="openEdit()">+ Agregar una tarea propia</button>
     <div id="weeks"></div>
+    <div id="hiddenTasks"></div>
     <div class="section">
       <h2>Fechas que venden</h2>
       <p class="muted small" style="margin-bottom:8px">Prepara cada campaña con 3 semanas de anticipación.</p>
@@ -299,6 +301,8 @@ details.howto{margin:12px 0}details.howto summary{cursor:pointer;font-weight:600
         <ol class="steps"><li><b>Stock listo.</b> Producción mantiene un stock mínimo de cada destacado (por ejemplo, 3 unidades). Cada lunes repone lo que se vendió.</li><li><b>Atraer.</b> Ventas publica 4 veces por semana e historias diarias, más un anuncio pequeño a WhatsApp.</li><li><b>Responder en menos de 1 hora</b> con el mensaje de bienvenida: para quién es, qué fecha, qué presupuesto.</li><li><b>Mostrar 2 o 3 opciones</b> del catálogo con precio, o el diseñador 3D si quiere algo personalizado.</li><li><b>Cerrar:</b> si es de stock, cobro total o anticipo del 50% y se entrega en 1 o 2 días. Si es personalizado, anticipo del 50% y fecha según Producción.</li><li><b>Registrar</b> pedido y cliente en el sistema, con la ocasión y la fecha especial.</li><li><b>Entregar:</b> foto antes de salir, entrega puntual, saldo y comprobante.</li><li><b>Después:</b> reseña en Google, foto para publicar y mensaje de recomendados.</li><li><b>Volver a vender:</b> escribirle 2 semanas antes de su próxima fecha especial.</li></ol></div>
       <div class="card"><h3>Lo que hace funcionar este modelo</h3>
         <ul><li>Fotos excelentes y precios visibles.</li><li>Respuesta rápida: el cliente final compra al que responde primero.</li><li>Stock de destacados para entregar el mismo día o al siguiente.</li><li>Campañas en fechas clave, preparadas con 3 semanas de anticipación.</li></ul></div>
+      <div class="card"><h3>Ventas todas las semanas, sin esperar fechas</h3>
+        <ol class="steps"><li><b>Un motivo nuevo cada semana:</b> cumpleaños, aniversario, “porque sí”, agradecer, nacimiento, decorar la casa u oficina. Siempre hay alguien celebrando algo.</li><li><b>Producto ancla económico</b> ($10 a $20) con stock listo, para compras rápidas y de impulso.</li><li><b>Anuncio siempre encendido</b> de $3 a $5 diarios, no solo en temporada. Se apaga solo si el costo por venta deja de ser rentable.</li><li><b>Respuesta en menos de 1 hora</b> y entrega en 24 horas en Loja, de 24 a 72 horas al resto del país.</li><li><b>Recompra:</b> la fecha especial de cada cliente guardada, y un mensaje 3 semanas antes.</li><li><b>Lista de difusión</b> de clientes que aceptan recibir novedades: una novedad por semana, nunca más.</li><li><b>Todo el país:</b> como tus flores no se marchitan, el mismo producto se vende en Quito, Guayaquil o Cuenca. Muestra los envíos en tus redes.</li></ol></div>
     </div>
 
     <div class="sub" id="s-may">
@@ -319,6 +323,8 @@ details.howto{margin:12px 0}details.howto summary{cursor:pointer;font-weight:600
         <ol class="steps"><li><b>Captar:</b> Ventas busca florerías, papelerías y tiendas de regalos, les envía la web de mayoristas y ofrece muestras.</li><li><b>Registrar y aprobar:</b> el cliente se registra en la web de mayoristas y el Dueño lo aprueba en el sistema.</li><li><b>Pedido:</b> el cliente indica producto, cantidad, colores y fecha deseada.</li><li><b>Planificar antes de responder:</b> Producción pasa el pedido por el planificador (pestaña Pedidos grandes) y ve si llega con el equipo actual o si necesita ayuda.</li><li><b>Cotizar:</b> Ventas envía la proforma desde el sistema con precio por escala, fecha de entrega realista, anticipo y condiciones. Para más de 200 unidades, incluye entregas por lotes.</li><li><b>Muestra aprobada:</b> para productos nuevos o personalizados, el cliente aprueba una muestra o una foto antes de producir. Esa muestra es la referencia de calidad.</li><li><b>Confirmar:</b> anticipo recibido y orden por escrito (WhatsApp o correo) con cantidades, colores, fecha y precio.</li><li><b>Comprar materiales</b> de una sola vez, con un 5% extra por fallas.</li><li><b>Producir en línea:</b> cada persona hace una etapa (cortar, armar, ensamblar, empacar). Es mucho más rápido que una persona haciendo piezas completas.</li><li><b>Controlar calidad</b> en cada lote: compara al azar 1 de cada 20 unidades con la muestra.</li><li><b>Empacar y despachar:</b> cajas rotuladas con cantidad y código, y fotos del embalaje.</li><li><b>Cobrar el saldo,</b> emitir factura y pedir opinión.</li><li><b>Recompra:</b> anota cada cuánto compra y escríbele antes de que se le acabe el stock.</li></ol></div>
       <div class="card"><h3>Cuándo contratar ayuda</h3>
         <ul><li><b>Por pedido:</b> cuando el planificador dice que no llegas a la fecha con tu equipo.</li><li><b>Fija:</b> cuando durante 3 semanas seguidas usan más del 80% de sus horas solo en producción.</li><li><b>Cómo pagar:</b> para ayuda temporal es común pagar por unidad terminada, con un precio que incluyes en tu costo. Entrena primero con la muestra y asígnale una sola etapa.</li><li><b>En regla:</b> si contratas personas, consulta con un contador cómo hacerlo correctamente (contrato y afiliación al IESS según el caso).</li></ul></div>
+      <div class="card"><h3>Cómo lograr mayoristas que repiten</h3>
+        <ol class="steps"><li><b>El cliente correcto:</b> emprendedoras que venden detalles por Instagram, tiendas de regalos, florerías que quieren un producto que no se dañe, decoradores de eventos. En todo Ecuador.</li><li><b>Que ganen dinero contigo:</b> precio sugerido de reventa con al menos 40% de margen para ellos. Si no ganan, no vuelven.</li><li><b>Kit de venta:</b> fotos y videos de tus productos para que publiquen en sus redes. Les ahorras trabajo y venden más rápido.</li><li><b>Pedido mínimo bajo para empezar</b> (12 unidades) y escalas que premien comprar más.</li><li><b>Pedido fijo:</b> reposición cada 15 o 30 días con un beneficio (precio de escala superior, envío gratis desde cierto monto, prioridad en temporada).</li><li><b>Avisar antes de que se acabe:</b> cada semana revisas a quién le toca reponer y le escribes con su pedido anterior listo para confirmar.</li><li><b>Novedad semanal</b> en la lista de difusión de mayoristas: un color, un producto o fotos nuevas.</li><li><b>Pago y envío claros:</b> 100% antes de despachar fuera de Loja hasta que haya historial, despacho en 48 horas y guía de seguimiento.</li><li><b>Meta concreta:</b> 10 mayoristas activos con $80 al mes cada uno son $800 de ventas base, todos los meses.</li></ol></div>
     </div>
 
     <div class="sub" id="s-plan">
@@ -868,9 +874,139 @@ TASKS.forEach(t=>{ if(OVR[t.id]) Object.assign(t,OVR[t.id]); });
 const _REV=REVIEW; 
 TASKS.filter(t=>t.cat==="Revisión").forEach(t=>{ t.how=["Abre la pestaña Plan y revisa qué tareas esenciales de la semana quedaron sin hacer. Las opcionales pueden esperar.","Abre Números y llena la semana: mensajes recibidos, tiempo de respuesta promedio, gasto en anuncios, seguidores y publicaciones.","Revisa que todas las ventas estén registradas en el sistema y asígnales el canal en Números.","Mira tres números: conversión (ventas ÷ mensajes), ganancia neta del mes y distancia al punto de equilibrio.","Decide una sola mejora para la próxima semana y escríbela."]; });
 
+
+/* ---------- v3: plan reorganizado (roles en paralelo) ---------- */
+(function(){
+  const P1="Fase 1: Arrancar en paralelo", P2="Fase 2: Ordenar la casa", P3="Fase 3: Vender con marketing", P4="Fase 4: Rutina";
+  Object.keys(PHASES).forEach(k=>delete PHASES[k]);
+  PHASES[P1]="Ya tienes web, redes y sistema: no hay que esperar. Cada rol avanza a la vez: el Dueño ordena números y trámites, Ventas pone al día los canales y empieza a publicar, Producción ordena proveedores y tiempos.";
+  PHASES[P2]="Catálogo, costos, precios y procesos, mientras corre el primer anuncio de prueba y se prepara Navidad.";
+  PHASES[P3]="Navidad, empresas y un piloto de mayoristas, con anuncios y contenido constante.";
+  PHASES[P4]="Cada día de la semana tiene su tarea. Repites, mides y ajustas.";
+  const W=[
+   [P1,"Arranque: números, reglas y canales al día","El Dueño define los números; Ventas deja Google, WhatsApp e Instagram listos con lo que ya tienes."],
+   [P1,"Formalizar y empezar a publicar","El Dueño hace los trámites; Ventas arranca el contenido, las reseñas y Meta Business Suite."],
+   [P2,"Ordenar el catálogo y primer anuncio de prueba","Inventario, costos y precios; un anuncio pequeño para aprender qué funciona."],
+   [P2,"Procesos, fotos y colección de Navidad","Proceso de pedido, clientes en el sistema, fotos nuevas y catálogo con precios publicado."],
+   [P3,"Lanzar Navidad","Preventa, anuncio de Navidad y regalos para empresas."],
+   [P3,"Piloto de mayoristas","10 negocios, muestras y capacidad del taller, sin descuidar el contenido."],
+   [P3,"Black Friday y producción de diciembre","Oferta corta, seguimientos y planificación de la producción."],
+   [P3,"Último empuje de Navidad","Fecha límite, anuncios y contenido de temporada."],
+   [P3,"Cierre de Navidad","Producir, entregar bien y convertir a cada cliente en reseña y recompra."]];
+  W.forEach(([f,t,s],i)=>Object.assign(WEEKS[i],{f,t,s}));
+  for(let i=9;i<12;i++) WEEKS[i].f=P4;
+
+  // Tareas nuevas
+  TASKS.push(
+  {id:"a3-anuncio",w:3,d:2,cat:"Anuncios",time:"1 hora",t:"Primer anuncio de prueba a WhatsApp",
+   why:"No hace falta esperar a tenerlo todo perfecto para anunciar. Un anuncio pequeño ahora te enseña cuánto cuesta cada mensaje y si tu atención convierte, antes de invertir más en Navidad.",
+   how:["Elige el reel o la publicación de las semanas 1 y 2 con más mensajes o guardados (Panel profesional de Instagram).","En Meta Business Suite → Crear anuncio → objetivo Mensajes → WhatsApp.","Público: Loja más 10 km, 22 a 55 años.","Presupuesto de prueba: $3 al día durante 5 días ($15 en total).","Usa el texto de abajo.","Durante esos días, responde cada mensaje del anuncio en menos de 1 hora y anota cuántos compran."],
+   tpl:"Flores que no se marchitan 🌹 Ramos y arreglos de cinta hechos a mano en Loja, con entrega a domicilio. Escríbenos y te ayudamos a elegir el detalle perfecto.",
+   note:"Es una prueba para aprender, no para vender mucho. Si el costo por mensaje pasa de $2 o casi nadie compra, el problema está en la publicación o en la atención: arréglalo antes del anuncio de Navidad.",
+   expect:"Sabes cuánto cuesta un mensaje y cuántos de esos mensajes compran.",res:"Ej.: $15 invertidos, 18 mensajes ($0,83 c/u), 3 ventas"}
+  );
+  // Rutina de contenido también en semanas 6 y 8
+  TASKS.filter(t=>t.w===10&&/-(mar|jue|sab)$/.test(t.id)).forEach(t=>TASKS.push({...t,id:t.id.replace("a10-","a6r-"),w:6}));
+  TASKS.filter(t=>t.w===10&&/-(lun|mar|mie|jue|vie|sab|prod|prodj)$/.test(t.id)).forEach(t=>TASKS.push({...t,id:t.id.replace("a10-","a8r-"),w:8}));
+  TASKS.filter(t=>t.w===10&&/-(prod|prodj)$/.test(t.id)).forEach(t=>TASKS.push({...t,id:t.id.replace("a10-","a5r-"),w:5}));
+  // Quitar la rutina mínima de la semana 5 (ya hay tareas de venta completas)
+  for(let i=TASKS.length-1;i>=0;i--) if(TASKS[i].id==="a5-vender") TASKS.splice(i,1);
+
+  TASKS.filter(t=>t.w===10&&/-(mar|mie|jue)$/.test(t.id)).forEach(t=>TASKS.push({...t,id:t.id.replace("a10-","a7r-"),w:7}));
+  TASKS.forEach(t=>{ if(t.id==="a7-bf") t.opt=false; });
+  const MAP={
+   // Semana 1
+   "a1-numeros":[1,0],"a1-ficha":[1,0],"a5-numero":[1,0],
+   "a1-equilibrio":[1,1],"a5-ig":[1,1],
+   "a1-clientes":[1,2],"a1-dinero":[1,2],
+   "a1-politicas":[1,3],"a1-proveedores":[1,3],
+   "a5-wa":[1,4],
+   "a1-horario":[1,5],"a5-avisar":[1,5],
+   // Semana 2
+   "a2-entender":[2,0],"a6-plan":[2,0],"a6-banco":[2,0],
+   "a2-ruc":[2,1],"a6-reel":[2,1],
+   "a2-firma":[2,2],"a7-resenas":[2,2],
+   "a2-patente":[2,3],"a6-entrega":[2,3],"a3-tiempos":[2,3],
+   "a2-calendario":[2,4],"a7-meta":[2,4],
+   "a2-carpeta":[2,5],"a4-web":[2,5],"a6-mkt":[2,5],"a5-marca":[2,5],
+   // Semana 3
+   "a3-inventario":[3,0],"a3-codigos":[3,1],"a3-costos":[3,2],"a3-difuntos":[3,2],"a3-precios":[3,3],
+   "a7-check":[3,4],"a3-depurar":[3,4],"a3-sistema":[3,5],
+   // Semana 4
+   "a4-proceso":[4,0],"a5-stock":[4,0],"a4-clientes":[4,1],"a4-taller":[4,1],
+   "a5-fotos":[4,2],"a4-pedidos":[4,2],"a4-gastos":[4,3],"a4-calidad":[4,3],"a6-carrusel":[4,3],"a4-plantillas":[4,4],
+   // Semana 5
+   "a6-preventa":[5,0],"a7-anuncio":[5,1],"a7-empresas":[5,2],"a8-referidos":[5,4],
+   // Semana 6
+   "a8-may-lista":[6,0],"a8-muestras":[6,0],"a8-may-contacto":[6,2],"a8-capacidad":[6,1],
+   // Semana 7
+   "a8-produccion":[7,1],"a8-contenido":[7,2],"a7-bf":[7,4],
+   // Semana 8
+   "a8-navidad":[8,0]
+  };
+  TASKS.forEach(t=>{ if(MAP[t.id]){ t.w=MAP[t.id][0]; t.d=MAP[t.id][1]; } });
+
+  // Textos que dependían del orden anterior
+  const X=(id,o)=>{const t=TASKS.find(x=>x.id===id); if(t) Object.assign(t,o);};
+  X("a5-numero",{why:"Es lo más rápido y urgente: tu ficha de Google Maps tiene el 099 220 2803 y tu WhatsApp de ventas es el 093 996 5833, y además muestra la dirección del local que cerraste. Alguien puede ir, no encontrar nada y dejarte una mala reseña."});
+  X("a5-ig",{how:["Revisa tu perfil como si fueras cliente: ¿en 5 segundos se entiende qué vendes, dónde y cómo pedir?","Cuenta profesional, logo de foto de perfil y la biografía de abajo.","Botón de contacto por WhatsApp y enlace a tu tienda web.","Destacadas: Catálogo, Entregas, Opiniones y Cómo pedir. Usa lo que ya tienes; Cómo pedir la completas el jueves con tus reglas de venta.","Fija arriba tus 3 mejores publicaciones.","Haz lo mismo en Facebook y en TikTok (misma foto, misma biografía, mismo enlace)."]});
+  X("a5-wa",{how:["Si aún usas WhatsApp normal, pásate a WhatsApp Business (conserva tus chats).","Perfil: logo, descripción, horario, Instagram y web.","Catálogo: sube tus productos más vendidos con foto y precio (en la semana 4 lo actualizas con el catálogo ordenado).","Mensaje de bienvenida y de ausencia (abajo).","Respuestas rápidas /precios, /envio y /pago con las reglas que escribieron ayer.","Etiquetas: Nuevo cliente, Cotizó, Pagó anticipo, Entregado, Cliente anterior, Mayorista, Empresa."]});
+  X("a5-avisar",{how:["Revisa tus chats de WhatsApp de los últimos 12 meses y anota a quienes te compraron.","Envía el mensaje uno por uno, con su nombre (no como mensaje masivo).","Pregunta para quién fue su compra y guarda la ocasión en Hoy → Fechas de clientes.","Anota cuántos enviaste, cuántos respondieron y cuántos compraron."],
+    tpl:"¡Hola [nombre]! Soy Vicente de Flowers Handmade 🌹 Hace un tiempo nos compraste un detalle y quería contarte que ahora atendemos en línea, con entregas a domicilio en Loja y envíos a todo Ecuador. También puedes diseñar tu ramo en 3D en nuestra web: [enlace]. Para Navidad estamos preparando una colección especial; si quieres, te aviso primero."});
+  X("a6-banco",{how:["Graba 6 videos verticales de 15 a 30 segundos con los productos que ya tienes: armando un ramo, envolviendo, poniendo la tarjeta, ramo terminado girando, unboxing del empaque y una pantalla del diseñador 3D.","Celular fijo y en vertical, buena luz.","No hace falta que salgas tú: las manos trabajando funcionan muy bien.","Producción hace, Ventas graba."]});
+  X("a7-resenas",{how:["Perfil de empresa en Google → Pedir reseñas → copia el enlace.","Envíalo a 10 clientes contentos (los que respondieron al aviso de la semana 1).","Responde cada reseña con el nombre de la persona.","Desde ahora, envía el enlace a cada cliente al día siguiente de la entrega."]});
+  X("a7-meta",{how:["Descarga Meta Business Suite y entra con tu Facebook.","Conecta la página, Instagram y WhatsApp Business.","Crea la cuenta publicitaria: moneda USD, zona horaria de Ecuador.","Agrega una tarjeta de la cuenta del negocio. El primer anuncio de prueba sale la próxima semana."]});
+  X("a7-check",{t:"Revisar el anuncio de prueba",how:["Mira el costo por conversación iniciada en Meta Business Suite.","Menos de $1: muy bien. Entre $1 y $2: aceptable. Más de $2: cambia la imagen o el video.","Cuenta cuántos de los que escribieron compraron.","Anota los dos números en el resultado: te dicen cuánto invertir en el anuncio de Navidad."]});
+  X("a4-web",{how:["Tu tienda ya tiene la sección Cómo trabajamos con anticipo, entregas, pagos y garantía. Revisa que coincida con las reglas que definieron en la semana 1.","Desde el celular, como cliente: ¿se entiende qué vendes, cuánto cuesta y cómo pedir?","Revisa que el número de WhatsApp sea el oficial y que los destacados aparezcan primero.","Revisa que la página cargue rápido con datos móviles.","Anota lo que haya que cambiar y pásame la lista."]});
+  X("a4-plantillas",{how:["Revisa que tu sistema genere bien las proformas (sección Proformas) con tu logo, datos y RUC.","Agrega los mensajes de abajo como respuestas rápidas en WhatsApp Business: /confirmacion, /antes y /gracias.","Prepara una tarjeta de agradecimiento que vaya en cada pedido, con tu Instagram y un código QR a tu WhatsApp."]});
+  X("a5-fotos",{t:"Sesión de fotos del catálogo y de Navidad",how:["Fotografía los destacados que eligieron en la semana 3 y una muestra de cada producto de Navidad.","Luz natural junto a una ventana, entre 9 y 11 de la mañana, sin sol directo.","Fondo liso, siempre el mismo.","3 fotos por producto: de frente, detalle de cerca y en mano (para que se vea el tamaño).","Graba un video de 10 segundos de cada uno girando, y usa tu procesador de fotos 360° del sistema.","Sube las fotos al sistema, al catálogo de WhatsApp y a la carpeta 04 de Drive."]});
+  X("a6-preventa",{how:["Publica la colección de Navidad (fotos de la semana 4).","Beneficio por reservar antes del 30 de noviembre: tarjeta personalizada o envío gratis.","Cupos limitados según lo que puedas producir.","Anticipo del 50% para separar.","Envíalo a clientes anteriores, estado de WhatsApp, historias, Facebook y Marketplace."]});
+  X("a7-anuncio",{how:["Usa lo que aprendiste en el anuncio de prueba: la publicación que mejor funcionó y el costo por mensaje.","Crear anuncio → Mensajes → WhatsApp, con el reel de la colección de Navidad.","Público: Loja más 10 km, 22 a 55 años.","Presupuesto: $4 a $5 diarios hasta el 30 de noviembre; revísalo cada 3 días.","Texto: el de abajo."]});
+  X("a8-may-lista",{how:["Busca 10 negocios (florerías, papelerías, tiendas de regalos, emprendedores de detalles) en Loja y ciudades cercanas.","Elige los que venden productos parecidos a los tuyos y tienen buena presencia en Instagram.","Revisa en tu sistema que cada producto mayorista tenga Precio mayorista y Cantidad mínima.","Meta del piloto: 3 clientes con un primer pedido pequeño (12 a 50 unidades) y uno que repita. En Navidad prioriza a los que puedas atender sin descuidar a tus clientes finales."]});
+})();
+
+
+/* ---------- v4: alcance nacional y ventas constantes ---------- */
+(function(){
+  TASKS.push(
+  {id:"a2-envios",w:2,d:1,cat:"Procesos",who:"Ventas",time:"2 horas",t:"Preparar los envíos a todo Ecuador",
+   why:"Tus flores no se marchitan: es la gran ventaja para vender en todo el país, algo que una florería normal no puede hacer. Pero solo funciona si enviar es fácil, seguro y con precio claro.",
+   how:["Cotiza con 2 o 3 couriers nacionales (por ejemplo Servientrega, Tramaco Express o Laar Courier) el envío de una caja pequeña y una mediana a Quito, Guayaquil y Cuenca.","Define el empaque de envío: caja de cartón resistente, relleno para que no se mueva, y el producto protegido con funda.","Define tus reglas para envíos fuera de Loja: pago del 100% antes de despachar, tiempo de entrega (24 a 72 horas según la ciudad), quién paga el envío.","Graba un video corto de cómo empacas un pedido para otra ciudad: da confianza y sirve de contenido.","Agrega la respuesta rápida /nacional en WhatsApp con el texto de abajo."],
+   tpl:"¡Sí, enviamos a todo Ecuador! 🌹 Nuestras flores no se marchitan, así que llegan perfectas.\nEnvío a ____: $____, llega en ____ días hábiles por ____.\nPara envíos fuera de Loja el pago es completo antes de despachar. Te enviamos foto del pedido empacado y el número de guía para que lo sigas.",
+   expect:"Tarifas por ciudad, empaque definido y respuesta /nacional lista.",res:"Ej.: Courier elegido, envío a Quito $6, 48 horas"},
+  {id:"a6-recurrente",w:6,d:3,cat:"Mayoristas",who:"Ventas",time:"2 horas",t:"Crear tu programa de pedido recurrente para mayoristas",
+   why:"Un mayorista que compra una vez no hace un negocio estable. Uno que repone cada 15 o 30 días sí. Hay que darle razones para quedarse y hacerle fácil volver a pedir.",
+   how:["Define el beneficio por pedido fijo cada 15 o 30 días: precio de la escala superior sin llegar a la cantidad, envío gratis desde cierto monto o prioridad en temporada alta.","Prepara un kit de venta para revendedores: fotos y videos de tus productos que puedan usar en sus redes, y un precio sugerido de reventa que les deje al menos 40% de ganancia.","Crea en WhatsApp una lista de difusión solo para mayoristas (Mayoristas Flowers) para enviar novedades una vez por semana.","Define cada cuánto debería reponer cada cliente según lo que compró, y anótalo en su ficha de cliente.","Ofrécelo a los mayoristas del piloto con el mensaje de abajo."],
+   tpl:"Hola [nombre] 🌹 Para clientes que reponen seguido tenemos el Pedido Fijo Flowers: eliges tus productos y cada ____ días te despachamos sin que tengas que pedir. Beneficios: ____ y prioridad en temporadas altas. Además te compartimos fotos y videos para que vendas en tus redes. ¿Te armo una propuesta según lo que más vendes?",
+   expect:"Programa definido y ofrecido a los mayoristas del piloto.",res:"Ej.: Pedido fijo quincenal, 2 de 4 aceptaron"}
+  );
+  for(let w=5;w<=12;w++){
+    TASKS.push({id:`m${w}-motivo`,w,d:0,cat:"Ventas",who:"Ventas",time:"20 min",t:"Elegir el motivo de venta de la semana",
+      why:"Las ventas constantes no esperan fechas especiales: cada semana hay cumpleaños, aniversarios, agradecimientos y gente que quiere decorar. Darle a la gente un motivo nuevo cada semana mantiene las ventas todo el año.",
+      how:["Elige el motivo de esta semana. Ideas que rotan: cumpleaños, aniversario, “porque sí”, agradecer a alguien, nacimiento de un bebé, decorar la casa u oficina, bienvenida a un empleado, día de la amistad, mascota, graduación.","Elige un producto ancla para ese motivo, de preferencia uno con stock listo y uno económico ($10 a $20) para compra rápida.","Publica ese motivo en el reel o la publicación de la semana y en los estados de WhatsApp.","Envía una novedad a tu lista de difusión de clientes (solo a quienes aceptaron recibir mensajes).","Anota el motivo y cuántas ventas trajo en el resultado: así sabes qué motivos funcionan."],
+      expect:"Un motivo y un producto para mover la semana.",res:"Ej.: Motivo cumpleaños, Ramo Mini $15, 4 ventas"});
+  }
+  for(let w=7;w<=12;w++){
+    TASKS.push({id:`m${w}-mayor`,w,d:2,cat:"Mayoristas",who:"Ventas",time:"45 min",t:"Mayoristas: reposición y novedades de la semana",
+      why:"Los pedidos seguidos no llegan solos: hay que avisar antes de que al mayorista se le acabe el producto y darle algo nuevo que ofrecer.",
+      how:["Revisa en tu sistema (Mayoristas y Ventas) a quién le toca reponer esta semana según su ciclo (15 o 30 días).","Escríbeles antes de que se queden sin producto, con una propuesta de pedido igual al anterior.","Envía a la lista de difusión de mayoristas una novedad: un color nuevo, un producto, o fotos para que vendan.","Contacta a 3 mayoristas nuevos de otras ciudades (busca en Instagram “detalles Quito”, “florería Guayaquil”, “regalos Cuenca”).","Anota pedidos, reposiciones y nuevos contactos en el resultado."],
+      tpl:"Hola [nombre] 🌹 Ya van ___ días de tu último pedido, ¿cómo te fue con las ventas? Te propongo reponer lo mismo: ____. Si lo confirmas hoy, sale despachado el ____. Esta semana también tenemos ____ por si quieres probar algo nuevo.",
+      expect:"Reposiciones ofrecidas y 3 mayoristas nuevos contactados.",res:"Ej.: 3 reposiciones ($240), 3 contactos nuevos"});
+  }
+  const X=(id,o)=>{const t=TASKS.find(x=>x.id===id); if(t) Object.assign(t,o);};
+  X("a5-ig",{tpl:"🌹 Flores de cinta hechas a mano que no se marchitan\n🎨 Diseña tu ramo en 3D\n📦 Envíos a todo Ecuador · Entregas en Loja\n🤝 Mayoristas: precios por cantidad (enlace)\n👇 Pide por WhatsApp"});
+  X("a6-plan",{how:["Usa 5 tipos de publicación y alterna: Proceso (armando un ramo), Producto (foto o carrusel con precio), Entrega o envío (cliente feliz, o un pedido que llegó a otra ciudad), Educación (por qué no se marchitan, cómo diseñar en 3D) y Mayoristas (emprende revendiendo, pedidos por cantidad).","Reparto semanal recomendado: 3 publicaciones para clientes finales y 1 para mayoristas.","Meta: 4 publicaciones por semana e historias todos los días.","En cada publicación menciona “envíos a todo Ecuador” y etiqueta la ciudad cuando muestres un envío.","Mejor hora en Ecuador: entre 19:00 y 21:00."]});
+  X("a3-anuncio",{how:["Elige el reel o la publicación de las semanas 1 y 2 con más mensajes o guardados (Panel profesional de Instagram).","En Meta Business Suite → Crear anuncio → objetivo Mensajes → WhatsApp.","Público de prueba: Loja más 10 km, 22 a 55 años (entrega rápida, fácil de medir).","Presupuesto de prueba: $3 al día durante 5 días ($15 en total).","Responde cada mensaje del anuncio en menos de 1 hora y anota cuántos compran."]});
+  X("a7-anuncio",{how:["Usa lo que aprendiste en el anuncio de prueba: la publicación que mejor funcionó y el costo por mensaje.","Crea dos conjuntos de anuncios con el reel de Navidad, objetivo Mensajes → WhatsApp:","Loja: Loja más 10 km, 22 a 55 años, texto con entrega a domicilio. $3 diarios.","Ecuador: Quito, Guayaquil y Cuenca, 22 a 55 años, texto con “envíos a todo Ecuador”. $3 diarios.","Revisa cada 3 días: pasa más presupuesto al conjunto que tenga menor costo por venta (no por mensaje)."],
+    tpl:"Regala flores que no se marchitan 🎄🌹 Hechas a mano en Ecuador, con envío a tu ciudad. Escríbenos y separa tu pedido de Navidad."});
+  X("a8-may-lista",{t:"Elegir 15 mayoristas de todo el país para un piloto",how:["Busca 15 negocios en Loja y en las ciudades grandes (Quito, Guayaquil, Cuenca, Ambato, Machala): florerías, tiendas de regalos, papelerías, decoradores de eventos y emprendedoras que venden detalles por Instagram.","Búscalos en Instagram con “detalles + ciudad”, “florería + ciudad” y en grupos de Facebook de emprendedores de Ecuador.","Elige los que venden productos parecidos a los tuyos y publican seguido.","Revisa en tu sistema que cada producto mayorista tenga Precio mayorista y Cantidad mínima, y ten listas tus tarifas de envío nacional.","Meta del piloto: 4 clientes con un primer pedido pequeño (12 a 50 unidades) y 2 que repitan."]});
+})();
+
+const ORIG = TASKS.map(t=>JSON.parse(JSON.stringify(t)));
+
 /* ---------- Estado ---------- */
 const KEY = "fh-plan-digital-v1";
-let S = {start:"2026-10-12",price:30,goal:500,fijos:0,margen:50,done:{},logs:[],sales:[],weeks:{},gastos:[],fechas:[],docs:{}};
+let S = {start:"2026-10-12",price:30,goal:500,fijos:0,margen:50,done:{},logs:[],sales:[],weeks:{},gastos:[],fechas:[],docs:{},edits:{},custom:{}};
 try{const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
@@ -878,7 +1014,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 const SB_URL = "https://vdjhrqcgymbgozmuiulc.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkamhycWNneW1iZ296bXVpdWxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NTI2MTMsImV4cCI6MjA5MzQyODYxM30.1Q5FWG7_0ptcqK3b3CFVmIFUzub-Vs9BpKE9xVW0vZ4";   // misma anon key de sistema.html
 const BIZ = "flowers";
-const T = {config:"mkt_config", log:"mkt_bitacora", sales:"mkt_ventas", weeks:"mkt_semanas", gastos:"mkt_gastos", fechas:"mkt_fechas", attr:"mkt_atribucion", docs:"mkt_documentos"};
+const T = {config:"mkt_config", log:"mkt_bitacora", sales:"mkt_ventas", weeks:"mkt_semanas", gastos:"mkt_gastos", fechas:"mkt_fechas", attr:"mkt_atribucion", docs:"mkt_documentos", tareas:"mkt_tareas"};
 let REAL=null, ATTR={};
 const OUTKEY = "fh-mkt-outbox-v1";
 let sb=null, online=false, OUT=[], flushing=false;
@@ -907,9 +1043,11 @@ const R={
   fecha:f=>queue({t:T.fechas,op:"up",row:toRow.fecha(f)}),
   delFecha:id=>queue({t:T.fechas,op:"del",match:{id,biz:BIZ}}),
   doc:(id,d)=>queue({t:T.docs,op:"up",row:{id,biz:BIZ,titulo:d.title,contenido:d.text,datos:{v:d.v||null,rows:d.rows||null},updated_at:d.updated},conflict:"id"}),
+  tarea:(id,kind,d)=>queue({t:T.tareas,op:"up",row:{id,biz:BIZ,tipo:kind,datos:d,updated_at:new Date().toISOString()},conflict:"id"}),
+  delTarea:id=>queue({t:T.tareas,op:"del",match:{id,biz:BIZ}}),
   attr:(id,c)=>queue({t:T.attr,op:"up",row:{sale_id:String(id),biz:BIZ,canal:c},conflict:"sale_id"})
 };
-function pushAll(){R.config(); S.logs.forEach(R.log); S.sales.forEach(R.sale); Object.keys(S.weeks).forEach(R.week); (S.gastos||[]).forEach(R.gasto); (S.fechas||[]).forEach(R.fecha); Object.entries(S.docs||{}).forEach(([id,d])=>R.doc(id,d));}
+function pushAll(){R.config(); S.logs.forEach(R.log); S.sales.forEach(R.sale); Object.keys(S.weeks).forEach(R.week); (S.gastos||[]).forEach(R.gasto); (S.fechas||[]).forEach(R.fecha); Object.entries(S.docs||{}).forEach(([id,d])=>R.doc(id,d)); Object.entries(S.edits||{}).forEach(([id,d])=>R.tarea(id,"edit",d)); Object.entries(S.custom||{}).forEach(([id,d])=>R.tarea(id,"custom",d));}
 async function flush(){
   if(!sb||!online||flushing){setSync();return;}
   flushing=true; setSync();
@@ -938,7 +1076,7 @@ async function pull(){
   // Ventas reales del sistema (misma tabla que usa sistema.html)
   const rs=await sb.from("sales").select("id,total,profit,product_name,created_at").order("created_at",{ascending:false}).limit(1000);
   if(!rs.error){ REAL=rs.data||[]; } else console.warn("No se pudieron leer las ventas del sistema:",rs.error);
-  const [c,l,s,w,g,f,at,dc]=await Promise.all([
+  const [c,l,s,w,g,f,at,dc,tk]=await Promise.all([
     sb.from(T.config).select("*").eq("biz",BIZ).maybeSingle(),
     sb.from(T.log).select("*").eq("biz",BIZ),
     sb.from(T.sales).select("*").eq("biz",BIZ),
@@ -946,11 +1084,12 @@ async function pull(){
     sb.from(T.gastos).select("*").eq("biz",BIZ),
     sb.from(T.fechas).select("*").eq("biz",BIZ),
     sb.from(T.attr).select("*").eq("biz",BIZ),
-    sb.from(T.docs).select("*").eq("biz",BIZ)]);
-  const bad=[c,l,s,w,g,f,at,dc].find(x=>x.error);
+    sb.from(T.docs).select("*").eq("biz",BIZ),
+    sb.from(T.tareas).select("*").eq("biz",BIZ)]);
+  const bad=[c,l,s,w,g,f,at,dc,tk].find(x=>x.error);
   if(bad){console.error(bad.error); setSync("No se pudo leer la base de datos: revisa que ejecutaste el SQL nuevo"); renderAll(); return;}
   ATTR={}; at.data.forEach(r=>ATTR[r.sale_id]=r.canal);
-  if(!c.data&&!l.data.length&&!s.data.length&&!w.data.length&&!g.data.length&&!f.data.length&&!dc.data.length){
+  if(!c.data&&!l.data.length&&!s.data.length&&!w.data.length&&!g.data.length&&!f.data.length&&!dc.data.length&&!tk.data.length){
     if(S.logs.length||S.sales.length||Object.keys(S.weeks).length||(S.gastos||[]).length) toast("Subiendo los datos de este celular");
     pushAll(); renderAll(); return;
   }
@@ -960,6 +1099,7 @@ async function pull(){
   S.weeks={}; w.data.forEach(r=>S.weeks[r.semana]={msg:r.mensajes??"",ads:r.gasto_anuncios??"",fol:r.seguidores??"",posts:r.publicaciones??"",resp:r.tiempo_respuesta??"",note:r.notas||""});
   S.gastos=g.data.map(r=>({id:r.id,date:r.fecha,cat:r.categoria,detail:r.detalle||"",amount:Number(r.monto),invoice:!!r.factura}));
   S.docs={}; dc.data.forEach(r=>S.docs[r.id]={text:r.contenido||"",updated:r.updated_at,title:r.titulo,v:(r.datos&&r.datos.v)||undefined,rows:(r.datos&&r.datos.rows)||undefined});
+  S.edits={}; S.custom={}; tk.data.forEach(r=>{ if(r.tipo==="custom") S.custom[r.id]=r.datos; else S.edits[r.id]=r.datos; });
   S.fechas=f.data.map(r=>({id:r.id,nombre:r.nombre,tel:r.telefono||"",ocasion:r.ocasion,mes:r.mes,dia:r.dia,notas:r.notas||""}));
   save(); renderAll(); setSync();
 }
@@ -1167,7 +1307,7 @@ function calc(){
 
 /* ---------- Responsables ---------- */
 const WHO = {
-  "a1-ficha":"Equipo","a1-numeros":"Dueño","a1-clientes":"Equipo","a1-dinero":"Dueño","a1-politicas":"Equipo","a1-proveedores":"Producción","a1-horario":"Equipo",
+  "a1-ficha":"Equipo","a1-equilibrio":"Dueño","a3-anuncio":"Ventas","a5-numero":"Ventas","a1-numeros":"Dueño","a1-clientes":"Equipo","a1-dinero":"Dueño","a1-politicas":"Equipo","a1-proveedores":"Producción","a1-horario":"Equipo",
   "a2-entender":"Dueño","a2-ruc":"Dueño","a2-firma":"Dueño","a2-patente":"Dueño","a2-calendario":"Dueño","a2-carpeta":"Equipo",
   "a3-inventario":"Equipo","a3-codigos":"Equipo","a3-tiempos":"Producción","a3-costos":"Producción","a3-precios":"Dueño","a3-difuntos":"Ventas","a3-depurar":"Equipo","a3-sistema":"Ventas",
   "a4-proceso":"Equipo","a4-taller":"Producción","a4-clientes":"Ventas","a4-pedidos":"Ventas","a4-gastos":"Dueño","a4-calidad":"Producción","a4-web":"Ventas","a4-plantillas":"Ventas",
@@ -1176,6 +1316,7 @@ const WHO = {
 };
 const WHO_LABEL = {"Equipo":"Juntos","Dueño":"Dueño","Producción":"Producción","Ventas":"Ventas"};
 function whoOf(t){
+  if(t.who) return t.who;
   if(WHO[t.id]) return WHO[t.id];
   if(t.cat==="Revisión") return "Equipo";
   if(t.id.endsWith("-prod")||t.id.endsWith("-prodj")) return "Producción";
@@ -1600,7 +1741,7 @@ function saveForm(id,markDone){
 }
 function openForm(id){
   const t=TASKS.find(x=>x.id===id), dn=S.done[id], D=FDEF[id], d=docOf(id);
-  openSheet(`${closeBtn}<p class="t-meta">Semana ${t.w}, ${DAYS[t.d].toLowerCase()} ${taskDate(t).getDate()}. Ficha</p>
+  openSheet(`${closeBtn}<button class="del" style="float:right;margin:12px 14px 0 0;text-decoration:none;font-weight:600;color:var(--rose)" onclick="openEdit('${t.id}')">✎ Editar</button><p class="t-meta">Semana ${t.w}, ${DAYS[t.d].toLowerCase()} ${taskDate(t).getDate()}. Ficha</p>
     <h2 style="margin-top:6px">${esc(t.t)}</h2><p class="small" style="margin-top:6px"><b>Responsable:</b> ${whoOf(t)==="Equipo"?"Todo el equipo, juntos":WHO_LABEL[whoOf(t)]==="Ventas"?"Ventas y marketing":WHO_LABEL[whoOf(t)]}${t.time?`. Tiempo estimado: ${esc(t.time)}`:""}</p>
     <div class="why"><b>Por qué:</b> ${esc(t.why)}</div>
     <details class="howto"><summary>Ver el paso a paso</summary><ol class="steps">${t.how.map(h=>`<li>${esc(h)}</li>`).join("")}</ol></details>
@@ -1720,7 +1861,68 @@ function taskScore(t){
   return S.done[t.id]?1:0;
 }
 
-function renderAll(){rebuildDone();renderGoal();renderToday();renderPlan();renderLog();renderNums();renderFechas();renderProgress();renderMini();renderDocs();}
+/* ---------- Editor de tareas ---------- */
+const CATS=["Negocio","Legal","Catálogo","Procesos","Producción","Canales","Contenido","Ventas","Anuncios","Mayoristas","Revisión","Otro"];
+function applyEdits(){
+  const E=S.edits||{}, C=S.custom||{};
+  const list=ORIG.map(t=>Object.assign(JSON.parse(JSON.stringify(t)),E[t.id]||{}));
+  Object.values(C).forEach(c=>list.push(JSON.parse(JSON.stringify(c))));
+  TASKS.length=0; list.filter(t=>!t.hidden).forEach(t=>TASKS.push(t));
+}
+function openEdit(id){
+  const base=id?(TASKS.find(x=>x.id===id)||ORIG.find(x=>x.id===id)):null;
+  const pos=planPos(), cw=pos.before?1:Math.min(pos.w,NW);
+  const t=base||{w:cw,d:Math.max(0,pos.before?0:pos.d),cat:"Ventas",t:"",why:"",how:[],time:"",expect:"",tpl:"",who:"Ventas"};
+  const isOrig=!!(id&&ORIG.find(x=>x.id===id)), isCustom=!!(id&&id.startsWith("c-")), edited=!!(id&&S.edits&&S.edits[id]);
+  const isForm=typeof FDEF!=="undefined"&&id&&FDEF[id];
+  const who=whoOf(t);
+  openSheet(`${closeBtn}<h2>${id?"Editar tarea":"Nueva tarea"}</h2>
+    <p class="muted small" style="margin-top:4px">${id?"Los cambios se guardan para todo el equipo. Siempre puedes restaurar la versión original.":"Agrega una tarea propia en la semana y el día que quieras."}</p>
+    <label for="eT">Título</label><input id="eT" value="${esc(t.t)}" placeholder="Ej.: Publicar en grupos de emprendedores de Quito">
+    <div class="row"><div><label for="eW">Semana</label><select id="eW">${WEEKS.map(W=>`<option value="${W.n}" ${W.n===t.w?"selected":""}>Semana ${W.n}</option>`).join("")}</select></div>
+    <div><label for="eD">Día</label><select id="eD">${DAYS.map((x,i)=>`<option value="${i}" ${i===t.d?"selected":""}>${x}</option>`).join("")}</select></div></div>
+    <div class="row"><div><label for="eWho">Responsable</label><select id="eWho">${[["Equipo","Todos juntos"],["Dueño","Dueño"],["Producción","Producción"],["Ventas","Ventas y marketing"]].map(([k,l])=>`<option value="${k}" ${k===who?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="eCat">Tipo</label><select id="eCat">${CATS.map(c=>`<option ${c===t.cat?"selected":""}>${c}</option>`).join("")}</select></div></div>
+    <label for="eTime">Tiempo estimado</label><input id="eTime" value="${esc(t.time||"")}" placeholder="Ej.: 1 hora">
+    <label for="eWhy">Por qué hacerla</label><textarea id="eWhy">${esc(t.why||"")}</textarea>
+    <label for="eHow">Paso a paso (un paso por línea)</label><textarea id="eHow" style="min-height:140px">${esc((t.how||[]).join("\n"))}</textarea>
+    <label for="eExp">Al terminar deberías tener</label><input id="eExp" value="${esc(t.expect||"")}">
+    ${isForm?"":`<label for="eTpl">Texto listo para copiar (opcional)</label><textarea id="eTpl">${esc(t.tpl||"")}</textarea>`}
+    <label style="display:flex;gap:8px;align-items:center;font-weight:500"><input id="eOpt" type="checkbox" style="width:auto" ${t.opt?"checked":""}> Tarea opcional (no cuenta para el avance)</label>
+    <button class="btn rose" onclick="saveEdit(${id?`'${id}'`:"null"})">Guardar</button>
+    ${isOrig?`<button class="btn ghost" onclick="hideTask('${id}')">Ocultar esta tarea</button>`:""}
+    ${isOrig&&edited?`<button class="btn ghost" onclick="restoreTask('${id}')">Restaurar la versión original</button>`:""}
+    ${isCustom?`<button class="btn ghost" style="color:var(--warn)" onclick="deleteCustom('${id}')">Eliminar tarea</button>`:""}`);
+}
+function saveEdit(id){
+  const title=$("eT").value.trim(); if(title.length<4){$("eT").focus();toast("Escribe un título claro");return;}
+  const how=$("eHow").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  const o={t:title,w:Number($("eW").value),d:Number($("eD").value),who:$("eWho").value,cat:$("eCat").value,time:$("eTime").value.trim(),
+    why:$("eWhy").value.trim(),how,expect:$("eExp").value.trim(),opt:$("eOpt").checked};
+  if($("eTpl")) o.tpl=$("eTpl").value.trim();
+  if(!id||id.startsWith("c-")){
+    const cid=id||("c-"+uid()); S.custom=S.custom||{}; S.custom[cid]=Object.assign({id:cid,res:"",why:"",how:[]},S.custom[cid]||{},o);
+    if(typeof R!=="undefined"&&R.tarea) R.tarea(cid,"custom",S.custom[cid]);
+  } else {
+    S.edits=S.edits||{}; S.edits[id]=Object.assign({},S.edits[id]||{},o,{hidden:false});
+    if(typeof R!=="undefined"&&R.tarea) R.tarea(id,"edit",S.edits[id]);
+  }
+  save(); closeSheet(); renderAll(); toast(id?"Tarea actualizada":"Tarea agregada");
+}
+function hideTask(id){ if(!confirm("La tarea deja de aparecer y de contar para el avance. ¿Ocultarla?"))return;
+  S.edits=S.edits||{}; S.edits[id]=Object.assign({},S.edits[id]||{},{hidden:true}); if(typeof R!=="undefined"&&R.tarea) R.tarea(id,"edit",S.edits[id]);
+  save(); closeSheet(); renderAll(); toast("Tarea oculta"); }
+function restoreTask(id){ if(!S.edits||!S.edits[id])return; delete S.edits[id]; if(typeof R!=="undefined"&&R.delTarea) R.delTarea(id); save(); closeSheet(); renderAll(); toast("Tarea restaurada"); }
+function deleteCustom(id){ if(!confirm("¿Eliminar esta tarea?"))return; delete S.custom[id]; if(typeof R!=="undefined"&&R.delTarea) R.delTarea(id); save(); closeSheet(); renderAll(); toast("Tarea eliminada"); }
+function renderHidden(){
+  const el=$("hiddenTasks"); if(!el) return;
+  const hid=Object.entries(S.edits||{}).filter(([id,e])=>e.hidden).map(([id])=>ORIG.find(t=>t.id===id)).filter(Boolean);
+  const nC=Object.keys(S.custom||{}).length, nE=Object.values(S.edits||{}).filter(e=>!e.hidden).length;
+  el.innerHTML=(nC||nE||hid.length?`<p class="muted small" style="margin-top:8px">${nC?`${nC} tarea(s) propia(s). `:""}${nE?`${nE} tarea(s) editada(s). `:""}</p>`:"")+
+    (hid.length?`<details class="card" style="margin-top:10px"><summary><b>Tareas ocultas (${hid.length})</b></summary>${hid.map(t=>`<div class="date"><div style="flex:1"><div class="t-title">${esc(t.t)}</div><p class="muted small">Semana ${t.w}</p></div><button class="del" onclick="restoreTask('${t.id}')">Restaurar</button></div>`).join("")}</details>`:"");
+}
+
+function renderAll(){applyEdits();rebuildDone();renderGoal();renderToday();renderPlan();renderLog();renderNums();renderFechas();renderProgress();renderMini();renderDocs();renderHidden();}
 
 /* ---------- Hojas ---------- */
 function openSheet(html){$("sheet").innerHTML=html; $("overlay").classList.add("open"); document.body.style.overflow="hidden"; $("sheet").scrollTop=0;}
@@ -1732,7 +1934,7 @@ function openTask(id){
   if(typeof FDEF!=="undefined"&&FDEF[id]) return openForm(id);
   const t=TASKS.find(x=>x.id===id), dn=S.done[id];
   const dt=taskDate(t).toISOString().slice(0,10);
-  openSheet(`${closeBtn}<p class="t-meta">Semana ${t.w}, ${DAYS[t.d].toLowerCase()} ${taskDate(t).getDate()}. <span class="tag">${t.cat}</span></p>
+  openSheet(`${closeBtn}<button class="del" style="float:right;margin:12px 14px 0 0;text-decoration:none;font-weight:600;color:var(--rose)" onclick="openEdit('${t.id}')">✎ Editar</button><p class="t-meta">Semana ${t.w}, ${DAYS[t.d].toLowerCase()} ${taskDate(t).getDate()}. <span class="tag">${t.cat}</span></p>
     <h2 style="margin-top:6px">${esc(t.t)}</h2><p class="small" style="margin-top:6px"><b>Responsable:</b> ${whoOf(t)==="Equipo"?"Todo el equipo, juntos":WHO_LABEL[whoOf(t)]==="Ventas"?"Ventas y marketing":WHO_LABEL[whoOf(t)]}</p>${t.time?`<p class="muted small" style="margin-top:4px">Tiempo estimado: ${esc(t.time)}</p>`:""}
     <div class="why"><b>Por qué:</b> ${esc(t.why)}</div>
     <h3>Paso a paso</h3><ol class="steps">${t.how.map(h=>`<li>${esc(h)}</li>`).join("")}</ol>
@@ -1835,7 +2037,7 @@ function importData(){
 }
 function resetAll(){
   if(!confirm("Se borrarán tareas hechas, bitácora, ventas y números. ¿Seguro?")) return;
-  S={start:S.start,price:S.price,goal:S.goal,fijos:S.fijos,margen:S.margen,done:{},logs:[],sales:[],weeks:{},gastos:[],fechas:[],docs:{}}; R.wipe(); save(); closeSheet(); renderAll(); toast("Datos borrados");
+  S={start:S.start,price:S.price,goal:S.goal,fijos:S.fijos,margen:S.margen,done:{},logs:[],sales:[],weeks:{},gastos:[],fechas:[],docs:{},edits:S.edits||{},custom:S.custom||{}}; R.wipe(); save(); closeSheet(); renderAll(); toast("Datos borrados");
 }
 async function copyTpl(){
   const txt=$("tpl").textContent;
