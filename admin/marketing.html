@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="app-version" content="13/10/2026 15:25">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Plan digital de Flowers Handmade</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -219,6 +220,7 @@ details.howto{margin:12px 0}details.howto summary{cursor:pointer;font-weight:600
       <div class="brand">Flowers Handmade</div>
       <h1 id="hello">Plan digital</h1>
       <p class="muted" id="when"></p>
+      <p class="small" id="appver" style="color:var(--leaf);font-weight:600;margin-top:2px">Versión 13/10/2026 15:25</p>
       <a href="./#inicio" class="del" style="display:inline-block;margin-right:12px">← Volver al sistema</a><button id="sync" class="del" style="text-decoration:none;text-align:left" onclick="if(sb&&!online)openLogin()"></button>
     </div>
     <button class="iconbtn" aria-label="Ajustes" onclick="openSettings()">
@@ -2057,6 +2059,7 @@ function openSettings(){
     <div><label for="cMargen">Margen promedio (%)</label><input id="cMargen" type="number" min="1" max="95" value="${S.margen||50}"></div></div>
     <p class="muted small" style="margin-top:6px">Punto de equilibrio = costos fijos ÷ margen. Es lo mínimo que hay que vender para no perder.</p>
     <button class="btn" onclick="saveSettings()">Guardar ajustes</button>
+    <p class="muted small" style="margin-top:14px">Versión del plan: <b>13/10/2026 15:25</b></p>
     <h3 style="margin-top:26px">Respaldo</h3>
     <p class="muted small" style="margin-top:4px">Con sesión iniciada, todo se guarda en la base de datos. Además queda una copia en este navegador. Copia un respaldo de vez en cuando y guárdalo en tus notas o envíatelo por WhatsApp; con él puedes recuperar todo en otro celular.</p>
     <button class="btn ghost" onclick="exportData()">Copiar respaldo</button>
@@ -2095,6 +2098,7 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("clic
   window.scrollTo(0,0);
 }));
 
+const APP_VERSION="13/10/2026 15:25"; console.log("Plan Flowers Handmade, versión "+APP_VERSION);
 renderAll();
 calc();
 plan();
