@@ -205,6 +205,8 @@ details.howto{margin:12px 0}details.howto summary{cursor:pointer;font-weight:600
 .fprog{position:sticky;top:-22px;z-index:2;background:var(--surface);padding:10px 0;margin:6px 0 4px;border-bottom:1px solid var(--line)}
 .fp-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px;flex-wrap:wrap}
 .minibar{height:5px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:6px}.minibar i{display:block;height:100%}
+.finfo{background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--rose);border-radius:10px;padding:12px 14px;margin-top:10px;font-size:.92rem;line-height:1.55}
+.calcf.wide{display:block}.calcf.wide b{display:block;white-space:normal;font-family:var(--sans);font-weight:600;font-size:.95rem;margin-top:4px}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
 .toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -1676,8 +1678,9 @@ function formHtml(id){
   FROWS = d.rows ? JSON.parse(JSON.stringify(d.rows)) : (D.rows&&D.rows.def ? JSON.parse(JSON.stringify(D.rows.def)) : Array.from({length:(D.rows&&D.rows.min)||0},()=>({})));
   let h="";
   (D.fields||[]).forEach(f=>{
+    if(f.info){h+=`<div class="finfo">${f.info}</div>`;return;}
     if(f.g){h+=`<h4 class="fg">${esc(f.g)}</h4>`;return;}
-    if(f.type==="calc"){h+=`<div class="calcf"><span>${esc(f.l)}</span><b id="fc_${f.k}"></b></div>`;return;}
+    if(f.type==="calc"){h+=`<div class="calcf${f.wide?" wide":""}"><span>${esc(f.l)}</span><b id="fc_${f.k}"></b></div>`;return;}
     h+=`<div class="ff ${f.half?"half":""}"><label for="ff_${f.k}">${esc(f.l)}</label>${fInput("ff_"+f.k,f,v[f.k],"formCalc('"+id+"')")}${f.hint?`<p class="muted small" style="margin-top:4px">${esc(f.hint)}</p>`:""}<p class="fmsg" id="fm_${f.k}"></p></div>`;
   });
   if(D.rows) h+=`<h4 class="fg">${esc(D.rows.label)}</h4><div id="frows"></div><p class="fmsg" id="fm__rows"></p><button class="btn ghost" type="button" onclick="addRow('${id}')">+ ${esc(D.rows.add)}</button><p class="small" id="ftotal" style="margin-top:8px"></p>`;
@@ -1921,6 +1924,46 @@ function renderHidden(){
   el.innerHTML=(nC||nE||hid.length?`<p class="muted small" style="margin-top:8px">${nC?`${nC} tarea(s) propia(s). `:""}${nE?`${nE} tarea(s) editada(s). `:""}</p>`:"")+
     (hid.length?`<details class="card" style="margin-top:10px"><summary><b>Tareas ocultas (${hid.length})</b></summary>${hid.map(t=>`<div class="date"><div style="flex:1"><div class="t-title">${esc(t.t)}</div><p class="muted small">Semana ${t.w}</p></div><button class="del" onclick="restoreTask('${t.id}')">Restaurar</button></div>`).join("")}</details>`:"");
 }
+
+/* ---------- Ficha de punto de equilibrio explicada (mismas claves: no se pierden datos) ---------- */
+(function(){
+  const D=FDEF["a1-equilibrio"]; if(!D) return;
+  const fijos=v=>nv(v.equipo)+nv(v.internet)+nv(v.publi)+nv(v.transp)+nv(v.otros);
+  const eqv=v=>{const m=nv(v.margen)/100; return m?fijos(v)/m:0;};
+  const tk=()=>Number(S.price)||30;
+  D.fields=[
+   {info:`<b>¿Qué es el punto de equilibrio?</b><br>Es <b>lo mínimo que hay que vender en un mes para no perder dinero</b>. Si vendes menos, el negocio pierde. Si vendes justo eso, quedas en cero. Todo lo que vendas por encima es ganancia.`},
+   {info:`<b>¿Por qué se calcula?</b><br>Hay gastos que pagas aunque no vendas nada: lo que pagas al equipo, el internet, la publicidad. Se llaman <b>costos fijos</b>. Cada venta deja una parte para pagarlos (el <b>margen</b>). Hay que saber cuántas ventas hacen falta para cubrirlos todos.`},
+   {info:`<b>Ejemplo sencillo</b><br>Tus costos fijos son $500 al mes. Vendes un ramo a $30 y sus materiales y empaque cuestan $15: de cada venta te quedan $15, es decir, el 50%.<br>Para juntar los $500 necesitas vender $1.000 al mes (500 ÷ 0,50). Son unos 34 ramos al mes, más o menos 8 por semana.<br><b>Fórmula: costos fijos ÷ margen = punto de equilibrio.</b>`},
+   {g:"Paso 1. Tus costos fijos de un mes"},
+   {info:`Anota lo que pagas cada mes <b>aunque no vendas nada</b>. No pongas materiales ni empaques: esos ya están dentro del costo de cada producto. Si algo no aplica, escribe 0.`},
+   {k:"equipo",l:"Pagos al equipo",type:"money",hint:"Lo que pagas al mes a las personas que trabajan (la suma de las dos). Si pagas por producción, pon un promedio mensual."},
+   {k:"internet",l:"Internet y teléfono",type:"money",half:1,hint:"Plan de celular e internet del negocio."},
+   {k:"publi",l:"Publicidad base",type:"money",half:1,hint:"Lo que piensas invertir al mes en anuncios."},
+   {k:"transp",l:"Transporte",type:"money",half:1,hint:"Movilización para compras y entregas que no cobras."},
+   {k:"otros",l:"Otros fijos",type:"money",half:1,hint:"Contador, impuestos, patente ÷ 12, etc."},
+   {k:"_fijos",l:"Total de costos fijos al mes",type:"calc",fn:v=>money(fijos(v))},
+   {g:"Paso 2. Cuánto te queda de cada venta (margen)"},
+   {info:`De cada $100 que vendes, ¿cuánto te queda después de pagar los materiales y el empaque del producto? Si te quedan $50, tu margen es 50%.<br><b>Dónde verlo:</b> en el sistema, Inicio → periodo Mes: divide la utilidad para las ventas y multiplica por 100. Si todavía no lo sabes, deja 50%.`},
+   {k:"margen",l:"Margen promedio",type:"pct",def:"50",hint:"Ejemplo: vendes en $30 y el producto te cuesta $12 → te quedan $18 → 18 ÷ 30 = 60%."},
+   {g:"Paso 3. Tu punto de equilibrio"},
+   {k:"_eq",l:"Punto de equilibrio: lo mínimo que hay que vender al mes",type:"calc",fn:v=>eqv(v)?money(eqv(v)):"Completa los pasos 1 y 2"},
+   {k:"_lect",l:"Qué significa en ventas",type:"calc",wide:1,fn:v=>{const e=eqv(v);if(!e)return"-";const n=Math.ceil(e/tk());return `Unas ${n} ventas al mes de ${money(tk())} (tu ticket promedio de Ajustes), es decir, unas ${Math.ceil(n/4.3)} por semana.`;}},
+   {k:"actual",l:"¿Cuánto vendes hoy al mes?",type:"money",hint:"El promedio de tus últimos 3 meses (sale de la ficha “Tus números”)."},
+   {k:"_falta",l:"Lo que te falta para no perder",type:"calc",fn:v=>{const e=eqv(v);if(!e)return"-";const d=e-nv(v.actual);return d>0?money(d)+" al mes":"Ya lo superas";}},
+   {g:"Paso 4. Tus metas"},
+   {info:`<b>¿Por qué dos metas?</b> Pasar de lo que vendes hoy al punto de equilibrio de un solo salto no es realista. Por eso se sube por etapas:<br>• <b>Meta del mes 1:</b> algo alcanzable, un poco más de lo que vendes hoy (por ejemplo, 20% más). Sirve para crear el hábito de vender todas las semanas.<br>• <b>Meta del mes 3:</b> llegar al punto de equilibrio o pasarlo. Desde ahí el negocio deja de perder.<br>Si en 3 meses no llegan al equilibrio, hay que decidir: subir precios, bajar costos fijos o cambiar cómo se paga al equipo.`},
+   {k:"_sug",l:"Sugerencia según tus datos",type:"calc",wide:1,fn:v=>{const e=eqv(v),a=nv(v.actual);if(!e)return"Completa los pasos anteriores";const m1=a?Math.max(a*1.2,a+50):e*0.5;return `Mes 1: unos ${money(Math.round(m1))}. Mes 3: ${money(Math.round(e))} o más.`;}},
+   {k:"meta1",l:"Meta del mes 1 (alcanzable)",type:"money",half:1},
+   {k:"meta3",l:"Meta del mes 3 (equilibrio o más)",type:"money",half:1},
+   {k:"decision",l:"¿Qué harán si el equilibrio está lejos?",type:"area",ph:"Ej.: pagar una parte fija y otra por producción, subir precios de los ramos grandes"}
+  ];
+  D.afterNote="Al guardar, los costos fijos, el margen y la meta del mes 1 se pasan a Ajustes y se ven en la pantalla Hoy.";
+  const t=TASKS.find(x=>x.id==="a1-equilibrio");
+  if(t){ t.why="Antes de cualquier marketing hay que saber cuánto vender para no perder dinero. Con dos personas trabajando, $500 al mes puede no alcanzar ni para pagarles. Esta ficha te lo explica paso a paso y hace las cuentas por ti.";
+    t.how=["Lee las explicaciones de la ficha: qué es el punto de equilibrio, por qué importa y el ejemplo.","Paso 1: anota tus costos fijos de un mes (lo que pagas aunque no vendas).","Paso 2: pon tu margen, o deja 50% si no lo sabes todavía.","Paso 3: mira tu punto de equilibrio y cuántas ventas por semana significa.","Paso 4: pon una meta alcanzable para el mes 1 y llegar al equilibrio en el mes 3.","Guarda: los números pasan solos a Ajustes."]; }
+  const o=ORIG.find(x=>x.id==="a1-equilibrio"); if(o&&t){o.why=t.why;o.how=[...t.how];}
+})();
 
 function renderAll(){applyEdits();rebuildDone();renderGoal();renderToday();renderPlan();renderLog();renderNums();renderFechas();renderProgress();renderMini();renderDocs();renderHidden();}
 
