@@ -433,6 +433,9 @@ details.more>summary small{color:var(--muted);font-weight:400;font-size:12px}
   .mbar .btn{width:100%;justify-content:center}
 }
 #aAdd.btn-tight{background:var(--rose);border-color:var(--rose)}
+.lay-chips .chip{min-width:0}
+#layoutWrap{margin-top:14px}
+#patSwap{font-size:12px;margin-left:8px}
 /* ═════ navegación más visible y tienda por tipo ═════ */
 header.scrolled{background:rgba(253,248,243,.98);box-shadow:0 6px 24px rgba(61,33,24,.10)}
 .nav{gap:6px}
@@ -897,10 +900,11 @@ header.scrolled{background:rgba(253,248,243,.98);box-shadow:0 6px 24px rgba(61,3
             <div class="lbl">Tu selección <small id="selCount"></small></div>
             <ul class="groups" id="groups"></ul>
             <div class="tools"><button type="button" class="link" id="clearBtn">Quitar todas</button></div>
-            <details class="more" id="flMore"><summary>Más opciones <small>apertura, acomodo y colores</small></summary>
-              <div id="aOpenWrap"><div class="lbl">Apertura de las próximas flores</div><div class="seg" id="aOpen"></div></div>
-              <div id="layoutWrap"><div class="lbl">Acomodo de las flores</div><div class="seg" id="layoutChips"></div>
+<div id="layoutWrap"><div class="lbl">Diseño del acomodo <button type="button" class="link hidden" id="patSwap">⇄ Intercambiar colores</button></div><div class="chips lay-chips" id="layoutChips"></div>
                 <div class="hintline" id="layoutHint"></div></div>
+            <details class="more" id="flMore"><summary>Más opciones <small>apertura y mezclar colores</small></summary>
+              <div id="aOpenWrap"><div class="lbl">Apertura de las próximas flores</div><div class="seg" id="aOpen"></div></div>
+
               <div class="tools"><button type="button" class="link" id="mixBtn">🔀 Mezclar colores</button></div>
             </details>
             <div class="nextrow"><button class="btn btn-line" data-prev>Atrás</button><button class="btn btn-dark" data-next>Siguiente</button></div>
@@ -1403,6 +1407,40 @@ function ringPositions(rads,inside,hole){
   return left>0?null:P;
 }
 
+/* ── Diseños de acomodo: primero se calcula dónde caben bien las flores y después
+   qué flor va en cada lugar (sirve para cualquier cantidad, envase y mezcla) ── */
+const DESIGNS={rodeado:1,alternado:1,mitades:1,franjas:1,corazon:1,espiral:1};
+function applyDesign(fl,rads,pts,lay,swap){
+  const gkey=f=>[f.type,f.color,f.tier].join('|'),order=[];fl.forEach(f=>{const k=gkey(f);if(!order.includes(k))order.push(k);});
+  if(order.length<2)return pts;if(swap)order.reverse();const gi=k=>order.indexOf(k);
+  const out=pts.slice(),classes={};rads.forEach((r,i)=>{const c=r.toFixed(4);(classes[c]=classes[c]||[]).push(i);});
+  const maxD=Math.max(1e-6,...pts.map(([x,z])=>Math.hypot(x,z)));
+  Object.values(classes).forEach(idx=>{
+    if(idx.length<2)return;const r=rads[idx[0]],S=idx.map(i=>({p:pts[i],x:pts[i][0],z:pts[i][1],d:Math.hypot(pts[i][0],pts[i][1]),a:(Math.atan2(pts[i][1],pts[i][0])+Math.PI*2.5)%(Math.PI*2)}));
+    const F=idx.map(i=>fl[i]),byG={};F.forEach(f=>{const k=gkey(f);(byG[k]=byG[k]||[]).push(f);});const G=order.filter(k=>byG[k]);
+    const take=k=>byG[k]&&byG[k].length?byG[k].shift():null,anyLeft=()=>{for(const k of G){if(byG[k].length)return byG[k].shift();}return null;};
+    let seqSlots,seq=[];
+    if(lay==='rodeado'){seqSlots=S.slice().sort((a,b)=>a.d-b.d);G.forEach(k=>{while(byG[k].length)seq.push(byG[k].shift());});}
+    else if(lay==='mitades'){seqSlots=S.slice().sort((a,b)=>(a.x-b.x)||(a.z-b.z));G.forEach(k=>{while(byG[k].length)seq.push(byG[k].shift());});}
+    else if(lay==='alternado'||lay==='espiral'){
+      const ring=s=>Math.round(s.d/(2*r*0.95));seqSlots=S.slice().sort(lay==='espiral'?((a,b)=>(a.d/(2*r)+a.a/(Math.PI*2))-(b.d/(2*r)+b.a/(Math.PI*2))):((a,b)=>(ring(a)-ring(b))||(a.a-b.a)));
+      const chunk=lay==='espiral'?Math.max(1,Math.round(idx.length/(G.length*3))):1;let gi2=0;
+      while(seq.length<F.length){const k=G[gi2%G.length];for(let c=0;c<chunk;c++){const f=take(k);if(f)seq.push(f);}gi2++;if(gi2>F.length*4){let f;while((f=anyLeft()))seq.push(f);}}
+    }
+    else if(lay==='franjas'){const w=2*r*1.25;seqSlots=S.slice().sort((a,b)=>((a.x+a.z)-(b.x+b.z)));
+      seqSlots.forEach(s=>{const band=Math.floor((s.x+s.z+maxD*2)/(w*1.414)),k=G[band%G.length];seq.push(take(k)||anyLeft());});}
+    else if(lay==='corazon'){
+      // el primer color rellena un corazón (de su mismo tamaño) y los demás lo rodean
+      const nA=byG[G[0]].length,inH=(x,z,K)=>inPolyT(x/K,-z/K-0.12,HEART);let lo=maxD*0.15,hi=maxD*1.6;
+      for(let it=0;it<22;it++){const K=(lo+hi)/2,c=S.filter(s=>inH(s.x,s.z,K)).length;if(c<nA)lo=K;else hi=K;}
+      const K=hi,dist=(x,z)=>{let m=1e9;for(let q=0;q<HEART.length;q++){const a=[HEART[q][0]*K,-(HEART[q][1]+0.12)*K],b=[HEART[(q+1)%HEART.length][0]*K,-(HEART[(q+1)%HEART.length][1]+0.12)*K],vx=b[0]-a[0],vz=b[1]-a[1],t=Math.max(0,Math.min(1,((x-a[0])*vx+(z-a[1])*vz)/(vx*vx+vz*vz||1)));m=Math.min(m,Math.hypot(x-a[0]-vx*t,z-a[1]-vz*t));}return m;};
+      seqSlots=S.slice().sort((a,b)=>(inH(a.x,a.z,K)?-dist(a.x,a.z):dist(a.x,a.z))-(inH(b.x,b.z,K)?-dist(b.x,b.z):dist(b.x,b.z)));
+      G.forEach(k=>{while(byG[k].length)seq.push(byG[k].shift());});}
+    seqSlots.forEach((s,j)=>{const f=seq[j];if(!f)return;const fi=fl.indexOf(f);out[fi]=s.p;});
+  });
+  return out;
+}
+
 /* ── Tamaño automático del envase según las flores ── */
 const AUTO_SIZE=c=>c.container==='vaso'||(c.container==='cupula'&&c.variant==='campana');
 function autoSize(cfg,mode){
@@ -1448,7 +1486,7 @@ const containerOn=c=>Object.values(CONTAINERS[c].variants).some(v=>v.on);
 // Ajusta cualquier diseño (propio, sugerido o compartido) a las reglas vigentes
 function sanitize(cfg){
   cfg.base='cerrada'; // la base abierta se retiró: siempre papel hasta abajo
-  if(!['auto','filas','anillos'].includes(cfg.layout))cfg.layout='auto';
+  if(!['auto','filas','anillos'].concat(Object.keys(DESIGNS)).includes(cfg.layout))cfg.layout='auto';cfg.patSwap=!!cfg.patSwap;
   if(cfg.pos&&typeof cfg.pos==='object'){const ids=new Set(cfg.flowers.map(f=>String(f.id)));Object.keys(cfg.pos).forEach(k=>{if(!ids.has(k))delete cfg.pos[k];});}else cfg.pos={};
   if(!CONTAINERS[cfg.container]||!containerOn(cfg.container))cfg.container=Object.keys(CONTAINERS).find(containerOn)||'ramo';
   const vs=CONTAINERS[cfg.container].variants;if(!vs[cfg.variant]||!vs[cfg.variant].on)cfg.variant=Object.keys(vs).find(k=>vs[k].on)||Object.keys(vs)[0];
@@ -1470,7 +1508,7 @@ function sanitize(cfg){
 }
 function encodeDesign(cfg){
   const k=cfg.container+'.'+cfg.variant;
-  const o={c:cfg.container,v:cfg.variant,s:(cfg.sizes||{})[k]||'',k:(cfg.ccolor||{})[k]||'',pt:cfg.paper.type,pc:cfg.paper.color,pi:cfg.paper.inner||'',fe:cfg.fieltro||'',m:cfg.malla?1:0,fo:cfg.forma??1,x:cfg.mix||0,b:cfg.base==='abierta'?1:0,la:cfg.layout&&cfg.layout!=='auto'?cfg.layout:'',po:(()=>{const ids=groupsOf(cfg).flatMap(x=>x.ids||[]),P=cfg.pos||{};return ids.some(id=>P[id])?ids.map(id=>P[id]?[+P[id][0].toFixed(3),+P[id][1].toFixed(3)]:0):undefined;})(),
+  const o={c:cfg.container,v:cfg.variant,s:(cfg.sizes||{})[k]||'',k:(cfg.ccolor||{})[k]||'',pt:cfg.paper.type,pc:cfg.paper.color,pi:cfg.paper.inner||'',fe:cfg.fieltro||'',m:cfg.malla?1:0,fo:cfg.forma??1,x:cfg.mix||0,b:cfg.base==='abierta'?1:0,la:cfg.layout&&cfg.layout!=='auto'?cfg.layout:'',ps:cfg.patSwap?1:0,po:(()=>{const ids=groupsOf(cfg).flatMap(x=>x.ids||[]),P=cfg.pos||{};return ids.some(id=>P[id])?ids.map(id=>P[id]?[+P[id][0].toFixed(3),+P[id][1].toFixed(3)]:0):undefined;})(),
     ls:cfg.lazo.style,lc:cfg.lazo.color,ci:cfg.cinta||'',g:cfg.gyps?1:0,co:cfg.corona||'',ma:cfg.mariposas?1:0,lu:cfg.luces?1:0,me:cfg.mensaje?1:0,t:cfg.mensaje?cfg.texto:'',
     fl:groupsOf(cfg).map(x=>[x.f.type,x.f.type==='girasol'?'':x.f.color,x.f.tier,Math.round((x.f.open||0)*100),x.n])};
   return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -1479,7 +1517,7 @@ function decodeDesign(code){
   try{let b=String(code||'').trim().replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';const o=JSON.parse(decodeURIComponent(escape(atob(b))));
     if(!o||!CONTAINERS[o.c]||!CONTAINERS[o.c].variants[o.v])return null;
     const c=defaultCfg(),k=o.c+'.'+o.v;c.container=o.c;c.variant=o.v;if(o.s)c.sizes[k]=String(o.s);if(o.k)c.ccolor[k]=String(o.k);
-    c.paper={type:String(o.pt||'liso'),color:String(o.pc||'Blanco'),inner:o.pi?String(o.pi):'Blanco'};c.fieltro=o.fe?String(o.fe):null;c.malla=!!o.m;c.forma=+o.fo||0;c.mix=+o.x||0;c.base=o.b?'abierta':'cerrada';c.layout=String(o.la||'auto');
+    c.paper={type:String(o.pt||'liso'),color:String(o.pc||'Blanco'),inner:o.pi?String(o.pi):'Blanco'};c.fieltro=o.fe?String(o.fe):null;c.malla=!!o.m;c.forma=+o.fo||0;c.mix=+o.x||0;c.base=o.b?'abierta':'cerrada';c.layout=String(o.la||'auto');c.patSwap=!!o.ps;
     c.lazo={style:LAZOS[o.ls]?o.ls:'simple',color:RIBBON[o.lc]?o.lc:'Dorado'};c.cinta=RIBBON[o.ci]?o.ci:null;c.gyps=!!o.g;c.corona=CROWN[o.co]?o.co:null;c.mariposas=!!o.ma;c.luces=!!o.lu;c.mensaje=!!o.me;if(o.t)c.texto=String(o.t).slice(0,40);
     c.flowers=[];let total=0;(Array.isArray(o.fl)?o.fl:[]).forEach(r=>{if(!Array.isArray(r))return;const[t,col,tier,op,n]=r;if(!TYPES[t])return;for(let i=0;i<Math.min(40,n|0)&&total<40;i++,total++)c.flowers.push(newFlower(t,String(col||'Amarillo'),{tier:String(tier||'M'),open:t==='girasol'?0:(+op||0)/100}));});
     if(Array.isArray(o.po)){c.pos={};o.po.forEach((p,k)=>{if(Array.isArray(p)&&c.flowers[k])c.pos[c.flowers[k].id]=[+p[0]||0,+p[1]||0];});}
@@ -1701,10 +1739,12 @@ function buildCluster(cfg,o){
   // se recuerda el acomodo: cambiar colores o adornos no vuelve a calcularlo
   const mkey=[rads.map(x=>x.toFixed(4)).join(','),cfg.container,cfg.variant,(sizeOf(cfg)||{}).id||'',o.msg?1:0,sp,cfg.forma??1].join('|');
   const lay=cfg.layout||'auto',mk2=mkey+'|'+lay;
-  pts=PACK_MEMO.get(mk2);if(!pts){pts=(lay==='filas'||(lay==='auto'&&o.grid&&!o.msg))?rowPositions(rads.map(r=>r*sp),inside,o.msg?cm(4.2):0):lay==='anillos'?ringPositions(rads.map(r=>r*sp),inside,o.msg?cm(4.2):0):null;
+  const geo=DESIGNS[lay]?'auto':lay;
+  pts=PACK_MEMO.get(mk2);if(!pts){pts=(geo==='filas'||(geo==='auto'&&o.grid&&!o.msg))?rowPositions(rads.map(r=>r*sp),inside,o.msg?cm(4.2):0):geo==='anillos'?ringPositions(rads.map(r=>r*sp),inside,o.msg?cm(4.2):0):null;
     if(!pts){const R2=rads.map(r=>r*sp),po={inside,hole:o.msg?cm(4.2):0,tight:!!o.box};if(o.box&&boxInside(cfg,rmx))po.insideFor=rr=>boxInside(cfg,rr/sp);pts=packPositions(R2,po);
       if(o.box&&inside&&n>1){const sepOf=P=>{let m=9;for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++)m=Math.min(m,Math.hypot(P[i][0]-P[j][0],P[i][1]-P[j][1])/(R2[i]+R2[j]));return m;};
         if(sepOf(pts)<0.76){const alt=packPositions(R2,Object.assign({},po,{edge:true}));if(sepOf(alt)>sepOf(pts)+0.04)pts=alt;}}}PACK_MEMO.set(mk2,pts);if(PACK_MEMO.size>40)PACK_MEMO.delete(PACK_MEMO.keys().next().value);}
+  if(DESIGNS[lay])pts=applyDesign(fl,rads,pts,lay,!!cfg.patSwap);
   // posiciones movidas a mano por el cliente (se respetan mientras sigan dentro del envase)
   if(cfg.pos){pts=pts.map((p,i)=>{const q=cfg.pos[fl[i].id];return q&&(!inside||inside(q[0],q[1]))?[q[0],q[1]]:p;});}
   let maxR=0,ring=0,drop=0;const heads=[];
@@ -2651,7 +2691,12 @@ window.initBuilder=function(){
   function renderLayout(){
     const ok=canMove();hide('layoutWrap',!ok);$('moveBtn').classList.toggle('hidden',!ok);if(!ok){if(moving)setMove(false,true);return;}
     const manual=Object.keys(state.pos||{}).length;
-    chips($('layoutChips'),[['auto','Automático','Natural'],['filas','En filas','Ordenado'],['anillos','En anillos','Simétrico'],['mano','✋ A mano','Arrástralas']],moving?'mano':(state.layout||'auto'),k=>{if(k==='mano'){setMove(!moving);if(moving)toast('Arrastra una flor en el 3D para moverla');return;}if(moving)setMove(false,true);state.layout=k;state.pos={};renderLayout();rebuild(false);});
+    // diseños de color solo si hay 2 o más tipos/colores; con un solo color, acomodos de forma
+    const kinds=new Set(state.flowers.map(f=>[f.type,f.color,f.tier].join('|'))).size,multi=kinds>=2;
+    const opts=[['auto','🌸 Natural','Automático']].concat(multi?[['rodeado','⭕ Rodeado','Un color al centro'],['alternado','🔀 Alternado','Intercalados'],['corazon','❤️ Corazón','Dibuja un corazón'],['mitades','◐ Mitades','Mitad y mitad'],['franjas','▤ Franjas','En diagonal'],['espiral','🌀 Espiral','Remolino']]:[]).concat([['filas','▦ Filas','Ordenado'],['anillos','◎ Anillos','Simétrico'],['mano','✋ A mano','Arrástralas']]);
+    if(!multi&&['rodeado','alternado','corazon','mitades','franjas','espiral'].includes(state.layout))state.layout='auto';
+    chips($('layoutChips'),opts,moving?'mano':(state.layout||'auto'),k=>{if(k==='mano'){setMove(!moving);if(moving)toast('Arrastra una flor en el 3D para moverla');return;}if(moving)setMove(false,true);state.layout=k;state.pos={};renderLayout();rebuild(false);});
+    const sw=$('patSwap');if(sw){const show=multi&&['rodeado','corazon','mitades','alternado','franjas','espiral'].includes(state.layout);sw.classList.toggle('hidden',!show);sw.onclick=()=>{state.patSwap=!state.patSwap;state.pos={};rebuild(false);toast('Colores intercambiados');};}
     $('layoutHint').innerHTML=moving?'✋ Arrastra cada flor en el 3D para ubicarla. Toca <b>Listo</b> al terminar.':
       (manual?`Moviste ${manual} flor${manual>1?'es':''} a mano. <button type="button" class="link" id="resetPos">Volver al acomodo</button>`:'Si quieres, toca <b>✋ Mover flores</b> y ubícalas a tu gusto.');
     const rp=$('resetPos');if(rp)rp.onclick=()=>{state.pos={};renderLayout();rebuild(false);toast('Acomodo restablecido');};
