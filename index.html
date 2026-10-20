@@ -432,6 +432,7 @@ details.more>summary small{color:var(--muted);font-weight:400;font-size:12px}
   .mbar{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center}
   .mbar .btn{width:100%;justify-content:center}
 }
+#aAdd.btn-tight{background:var(--rose);border-color:var(--rose)}
 /* ═════ navegación más visible y tienda por tipo ═════ */
 header.scrolled{background:rgba(253,248,243,.98);box-shadow:0 6px 24px rgba(61,33,24,.10)}
 .nav{gap:6px}
@@ -1256,41 +1257,49 @@ const inPolyT=(px,py,poly)=>{let c=false;for(let i=0,j=poly.length-1;i<poly.leng
 function boxInside(cfg,r){
   const c=cfg.container,v=cfg.variant,s=sizeOf(cfg),U=x=>x/20;if(!s)return null;
   if(c==='caja'){
-    if(v==='redonda'){const R=U(s.d)/2;return (x,z)=>Math.hypot(x,z)<=Math.max(R*0.35,R-r*0.88);}
-    if(v==='corazon'){const K=U(s.d)/2,Kin=Math.max(K*0.45,K*0.97-r*0.95);return (x,z)=>inPolyT(x/Kin,-z/Kin,HEART);}
-    if(v==='hexagonal'){const R=U(s.d)/2,Ri=Math.max(R*0.4,R*0.866-r*0.85);return (x,z)=>{const q=Math.abs(z),w=Math.abs(x);return q<=Ri&&(0.5*q+0.866*w)<=Ri;};}
-    if(v==='acrilica'){const W=U(s.d),m=Math.max(W/2*0.35,W/2-U(0.4)-r*0.9);return (x,z)=>Math.abs(x)<=m&&Math.abs(z)<=m;}
-    if(v==='cuadrada'||v==='cartera'||v==='rectangular'){const W=U(s.d),D=U(v==='cuadrada'?s.d:s.dp),mx=Math.max(W/2*0.35,W/2-r*0.85),mz=Math.max(D/2*0.35,D/2-r*0.85);return (x,z)=>Math.abs(x)<=mx&&Math.abs(z)<=mz;}
+    if(v==='redonda'){const R=U(s.d)/2;return (x,z)=>Math.hypot(x,z)<=Math.max(R*0.35,R-r*0.75);}
+    if(v==='corazon'){const K=U(s.d)/2,Kin=Math.max(K*0.45,K*0.97-r*0.85);return (x,z)=>inPolyT(x/Kin,-z/Kin,HEART);}
+    if(v==='hexagonal'){const R=U(s.d)/2,Ri=Math.max(R*0.4,R*0.866-r*0.75);return (x,z)=>{const q=Math.abs(z),w=Math.abs(x);return q<=Ri&&(0.5*q+0.866*w)<=Ri;};}
+    if(v==='acrilica'){const W=U(s.d),m=Math.max(W/2*0.35,W/2-U(0.3)-r*0.8);return (x,z)=>Math.abs(x)<=m&&Math.abs(z)<=m;}
+    if(v==='cuadrada'||v==='cartera'||v==='rectangular'){const W=U(s.d),D=U(v==='cuadrada'?s.d:s.dp),mx=Math.max(W/2*0.35,W/2-r*0.78),mz=Math.max(D/2*0.35,D/2-r*0.78);return (x,z)=>Math.abs(x)<=mx&&Math.abs(z)<=mz;}
   }
-  if(c==='cuadro'){const S=U(s.d),h=Math.max(S/2*0.35,S/2*0.86-r*0.85);return (x,z)=>Math.abs(x)<=h&&Math.abs(z)<=h;}
-  if(c==='cupula'&&v==='esfera'){const R=U(s.d)/2,top=U(1.5)+r*1.7,lim=Math.max(R*0.2,Math.sqrt(Math.max(0,R*R-top*top))-r*0.9);return (x,z)=>Math.hypot(x,z)<=lim;}
-  if(c==='cupula'&&v==='campana'){const R=U(s.d)/2,lim=Math.max(R*0.25,R*0.95-r*0.9);return (x,z)=>Math.hypot(x,z)<=lim;}
+  if(c==='cuadro'){const S=U(s.d),h=Math.max(S/2*0.35,S/2*0.86-r*0.75);return (x,z)=>Math.abs(x)<=h&&Math.abs(z)<=h;}
+  if(c==='cupula'&&v==='esfera'){const R=U(s.d)/2,top=U(1.5)+r*1.7,lim=Math.max(R*0.2,Math.sqrt(Math.max(0,R*R-top*top))-r*0.8);return (x,z)=>Math.hypot(x,z)<=lim;}
+  if(c==='cupula'&&v==='campana'){const R=U(s.d)/2,lim=Math.max(R*0.25,R*0.95-r*0.8);return (x,z)=>Math.hypot(x,z)<=lim;}
   return null;
 }
 // ¿Cuántas flores de este tamaño caben de verdad sin encimarse? (se calcula acomodándolas y se recuerda)
 const FIT_MEMO=new Map();
-function fitCount(cfg,r,hole){
-  const s=sizeOf(cfg),key=[cfg.container,cfg.variant,s&&s.id,r.toFixed(4),hole?1:0].join('|');if(FIT_MEMO.has(key))return FIT_MEMO.get(key);
-  const inside=boxInside(cfg,r);if(!inside)return null;
-  const o={inside,hole:hole?4.2/20:0,tight:true,stopBelow:0.84,extent:Math.max(s.d,s.dp||0)/20*0.75+r};
-  // se prueba llenando desde el centro y desde las paredes; vale el que más flores acomoda
-  const N=Math.max(packPositions(Array(160).fill(r),o).length,packPositions(Array(160).fill(r),Object.assign({},o,{edge:true})).length);
-  FIT_MEMO.set(key,N);return N;
+function packCount(cfg,rads,hole,sep){
+  const s=sizeOf(cfg);if(!s||!rads.length)return 0;
+  const key=[cfg.container,cfg.variant,s.id,hole?1:0,sep,rads.map(x=>x.toFixed(4)).join(',')].join('|');if(FIT_MEMO.has(key))return FIT_MEMO.get(key);
+  if(!boxInside(cfg,Math.min(...rads))){FIT_MEMO.set(key,null);return null;}
+  const o={insideFor:r=>boxInside(cfg,r),hole:hole?4.2/20:0,tight:true,stopBelow:sep,extent:Math.max(s.d,s.dp||0)/20*0.75+Math.max(...rads)};
+  let N=Math.max(packPositions(rads,o).length,packPositions(rads,Object.assign({},o,{edge:true})).length);
+  // flores iguales: también se prueba en cuadrícula y en panal (en cajas cuadradas suele caber una fila más)
+  if(rads.every(x=>Math.abs(x-rads[0])<1e-6)&&!hole){const r=rads[0],ins=boxInside(cfg,r),L=o.extent;
+    for(const d of [2*r*Math.max(sep,0.94),2*r*Math.max(sep,0.86)])for(const hex of [false,true])for(const off of [0,0.5]){let c=0;const dz=hex?d*0.866:d,M=Math.ceil(L/d)+1;
+      for(let j=-M;j<=M;j++)for(let i=-M;i<=M;i++){const x=(i+off+(hex&&(j&1)?0.5:0))*d,z=(j+off)*dz;if(ins(x,z))c++;}if(c>N&&c<=rads.length)N=c;else if(c>N)N=rads.length;}}
+  if(FIT_MEMO.size>400)FIT_MEMO.clear();FIT_MEMO.set(key,N);return N;
 }
+const SEP_OK=0.8,SEP_TIGHT=0.7;
 function capacity(cfg){
   const n=cfg.flowers.length,m=mouth(cfg),s=sizeOf(cfg);
   if(m){const big=cfg.flowers.find(f=>fcm(f)>m.min);const overCount=m.max&&n>m.max;
-    // capacidad real: cuántas flores caben acomodadas dentro de las paredes (con la más grande como referencia)
-    const rOf=f=>fcm(f)/40,hole=!!cfg.mensaje&&cfg.container!=='cuadro'?1:0,rRef=n?Math.max(...cfg.flowers.map(rOf)):rOf({type:'rosa',tier:'M'});
-    const real=boxInside(cfg,rRef)?fitCount(cfg,rRef,hole):null;
-    const cap=real!=null?real*Math.PI*rRef*rRef*400:m.area*B.empaque,used=cfg.flowers.reduce((a,f)=>a+Math.PI*(fcm(f)/2)**2,0);
-    return {mode:'area',cap,used,pct:cap?used/cap:1,ok:used<=cap*1.001&&!big&&!overCount,big,maxN:m.max||null,
-      fits:f=>{if(fcm(f)>m.min)return 0;let room;
-        if(real!=null){const rr=Math.max(rRef,rOf(f)),N=fitCount(cfg,rr,hole),eq=cfg.flowers.reduce((a,x)=>a+(rOf(x)/rr)**2,0);room=Math.floor(N-eq+1e-6);}
-        else room=Math.floor((cap-used)/(Math.PI*(fcm(f)/2)**2)+1e-6);
-        return Math.max(0,m.max?Math.min(room,m.max-n):room);}};}
+    const rOf=f=>fcm(f)/40,hole=!!cfg.mensaje&&cfg.container!=='cuadro'?1:0,cur=cfg.flowers.slice().sort((a,b)=>fcm(b)-fcm(a)).map(rOf);
+    const real=boxInside(cfg,cur.length?Math.min(...cur):rOf({type:'rosa',tier:'M'}))!=null;
+    // ¿Cuántas más de esta flor caben, acomodándolas de verdad con las que ya están?
+    const roomFor=(f,sep)=>{if(fcm(f)>m.min)return 0;const rp=rOf(f);
+      if(!real){const used=cfg.flowers.reduce((a,x)=>a+Math.PI*(fcm(x)/2)**2,0);return Math.max(0,Math.floor((m.area*B.empaque-used)/(Math.PI*(fcm(f)/2)**2)+1e-6));}
+      const K=Math.min(90,Math.ceil(m.area/(Math.PI*(fcm(f)/2)**2)*1.3)+2),placed=packCount(cfg,cur.concat(Array(K).fill(rp)),hole,sep);
+      const room=Math.max(0,placed-n);return m.max?Math.max(0,Math.min(room,m.max-n)):room;};
+    const okAt=sep=>!real?(cfg.flowers.reduce((a,x)=>a+Math.PI*(fcm(x)/2)**2,0)<=m.area*B.empaque*1.001):(n===0||packCount(cfg,cur,hole,sep)>=n);
+    const okTight=!big&&!overCount&&okAt(SEP_TIGHT),okNormal=okTight&&okAt(SEP_OK);
+    const ref=cfg.flowers[cfg.flowers.length-1]||{type:'rosa',tier:'M',open:0.5},roomRef=roomFor(ref,SEP_OK),used=cfg.flowers.reduce((a,x)=>a+Math.PI*(fcm(x)/2)**2,0),cap=used+roomRef*Math.PI*(fcm(ref)/2)**2;
+    return {mode:'area',cap,used,pct:cap?used/cap:1,ok:okTight,okNormal,tight:okTight&&!okNormal,big,maxN:m.max||null,
+      fits:f=>roomFor(f,SEP_OK),fitsTight:f=>roomFor(f,SEP_TIGHT)};}
   const max=(s&&s.max)||vdef(cfg).max;
-  return {mode:'count',max,pct:n/max,ok:n<=max,fits:()=>Math.max(0,max-n)};
+  return {mode:'count',max,pct:n/max,ok:n<=max,okNormal:n<=max,fits:()=>Math.max(0,max-n),fitsTight:()=>Math.max(0,max-n)};
 }
 function dimsText(cfg){
   const s=sizeOf(cfg),c=cfg.container,v=cfg.variant;if(!s)return null;
@@ -1354,11 +1363,12 @@ function packPositions(rads,opts){
    if(!opts.hole&&n0>=2&&n0<=7&&mn>mx/1.7){const d=mx*2*0.94,s3=Math.sqrt(3);
     const PAT={2:[[-0.5,0],[0.5,0]],3:[[0,-1/s3],[-0.5,0.5/s3],[0.5,0.5/s3]],4:[[0,-0.62],[-0.62,0],[0.62,0],[0,0.62]],
       5:[[0,0],[0,-1],[-1,0],[1,0],[0,1]].map(([x,z])=>[x*0.98,z*0.98]),6:[[0,0]].concat([0,1,2,3,4].map(k=>[Math.sin(k*1.2566),-Math.cos(k*1.2566)])),7:[[0,0]].concat([0,1,2,3,4,5].map(k=>[Math.sin(k*1.0472+0.5236),-Math.cos(k*1.0472+0.5236)]))}[n0];
-    const P=PAT.map(([x,z])=>[x*d,z*d]);if(!opts.inside||P.every(([x,z])=>opts.inside(x,z)))return P;}}const tight=!!opts.tight;const n=rads.length;if(!n)return [];
+    const P=PAT.map(([x,z])=>[x*d,z*d]);if(opts.insideFor?P.every(([x,z],i)=>opts.insideFor(rads[i])(x,z)):(!opts.inside||P.every(([x,z])=>opts.inside(x,z))))return P;}}const tight=!!opts.tight;const n=rads.length;if(!n)return [];
   const rmin=Math.min(...rads),rmax=Math.max(...rads),area=rads.reduce((a,r)=>a+r*r,0),hole=opts.hole||0;
   const L=opts.extent||(Math.sqrt(area)*1.75+rmax*2+hole*2),step=Math.max(rmin*0.34,L/46),N=Math.ceil(L/step);
+  const inside0=opts.insideFor?opts.insideFor(rmin):opts.inside,insC=new Map(),insOf=r=>{if(!opts.insideFor)return null;const k=r.toFixed(5);if(!insC.has(k))insC.set(k,opts.insideFor(r));return insC.get(k);};
   const cand=[];for(let j=-N;j<=N;j++){const z=j*step*0.866;for(let i=-N;i<=N;i++){const x=(i+(j&1?0.5:0))*step,d=Math.hypot(x,z);
-    if(d>L)continue;if(opts.inside&&!opts.inside(x,z))continue;cand.push([x,z,d+Math.atan2(z,x)*1e-6]);}}
+    if(d>L)continue;if(inside0&&!inside0(x,z))continue;cand.push([x,z,d+Math.atan2(z,x)*1e-6]);}}
   cand.sort((a,b)=>opts.edge?b[2]-a[2]:a[2]-b[2]);
   if(!cand.length)return rads.map(()=>[0,0]);
   // rejilla para revisar solo las flores vecinas (mucho más rápido en celulares)
@@ -1366,14 +1376,14 @@ function packPositions(rads,opts){
   const score=(x,z,r)=>{let m=hole?Math.hypot(x,z)/(r*0.6+hole):Infinity;const gx=Math.floor(x/cs),gz=Math.floor(z/cs);
     for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const l=grid.get((gx+a)+','+(gz+b));if(!l)continue;for(const k of l){const q=P[k],v=Math.hypot(x-q[0],z-q[1])/(r+q[2]);if(v<m)m=v;}}return m;};
   const TH=tight?[0.97,0.91,0.85,0.78]:[0.92,0.84,0.76,0.68];
-  for(let i=0;i<n;i++){const r=rads[i],first=[null,null,null,null];let best=null,bv=-1,pick=null;
-    for(const c of cand){const v=score(c[0],c[1],r);if(v>=TH[0]){pick=c;break;}
+  for(let i=0;i<n;i++){const r=rads[i],first=[null,null,null,null],ins=insOf(r);let best=null,bv=-1,pick=null;
+    for(const c of cand){if(ins&&!ins(c[0],c[1]))continue;const v=score(c[0],c[1],r);if(v>=TH[0]){pick=c;break;}
       for(let t=1;t<TH.length;t++)if(!first[t]&&v>=TH[t])first[t]=c;if(v>bv){bv=v;best=c;}}
     if(opts.stopBelow&&!pick&&bv<opts.stopBelow)break;
     if(!pick)pick=first[1]||first[2]||first[3]||best;
     const idx=P.length;P.push([pick[0],pick[1],r]);const k=key(pick[0],pick[1]);if(!grid.has(k))grid.set(k,[]);grid.get(k).push(idx);}
   // ramos: se centra el conjunto (el ajuste es mínimo al agregar una flor)
-  if(!opts.inside&&!hole&&n>1){const cx=P.reduce((a,p)=>a+p[0],0)/n,cz=P.reduce((a,p)=>a+p[1],0)/n;P.forEach(p=>{p[0]-=cx;p[1]-=cz;});}
+  if(!opts.inside&&!opts.insideFor&&!hole&&n>1){const cx=P.reduce((a,p)=>a+p[0],0)/n,cz=P.reduce((a,p)=>a+p[1],0)/n;P.forEach(p=>{p[0]-=cx;p[1]-=cz;});}
   return P.map(p=>[p[0],p[1]]);
 }
 
@@ -1397,12 +1407,12 @@ function ringPositions(rads,inside,hole){
 const AUTO_SIZE=c=>c.container==='vaso'||(c.container==='cupula'&&c.variant==='campana');
 function autoSize(cfg,mode){
   const V=vdef(cfg);if(!V.sizes||V.sizes.length<2)return null;const key=cfg.container+'.'+cfg.variant,cur=cfg.sizes[key],asc=V.sizes.slice().sort((a,b)=>a.d-b.d);
-  const test=id=>{cfg.sizes[key]=id;return capacity(cfg).ok;};
+  const test=id=>{cfg.sizes[key]=id;return capacity(cfg).okNormal;};
   let pick=null;
   const user=cfg.userSizes&&V.sizes.find(z=>z.id===cfg.userSizes[key]),floor=user?user.d:0;
   if(mode==='fit'||AUTO_SIZE(cfg)){for(const z of asc)if(test(z.id)){pick=z;break;}}
   else if(mode==='shrink'){const curD=(V.sizes.find(z=>z.id===cur)||{d:0}).d;for(const z of asc)if(z.d>=floor&&z.d<=curD&&test(z.id)){pick=z;break;}}
-  else{cfg.sizes[key]=cur;if(capacity(cfg).ok)return null;for(const z of asc)if(z.d>=(sizeOf(cfg)||{d:0}).d&&test(z.id)){pick=z;break;}}
+  else{cfg.sizes[key]=cur;if(capacity(cfg).okNormal)return null;for(const z of asc)if(z.d>=(sizeOf(cfg)||{d:0}).d&&test(z.id)){pick=z;break;}}
   if(!pick){cfg.sizes[key]=cur;return null;}
   cfg.sizes[key]=pick.id;return (cur!==pick.id)?pick:null;
 }
@@ -1692,9 +1702,9 @@ function buildCluster(cfg,o){
   const mkey=[rads.map(x=>x.toFixed(4)).join(','),cfg.container,cfg.variant,(sizeOf(cfg)||{}).id||'',o.msg?1:0,sp,cfg.forma??1].join('|');
   const lay=cfg.layout||'auto',mk2=mkey+'|'+lay;
   pts=PACK_MEMO.get(mk2);if(!pts){pts=(lay==='filas'||(lay==='auto'&&o.grid&&!o.msg))?rowPositions(rads.map(r=>r*sp),inside,o.msg?cm(4.2):0):lay==='anillos'?ringPositions(rads.map(r=>r*sp),inside,o.msg?cm(4.2):0):null;
-    if(!pts){const R2=rads.map(r=>r*sp),po={inside,hole:o.msg?cm(4.2):0,tight:!!o.box};pts=packPositions(R2,po);
+    if(!pts){const R2=rads.map(r=>r*sp),po={inside,hole:o.msg?cm(4.2):0,tight:!!o.box};if(o.box&&boxInside(cfg,rmx))po.insideFor=rr=>boxInside(cfg,rr/sp);pts=packPositions(R2,po);
       if(o.box&&inside&&n>1){const sepOf=P=>{let m=9;for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++)m=Math.min(m,Math.hypot(P[i][0]-P[j][0],P[i][1]-P[j][1])/(R2[i]+R2[j]));return m;};
-        if(sepOf(pts)<0.9){const alt=packPositions(R2,Object.assign({},po,{edge:true}));if(sepOf(alt)>sepOf(pts))pts=alt;}}}PACK_MEMO.set(mk2,pts);if(PACK_MEMO.size>40)PACK_MEMO.delete(PACK_MEMO.keys().next().value);}
+        if(sepOf(pts)<0.76){const alt=packPositions(R2,Object.assign({},po,{edge:true}));if(sepOf(alt)>sepOf(pts)+0.04)pts=alt;}}}PACK_MEMO.set(mk2,pts);if(PACK_MEMO.size>40)PACK_MEMO.delete(PACK_MEMO.keys().next().value);}
   // posiciones movidas a mano por el cliente (se respetan mientras sigan dentro del envase)
   if(cfg.pos){pts=pts.map((p,i)=>{const q=cfg.pos[fl[i].id];return q&&(!inside||inside(q[0],q[1]))?[q[0],q[1]]:p;});}
   let maxR=0,ring=0,drop=0;const heads=[];
@@ -2607,13 +2617,13 @@ window.initBuilder=function(){
     hide('aColorWrap',f.type==='girasol');$('aColorName').textContent=f.color;sws($('aColor'),FLOWER_COLORS,f.color,n=>{f.color=n;renderFlores();});
     chips($('aSize'),Object.entries(B.flores[f.type]).map(([k,x])=>[k,`${x.cm} cm`,fmt(x.p)]),f.tier,k=>{f.tier=k;renderFlores();});
     hide('aOpenWrap',!t.open);if(t.open)chips($('aOpen'),t.open.map(([l,v])=>[v,l]),f.open,v=>{f.open=v;renderFlores();});
-    const probe=newFlower(f.type,f.color,{tier:f.tier,open:f.open}),room=roomWithUpgrade(state,probe);
+    const probe=newFlower(f.type,f.color,{tier:f.tier,open:f.open}),roomN=roomWithUpgrade(state,probe),tightRoom=roomN<1&&cap.fitsTight?cap.fitsTight(probe):0,room=roomN>0?roomN:tightRoom;f.tight=roomN<1&&tightRoom>0;
     if(f.qty>Math.max(1,room))f.qty=Math.max(1,room);
     $('aQty').textContent=f.qty;$('aMinus').disabled=f.qty<=1;$('aPlus').disabled=f.qty>=room;
-    $('aAdd').disabled=room<1;$('aAdd').textContent=room<1?'Ya no caben más':`Agregar ${f.qty} · ${fmt(tierOf(f).p*f.qty)}`;
+    $('aAdd').disabled=room<1;$('aAdd').textContent=room<1?'Ya no caben más':f.tight?`Agregar igual ${f.qty} · quedan apretadas`:`Agregar ${f.qty} · ${fmt(tierOf(f).p*f.qty)}`;$('aAdd').classList.toggle('btn-tight',!!f.tight);
     {const fill=cap.mode==='area'?cap.fits(probe):0,fb=$('aFill');if(fb){fb.classList.toggle('hidden',fill<2);fb.textContent=`Llenar (${fill})`;fb.dataset.n=fill;}}
     const big=cap.mode==='area'&&fcm(probe)>mouth(state).min;
-    $('aHint').textContent=big?`Esta flor de ${fcm(probe)} cm no entra en este envase. Elige un tamaño menor o un envase más grande.`:room<1?'El envase más grande ya está lleno. Quita flores o elige otro envase.':(cap.fits(probe)<f.qty&&!AUTO_SIZE(state)?`Si agregas más, la caja se agranda sola. Caben hasta ${room} más.`:`Caben ${room} más de este tamaño.`);
+    $('aHint').textContent=f.tight?`Ya están justas en este tamaño. Puedes agregar hasta ${tightRoom} más: quedarán apretadas, como en una caja muy llena.`:big?`Esta flor de ${fcm(probe)} cm no entra en este envase. Elige un tamaño menor o un envase más grande.`:room<1?'El envase más grande ya está lleno. Quita flores o elige otro envase.':(cap.fits(probe)<f.qty&&!AUTO_SIZE(state)?`Si agregas más, la caja se agranda sola. Caben hasta ${room} más.`:`Caben ${room} más de este tamaño.`);
     // capacidad
     const pct=Math.min(1.5,cap.pct||0),el=$('cap');el.classList.toggle('warn',pct>0.85&&cap.ok);el.classList.toggle('over',!cap.ok);
     $('capBar').style.width=Math.min(100,pct*100)+'%';
@@ -2634,7 +2644,7 @@ window.initBuilder=function(){
   $('aMinus').onclick=()=>{addForm.qty=Math.max(1,addForm.qty-1);renderFlores();};
   $('aPlus').onclick=()=>{addForm.qty++;renderFlores();};
   $('aFill').onclick=()=>{const f=addForm,n=+$('aFill').dataset.n||0;for(let i=0;i<n;i++)state.flowers.push(newFlower(f.type,f.color,{tier:f.tier,open:f.type==='girasol'?0:f.open}));f.qty=1;flowersChanged();toast(`Agregamos ${n} flores`);};
-  $('aAdd').onclick=()=>{const f=addForm;for(let i=0;i<f.qty;i++)state.flowers.push(newFlower(f.type,f.color,{tier:f.tier,open:f.type==='girasol'?0:f.open}));f.qty=1;flowersChanged();};
+  $('aAdd').onclick=()=>{const f=addForm,tight=!!f.tight;for(let i=0;i<f.qty;i++)state.flowers.push(newFlower(f.type,f.color,{tier:f.tier,open:f.type==='girasol'?0:f.open}));f.qty=1;if(tight){changed(true);toast('Agregadas: quedan apretadas');}else flowersChanged();};
   $('mixBtn').onclick=()=>{state.mix=(state.mix||0)+1;soon();};
   /* Acomodo: automático, en filas, en anillos o a mano (arrastrando cada flor en el 3D) */
   const canMove=()=>state.container!=='vaso'&&!(state.container==='cupula'&&state.variant==='campana')&&state.flowers.length>0;
