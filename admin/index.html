@@ -176,6 +176,8 @@ const INJECT={
       .list-item .acts{flex-wrap:wrap;justify-content:flex-end;max-width:230px}
       .list-item .acts .icon-btn{width:auto!important;padding:0 10px!important;gap:5px;display:inline-flex;align-items:center;font-size:13px}
       .list-item .acts .icon-btn::after{content:attr(title);font-size:12px;font-weight:500}
+      .list-item .acts .icon-btn.danger{padding:0!important;width:36px!important;justify-content:center}
+      .list-item .acts .icon-btn.danger::after{content:none}
     }
   </style>`,
   tool:`<style id="fh-shell">
@@ -269,7 +271,9 @@ function show(k,tries){
 let toolStale=false;
 window.addEventListener('message',e=>{if(e.data&&e.data.fh==='products-changed')toolStale=true;});
 function go(k){
-  const s=SECTIONS.find(x=>x.k===k)||SECTIONS[1];setActive(s.k);
+  const s=SECTIONS.find(x=>x.k===k)||SECTIONS[1];
+  if(s.k!==current&&frames.tool&&ready.tool){try{frames.tool.contentWindow.document.querySelectorAll('.modal-overlay.open,.modal.open,[id$="Modal"].open').forEach(m=>m.classList.remove('open'));}catch(_){}}
+  setActive(s.k);
   if(s.app==='tool'&&toolStale&&frames.tool){toolStale=false;frames.tool.remove();delete frames.tool;ready.tool=false;}
   mount(s.app);
   if(ready[s.app])show(s.k);
